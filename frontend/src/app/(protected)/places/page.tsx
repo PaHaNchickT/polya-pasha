@@ -1,21 +1,22 @@
 "use client";
 
+import { useEffect, useState } from "react";
+import { PlacesPage } from "@/components/auth/PlacesPage/PlacesPage";
 import { api } from "@/lib/api";
-import { Button } from "@mui/material";
+import { Loader } from "@/components/ui/Loader";
+import { Place } from "@/types/place";
 
 export default function HomePage() {
-  return (
-    <main className="grow flex flex-col gap-4">
-      <h1 className="text-[37px] font-medium">Пользователи</h1>
-      <p>Page has been loaded</p>
-      <Button
-        onClick={() => {
-          api.getPlaces().then((data) => console.log(data));
-          console.log("clicked");
-        }}
-      >
-        Get users
-      </Button>
-    </main>
-  );
+  const [data, setData] = useState<Place[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    api
+      .getPlaces()
+      .then(setData)
+      .catch((err) => console.error(err.message))
+      .finally(() => setLoading(false));
+  }, []);
+
+  return <>{loading ? <Loader /> : <PlacesPage data={data} />}</>;
 }

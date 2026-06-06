@@ -5,10 +5,3 @@ export interface LoginResponse {
     role: string;
   };
 }
-
-export interface Place {
-  id: number;
-  name: string;
-  address: string;
-  rating: number;
-}
