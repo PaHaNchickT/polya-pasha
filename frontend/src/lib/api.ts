@@ -1,5 +1,8 @@
 import { LoginResponse, Place } from "@/types/api";
-import { LOCAL_STORAGE_TOKEN_KEY } from "./constants/common";
+import {
+  LOCAL_STORAGE_TOKEN_KEY,
+  LOCAL_STORAGE_USERNAME_KEY,
+} from "./constants/common";
 import { LoginData } from "@/types/login";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL;
@@ -61,6 +64,7 @@ const login = async (loginData: LoginData): Promise<LoginResponse> => {
   const data: LoginResponse = await res.json();
 
   localStorage.setItem(LOCAL_STORAGE_TOKEN_KEY, data.token);
+  localStorage.setItem(LOCAL_STORAGE_USERNAME_KEY, data.user.login);
 
   return data;
 };
