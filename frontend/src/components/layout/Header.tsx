@@ -6,12 +6,9 @@ import LogoutIcon from "@mui/icons-material/Logout";
 import { api } from "@/lib/api";
 import { notify } from "@/lib/utils/notify";
 import { useEffect, useState } from "react";
-import {
-  LOCAL_STORAGE_TOKEN_KEY,
-  LOCAL_STORAGE_USERNAME_KEY,
-  USERS_MAP,
-} from "@/lib/constants/common";
+import { LOCAL_STORAGE_USERNAME_KEY, USERS_MAP } from "@/lib/constants/common";
 import { UserTypes } from "@/types/common";
+import { isAuthentificated } from "@/lib/helpers/isAuthentificated";
 
 export const Header = () => {
   const pathname = usePathname();
@@ -29,12 +26,12 @@ export const Header = () => {
   };
 
   useEffect(() => {
-    const token = localStorage.getItem(LOCAL_STORAGE_TOKEN_KEY);
+    setIsSignedIn(isAuthentificated());
+
     const username = localStorage.getItem(
       LOCAL_STORAGE_USERNAME_KEY,
     ) as UserTypes;
 
-    setIsSignedIn(Boolean(token));
     setUsername(username || "guest");
   }, [pathname]);
 
