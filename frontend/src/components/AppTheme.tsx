@@ -5,6 +5,7 @@ import type { ThemeOptions } from "@mui/material/styles";
 import { colorSchemes, typography, shadows, shape } from "./themePrimitives";
 import { ReactNode, useEffect, useMemo, useState } from "react";
 import { Loader } from "./ui/Loader";
+import { SnackbarProvider } from "notistack";
 
 interface AppThemeProps {
   children: ReactNode;
@@ -43,7 +44,16 @@ export default function AppTheme(props: AppThemeProps) {
   return (
     <ThemeProvider theme={theme} disableTransitionOnChange>
       <CssBaseline enableColorScheme />
-      {loading ? <Loader /> : children}
+      <SnackbarProvider
+        maxSnack={3}
+        anchorOrigin={{
+          vertical: "bottom",
+          horizontal: "right",
+        }}
+        autoHideDuration={2000}
+      >
+        {loading ? <Loader /> : children}
+      </SnackbarProvider>
     </ThemeProvider>
   );
 }

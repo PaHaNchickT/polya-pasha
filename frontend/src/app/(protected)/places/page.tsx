@@ -1,6 +1,6 @@
 "use client";
 
-import { getPlaces } from "@/lib/api";
+import { api } from "@/lib/api";
 import { Button } from "@mui/material";
 
 export default function HomePage() {
@@ -10,7 +10,7 @@ export default function HomePage() {
       <p>Page has been loaded</p>
       <Button
         onClick={() => {
-          getPlaces().then((data) => console.log(data));
+          api.getPlaces().then((data) => console.log(data));
           console.log("clicked");
         }}
       >

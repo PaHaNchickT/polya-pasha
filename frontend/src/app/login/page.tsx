@@ -2,39 +2,23 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { login } from "@/lib/api";
 import { LOCAL_STORAGE_TOKEN_KEY } from "@/lib/constants/common";
+import { LoginPage } from "@/components/auth/LoginPage/LoginPage";
+import { Loader } from "@/components/ui/Loader";
 
-export default function LoginPage() {
+export default function LoginPageServer() {
   const router = useRouter();
-  const [error, setError] = useState("");
-
-  async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
-    e.preventDefault();
-    const form = new FormData(e.currentTarget);
-    const l = form.get("login") as string;
-    const p = form.get("password") as string;
-    try {
-      await login(l, p);
-      router.push("/places");
-    } catch (err: unknown) {
-      const message =
-        err instanceof Error ? err.message : "Неизвестная ошибка входа";
-      setError(message);
-    }
-  }
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const token = localStorage.getItem(LOCAL_STORAGE_TOKEN_KEY);
-    if (token) router.replace("/places");
+
+    if (token) {
+      router.replace("/places");
+    } else {
+      setLoading(false);
+    }
   }, [router]);
 
-  return (
-    <form onSubmit={handleSubmit}>
-      <input name="login" placeholder="Логин" required />
-      <input name="password" type="password" placeholder="Пароль" required />
-      <button type="submit">Войти</button>
-      {error && <p style={{ color: "red" }}>{error}</p>}
-    </form>
-  );
+  return <>{loading ? <Loader /> : <LoginPage />}</>;
 }

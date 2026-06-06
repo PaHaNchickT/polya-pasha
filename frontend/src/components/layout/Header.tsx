@@ -3,14 +3,28 @@
 import { usePathname } from "next/navigation";
 import { Button, Typography } from "@mui/material";
 import LogoutIcon from "@mui/icons-material/Logout";
+import { api } from "@/lib/api";
+import { notify } from "@/lib/utils/notify";
+import { useEffect, useState } from "react";
+import { LOCAL_STORAGE_TOKEN_KEY } from "@/lib/constants/common";
 
 export const Header = () => {
   const pathname = usePathname();
-  const isLoginPage = pathname === "/login";
+  const [isLogoutButton, setIsLogoutButton] = useState(false);
 
   const handleLogout = () => {
-    console.log("logout");
+    api
+      .logout()
+      .then(() => {
+        notify("Вы успешно вышли из аккаунта!", "success");
+      })
+      .catch((err) => notify(err.message, "error"));
   };
+
+  useEffect(() => {
+    const token = localStorage.getItem(LOCAL_STORAGE_TOKEN_KEY);
+    setIsLogoutButton(Boolean(token));
+  }, [pathname]);
 
   return (
     <header className="py-5 flex justify-between items-center">
@@ -21,7 +35,7 @@ export const Header = () => {
       >
         ПоляПаша❤
       </Typography>
-      {!isLoginPage && (
+      {isLogoutButton && (
         <Button
           size="large"
           disableElevation
@@ -31,14 +45,6 @@ export const Header = () => {
           <LogoutIcon className="h-16 text-white opacity-90 hover:opacity-100" />
         </Button>
       )}
-      <Button
-        size="large"
-        disableElevation
-        onClick={handleLogout}
-        className="h-[52px] text-white opacity-90 hover:opacity-100"
-      >
-        <LogoutIcon className="h-16 text-white opacity-90 hover:opacity-100" />
-      </Button>
     </header>
   );
 };

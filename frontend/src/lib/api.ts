@@ -1,13 +1,14 @@
 import { LoginResponse, Place } from "@/types/api";
 import { LOCAL_STORAGE_TOKEN_KEY } from "./constants/common";
+import { LoginData } from "@/types/login";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
 // --- Вспомогательная функция для защищённых запросов ---
-async function authFetch<T>(
+const authFetch = async <T>(
   url: string,
   options: RequestInit = {},
-): Promise<T> {
+): Promise<T> => {
   const token = localStorage.getItem(LOCAL_STORAGE_TOKEN_KEY);
 
   // Создаём объект Headers, который правильно обрабатывает любые ключи
@@ -42,17 +43,14 @@ async function authFetch<T>(
   }
 
   return res.json();
-}
+};
 
 // --- Логин ---
-export async function login(
-  login: string,
-  password: string,
-): Promise<LoginResponse> {
+const login = async (loginData: LoginData): Promise<LoginResponse> => {
   const res = await fetch(`${API_URL}/api/login`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ login, password }),
+    body: JSON.stringify(loginData),
   });
 
   if (!res.ok) {
@@ -61,17 +59,19 @@ export async function login(
   }
 
   const data: LoginResponse = await res.json();
+
   localStorage.setItem(LOCAL_STORAGE_TOKEN_KEY, data.token);
+
   return data;
-}
+};
 
 // --- Получить места ---
-export async function getPlaces(): Promise<Place[]> {
+const getPlaces = async (): Promise<Place[]> => {
   return authFetch<Place[]>("/api/places");
-}
+};
 
 // --- Выход ---
-export async function logout(): Promise<void> {
+const logout = async (): Promise<void> => {
   try {
     await authFetch("/api/logout", { method: "POST" });
   } catch (err) {
@@ -80,4 +80,10 @@ export async function logout(): Promise<void> {
     localStorage.removeItem(LOCAL_STORAGE_TOKEN_KEY);
     window.location.href = "/login";
   }
-}
+};
+
+export const api = {
+  login,
+  getPlaces,
+  logout,
+};
