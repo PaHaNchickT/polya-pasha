@@ -1,10 +1,12 @@
-// api/index.js
-require("dotenv").config(); // для локальной разработки
+require("dotenv").config();
+
+const cors = require("cors");
 const express = require("express");
 const { put, list, del } = require("@vercel/blob");
 const { defaultPlaces, defaultReviews } = require("../defaultData");
 
 const app = express();
+app.use(cors());
 app.use(express.json());
 
 // ---------- Вспомогательные функции для работы с Blob ----------
