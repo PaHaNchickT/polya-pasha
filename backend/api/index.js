@@ -1,5 +1,5 @@
-// api/index.js
 require("dotenv").config();
+
 const express = require("express");
 const cors = require("cors");
 const jwt = require("jsonwebtoken");
@@ -9,9 +9,9 @@ const { authMiddleware } = require("./auth");
 
 const app = express();
 app.use(cors());
-app.use(express.json({ limit: "50mb" })); // увеличим лимит для base64 картинок
+app.use(express.json({ limit: "50mb" }));
 
-// ---------- Конфигурация пользователей из .env ----------
+// ---------- Пользователи из .env ----------
 const USERS = [
   {
     login: process.env.USER1_LOGIN,
@@ -25,35 +25,75 @@ const USERS = [
   },
 ].filter((user) => user.login && user.password);
 
-// ---------- Blob helpers ----------
+// ---------- Blob helpers с ETag-блокировкой ----------
 async function readJsonBlob(filename) {
-  const { blobs } = await list({ prefix: filename });
+  const token = process.env.BLOB_READ_WRITE_TOKEN;
+  const { blobs } = await list({ prefix: filename, token });
   if (blobs.length === 0) return null;
   const blob = blobs[0];
-  const response = await fetch(blob.url);
-  if (!response.ok) throw new Error(`Blob fetch failed for ${filename}`);
-  return await response.json();
-}
-
-async function writeJsonBlob(filename, data) {
-  const { blobs } = await list({ prefix: filename });
-  for (const blob of blobs) await del(blob.url);
-  await put(filename, JSON.stringify(data, null, 2), {
-    access: "public",
-    contentType: "application/json",
+  const response = await fetch(blob.url, {
+    headers: { Authorization: `Bearer ${token}` },
   });
-}
-
-async function ensureDefaultData(filename, defaultData) {
-  const existing = await readJsonBlob(filename);
-  if (existing === null) {
-    await writeJsonBlob(filename, defaultData);
-    return defaultData;
+  if (!response.ok) {
+    throw new Error(`Blob fetch failed for ${filename}: ${response.status}`);
   }
-  return existing;
+  const data = await response.json();
+  const etag = response.headers.get("ETag");
+  return { data, etag };
 }
 
-// ---------- Вспомогательные вычисляемые поля ----------
+async function writeJsonBlob(filename, data, etag = undefined) {
+  const token = process.env.BLOB_READ_WRITE_TOKEN;
+  const { blobs } = await list({ prefix: filename, token });
+  for (const blob of blobs) await del(blob.url, { token });
+  const options = {
+    access: 'private',
+    contentType: "application/json",
+    token,
+  };
+  if (etag) {
+    options.headers = { "If-Match": etag };
+  }
+  await put(filename, JSON.stringify(data, null, 2), options);
+}
+
+// Атомарное обновление файла с повторами при конфликте
+async function updateJsonBlob(filename, updateFn) {
+  const MAX_RETRIES = 3;
+  for (let attempt = 0; attempt < MAX_RETRIES; attempt++) {
+    const result = await readJsonBlob(filename);
+    if (!result) throw new Error(`File ${filename} not found`);
+    const { data, etag } = result;
+    const newData = updateFn(data);
+    try {
+      await writeJsonBlob(filename, newData, etag);
+      return newData;
+    } catch (err) {
+      // 412 Precondition Failed – файл изменился, пробуем ещё раз
+      if (err.status === 412 && attempt < MAX_RETRIES - 1) {
+        continue;
+      }
+      throw err;
+    }
+  }
+}
+
+// Инициализация данных (только если файлов нет)
+async function initDataIfEmpty() {
+  const places = await readJsonBlob("places.json");
+  if (!places) {
+    await writeJsonBlob("places.json", defaultPlaces);
+    console.log("✅ places.json инициализирован");
+  }
+  const reviews = await readJsonBlob("reviews.json");
+  if (!reviews) {
+    await writeJsonBlob("reviews.json", defaultReviews);
+    console.log("✅ reviews.json инициализирован");
+  }
+}
+initDataIfEmpty().catch(console.error);
+
+// ---------- Вычисляемые поля ----------
 function enrichPlace(place) {
   const now = new Date();
   const createdDate = new Date(place.created_at);
@@ -66,23 +106,20 @@ function enrichPlace(place) {
     is_expired = now > eventDate;
   }
 
-  return {
-    ...place,
-    is_new,
-    is_expired,
-  };
+  return { ...place, is_new, is_expired };
 }
 
-// ---------- Работа с чёрным списком токенов ----------
+// ---------- Чёрный список токенов ----------
 async function getRevokedTokens() {
-  const tokens = await readJsonBlob("revoked_tokens.json");
-  return tokens || [];
+  const result = await readJsonBlob("revoked_tokens.json");
+  return result ? result.data : [];
 }
 
 async function addRevokedToken(token) {
-  const tokens = await getRevokedTokens();
-  tokens.push(token);
-  await writeJsonBlob("revoked_tokens.json", tokens);
+  await updateJsonBlob("revoked_tokens.json", (tokens) => {
+    tokens.push(token);
+    return tokens;
+  });
 }
 
 async function checkRevoked(req, res, next) {
@@ -93,7 +130,7 @@ async function checkRevoked(req, res, next) {
   next();
 }
 
-// ---------- Auth routes ----------
+// ---------- Auth ----------
 app.post("/api/login", (req, res) => {
   const { login, password } = req.body;
   if (!login || !password) {
@@ -120,15 +157,14 @@ app.post("/api/logout", authMiddleware, async (req, res) => {
   }
 });
 
-// ---------- Places CRUD ----------
-// Все маршруты защищены authMiddleware + checkRevoked
+// ---------- Places CRUD (защищённые, атомарные) ----------
 
 // GET /api/places – список всех мест
 app.get("/api/places", authMiddleware, checkRevoked, async (req, res) => {
   try {
-    const places = await ensureDefaultData("places.json", defaultPlaces);
-    const enriched = places.map(enrichPlace);
-    res.json(enriched);
+    const result = await readJsonBlob("places.json");
+    if (!result) return res.status(404).json({ error: "Данные не найдены" });
+    res.json(result.data.map(enrichPlace));
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
@@ -137,9 +173,10 @@ app.get("/api/places", authMiddleware, checkRevoked, async (req, res) => {
 // GET /api/places/:id – одно место
 app.get("/api/places/:id", authMiddleware, checkRevoked, async (req, res) => {
   try {
-    const places = await ensureDefaultData("places.json", defaultPlaces);
+    const result = await readJsonBlob("places.json");
+    if (!result) return res.status(404).json({ error: "Данные не найдены" });
     const id = Number(req.params.id);
-    const place = places.find((p) => p.id === id);
+    const place = result.data.find((p) => p.id === id);
     if (!place) return res.status(404).json({ error: "Место не найдено" });
     res.json(enrichPlace(place));
   } catch (err) {
@@ -150,7 +187,6 @@ app.get("/api/places/:id", authMiddleware, checkRevoked, async (req, res) => {
 // POST /api/places – создать новое место
 app.post("/api/places", authMiddleware, checkRevoked, async (req, res) => {
   try {
-    const places = await ensureDefaultData("places.json", defaultPlaces);
     const newPlace = {
       id: Date.now(),
       title: req.body.title,
@@ -169,58 +205,57 @@ app.post("/api/places", authMiddleware, checkRevoked, async (req, res) => {
       images: req.body.images || [],
       is_visited: req.body.is_visited || false,
     };
-    places.push(newPlace);
-    await writeJsonBlob("places.json", places);
+
+    await updateJsonBlob("places.json", (places) => {
+      return [...places, newPlace];
+    });
     res.status(201).json(enrichPlace(newPlace));
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
 });
 
-// PATCH /api/places/:id – обновить место (только разрешённые поля)
+// PATCH /api/places/:id – обновить место
 app.patch("/api/places/:id", authMiddleware, checkRevoked, async (req, res) => {
   try {
-    const places = await ensureDefaultData("places.json", defaultPlaces);
     const id = Number(req.params.id);
-    const index = places.findIndex((p) => p.id === id);
-    if (index === -1)
-      return res.status(404).json({ error: "Место не найдено" });
+    const updatedPlace = await updateJsonBlob("places.json", (places) => {
+      const index = places.findIndex((p) => p.id === id);
+      if (index === -1) throw { status: 404, message: "Место не найдено" };
 
-    // Список полей, которые разрешено менять (кроме id, created_at, rating? можно rating)
-    const updatable = [
-      "title",
-      "description",
-      "event_date",
-      "author",
-      "location_type",
-      "activity_type",
-      "cover_type",
-      "comment",
-      "address",
-      "coordinates",
-      "link",
-      "rating",
-      "images",
-      "is_visited",
-    ];
+      const updatable = [
+        "title",
+        "description",
+        "event_date",
+        "author",
+        "location_type",
+        "activity_type",
+        "cover_type",
+        "comment",
+        "address",
+        "coordinates",
+        "link",
+        "rating",
+        "images",
+        "is_visited",
+      ];
 
-    const existing = places[index];
-    const updated = { ...existing };
-
-    for (const field of updatable) {
-      if (req.body[field] !== undefined) {
-        updated[field] = req.body[field];
+      const existing = places[index];
+      const updated = { ...existing };
+      for (const field of updatable) {
+        if (req.body[field] !== undefined) {
+          updated[field] = req.body[field];
+        }
       }
-    }
+      updated.id = existing.id;
+      updated.created_at = existing.created_at;
 
-    // Убедимся, что id и created_at не изменились
-    updated.id = existing.id;
-    updated.created_at = existing.created_at;
-
-    places[index] = updated;
-    await writeJsonBlob("places.json", places);
-    res.json(enrichPlace(updated));
+      places[index] = updated;
+      return places;
+    });
+    res.json(enrichPlace(updatedPlace.find((p) => p.id === id)));
   } catch (err) {
+    if (err.status === 404) return res.status(404).json({ error: err.message });
     res.status(500).json({ error: err.message });
   }
 });
@@ -228,17 +263,20 @@ app.patch("/api/places/:id", authMiddleware, checkRevoked, async (req, res) => {
 // DELETE /api/places – удалить несколько мест (массив id в теле)
 app.delete("/api/places", authMiddleware, checkRevoked, async (req, res) => {
   try {
-    const places = await ensureDefaultData("places.json", defaultPlaces);
-    const idsToDelete = req.body?.ids; // ожидается массив [1,2,3]
+    const idsToDelete = req.body?.ids;
     if (!Array.isArray(idsToDelete)) {
       return res.status(400).json({ error: "Необходим массив ids" });
     }
-    const newPlaces = places.filter((p) => !idsToDelete.includes(p.id));
-    if (newPlaces.length === places.length) {
+    let deletedCount = 0;
+    await updateJsonBlob("places.json", (places) => {
+      const newPlaces = places.filter((p) => !idsToDelete.includes(p.id));
+      deletedCount = places.length - newPlaces.length;
+      return newPlaces;
+    });
+    if (deletedCount === 0) {
       return res.status(404).json({ error: "Ни одно место не найдено" });
     }
-    await writeJsonBlob("places.json", newPlaces);
-    res.json({ deleted: places.length - newPlaces.length });
+    res.json({ deleted: deletedCount });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
@@ -251,21 +289,24 @@ app.delete(
   checkRevoked,
   async (req, res) => {
     try {
-      const places = await ensureDefaultData("places.json", defaultPlaces);
       const id = Number(req.params.id);
-      const index = places.findIndex((p) => p.id === id);
-      if (index === -1)
-        return res.status(404).json({ error: "Место не найдено" });
-      const [deleted] = places.splice(index, 1);
-      await writeJsonBlob("places.json", places);
-      res.json(enrichPlace(deleted)); // или просто { success: true }
+      let deletedPlace = null;
+      await updateJsonBlob("places.json", (places) => {
+        const index = places.findIndex((p) => p.id === id);
+        if (index === -1) throw { status: 404, message: "Место не найдено" };
+        [deletedPlace] = places.splice(index, 1);
+        return places;
+      });
+      res.json(enrichPlace(deletedPlace));
     } catch (err) {
+      if (err.status === 404)
+        return res.status(404).json({ error: err.message });
       res.status(500).json({ error: err.message });
     }
   },
 );
 
-// Для теста
+// Тестовый статус
 app.get("/api/status", (req, res) => res.json({ status: "ok" }));
 
 module.exports = app;
