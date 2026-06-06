@@ -2,7 +2,7 @@ import { useForm, useWatch } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { TextField, FormControl, FormGroup } from "@mui/material";
 import { nanoid } from "nanoid";
-import { userSchema, UserFormData } from "@/schemas/user";
+import { userSchema, UserFormData } from "@/lib/schemas/user";
 import { User, UserRole } from "@/types/user";
 import { UserFormRolesSelector } from "./UserFormRolesSelector";
 import { UserFormRolesSubordinates } from "./UserFormRolesSubordinates";
@@ -10,9 +10,9 @@ import { ModalMode } from "@/types/usersTable";
 import { UserFormActionButtons } from "./UserFormActionButtons";
 import { useCallback, useState } from "react";
 import { updateHierarchy } from "./helpers/updateHierarchy";
-import { notify } from "@/utils/notify";
-import { NOTIFY_TEXT } from "@/constants/notify";
-import { getPotentialSubordinates } from "@/utils/getPotentialSubordinates";
+import { notify } from "@/lib/utils/notify";
+import { NOTIFY_TEXT } from "@/lib/constants/notify";
+import { getPotentialSubordinates } from "@/lib/utils/getPotentialSubordinates";
 
 type UserFormProps = {
   users: User[];
@@ -70,12 +70,12 @@ export const UserFormView = ({
       setValue(
         "subordinates",
         currentUser.subordinates.filter((sub) =>
-          potentialSubsUpdatedIds.includes(sub)
-        )
+          potentialSubsUpdatedIds.includes(sub),
+        ),
       );
       setPotentialSubs(potentialSubsUpdated);
     },
-    [currentUser, setValue, users]
+    [currentUser, setValue, users],
   );
 
   const onSubmit = useCallback(
@@ -102,7 +102,7 @@ export const UserFormView = ({
         }
       }
     },
-    [addUser, currentUser, mode, onSave, updateUser, users]
+    [addUser, currentUser, mode, onSave, updateUser, users],
   );
 
   return (

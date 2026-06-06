@@ -1,15 +1,15 @@
-import { UserFormData } from "@/schemas/user";
+import { UserFormData } from "@/lib/schemas/user";
 import { User } from "@/types/user";
-import { getUserRoleIndex } from "@/utils/getUserRoleIndex";
+import { getUserRoleIndex } from "@/lib/utils/getUserRoleIndex";
 import { updateHierarchyStatus } from "./updateHierarchy";
-import { NOTIFY_TEXT } from "@/constants/notify";
+import { NOTIFY_TEXT } from "@/lib/constants/notify";
 
 export const getNewManager = (
   users: User[],
   user: User,
   userData: UserFormData,
   updateUser: (id: string, patch: Partial<User>) => void,
-  currentUserId?: string
+  currentUserId?: string,
 ) => {
   let status: updateHierarchyStatus = { status: "success" };
 
@@ -17,7 +17,7 @@ export const getNewManager = (
     (candidate) =>
       candidate.id !== currentUserId &&
       getUserRoleIndex(candidate.role) < getUserRoleIndex(user.role) &&
-      !userData.subordinates.includes(candidate.id)
+      !userData.subordinates.includes(candidate.id),
   );
 
   if (newManager) {

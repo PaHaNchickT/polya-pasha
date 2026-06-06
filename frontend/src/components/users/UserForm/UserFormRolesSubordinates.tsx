@@ -1,4 +1,4 @@
-import { UserFormData } from "@/schemas/user";
+import { UserFormData } from "@/lib/schemas/user";
 import { User } from "@/types/user";
 import {
   Checkbox,
@@ -27,7 +27,7 @@ export const UserFormRolesSubordinates = ({
   const handleChange = useCallback(
     (event: SelectChangeEvent<string[]>) =>
       setValue("subordinates", event.target.value as unknown as string[]),
-    [setValue]
+    [setValue],
   );
 
   return (

@@ -1,6 +1,6 @@
-import { UserFormData } from "@/schemas/user";
+import { UserFormData } from "@/lib/schemas/user";
 import { User } from "@/types/user";
-import { getUserRoleIndex } from "@/utils/getUserRoleIndex";
+import { getUserRoleIndex } from "@/lib/utils/getUserRoleIndex";
 import { getNewManager } from "./getNewManager";
 
 export type updateHierarchyStatus = {
@@ -13,7 +13,7 @@ export const updateHierarchy = (
   users: User[],
   userData: UserFormData,
   currentUser: User | null | undefined,
-  updateUser: (id: string, patch: Partial<User>) => void
+  updateUser: (id: string, patch: Partial<User>) => void,
 ): updateHierarchyStatus => {
   let status: updateHierarchyStatus = { status: "success" };
 
@@ -27,7 +27,7 @@ export const updateHierarchy = (
     [...(currentUser?.subordinates ?? [])].sort().join(",");
 
   const subsDiff = userData.subordinates.filter(
-    (item) => !currentUser?.subordinates.includes(item)
+    (item) => !currentUser?.subordinates.includes(item),
   );
 
   users.forEach((user) => {
@@ -36,7 +36,7 @@ export const updateHierarchy = (
       if (subsDiff.includes(user.id)) {
         // У старого начальника убираем подчиненного, у которого теперь новый начальник
         const oldManager = users.find(
-          (candidate) => candidate.id === user.managerId
+          (candidate) => candidate.id === user.managerId,
         );
 
         if (oldManager) {
@@ -62,7 +62,7 @@ export const updateHierarchy = (
           user,
           userData,
           updateUser,
-          currentUserId
+          currentUserId,
         );
       }
     }
@@ -70,7 +70,7 @@ export const updateHierarchy = (
     // ROLE CHECK
     if (isRoleChanged) {
       const managerData = users.find(
-        (userManager) => userManager.id === user.managerId
+        (userManager) => userManager.id === user.managerId,
       );
 
       if (
@@ -100,7 +100,7 @@ export const updateHierarchy = (
           user,
           userData,
           updateUser,
-          currentUserId
+          currentUserId,
         );
       }
     }

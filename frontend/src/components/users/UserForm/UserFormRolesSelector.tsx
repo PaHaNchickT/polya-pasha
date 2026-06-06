@@ -1,4 +1,4 @@
-import { UserFormData } from "@/schemas/user";
+import { UserFormData } from "@/lib/schemas/user";
 import { UserRole } from "@/types/user";
 import { MenuItem, TextField } from "@mui/material";
 import { ChangeEvent, useCallback } from "react";
@@ -22,7 +22,7 @@ export const UserFormRolesSelector = ({
       updateSubs(event.target.value as UserRole);
       setValue("role", event.target.value as UserRole);
     },
-    [updateSubs, setValue]
+    [updateSubs, setValue],
   );
 
   return (

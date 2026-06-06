@@ -1,7 +1,7 @@
-import { UserFormData } from "@/schemas/user";
+import { UserFormData } from "@/lib/schemas/user";
 import { UserFormView } from "./UserFormView";
 import { User } from "@/types/user";
-import { getPotentialSubordinates } from "@/utils/getPotentialSubordinates";
+import { getPotentialSubordinates } from "@/lib/utils/getPotentialSubordinates";
 import { ModalMode } from "@/types/usersTable";
 import { useMemo } from "react";
 
@@ -35,7 +35,7 @@ export const UserFormContainer = ({
 
   const potentialSubordinates = useMemo(
     () => getPotentialSubordinates(users, currentUser),
-    [users, currentUser]
+    [users, currentUser],
   );
 
   return (
