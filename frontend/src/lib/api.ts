@@ -51,7 +51,7 @@ const authFetch = async <T>(
   return res.json();
 };
 
-// --- Логин ---
+// POST /api/login – логин
 const login = async (loginData: LoginData): Promise<LoginResponse> => {
   const res = await fetch(`${API_URL}/api/login`, {
     method: "POST",
@@ -72,7 +72,7 @@ const login = async (loginData: LoginData): Promise<LoginResponse> => {
   return data;
 };
 
-// --- Выход ---
+// POST /api/logout – разлогин
 const logout = async (): Promise<void> => {
   try {
     await authFetch("/api/logout", { method: "POST" });
@@ -84,17 +84,17 @@ const logout = async (): Promise<void> => {
   }
 };
 
-// Получить все места
+// GET /api/places – список всех мест
 const getPlaces = async (): Promise<Place[]> => {
   return authFetch<Place[]>("/api/places");
 };
 
-// Получить одно место по id
+// GET /api/places/:id – одно место
 const getPlace = async (id: number): Promise<Place> => {
   return authFetch<Place>(`/api/places/${id}`);
 };
 
-// Создать место (отправляем Omit<Place, 'id' | 'created_at' | 'is_new' | 'is_expired'>)
+// POST /api/places – создать новое место
 const createPlace = async (
   data: Omit<Place, "id" | "created_at" | "is_new" | "is_expired">,
 ): Promise<Place> => {
@@ -104,7 +104,7 @@ const createPlace = async (
   });
 };
 
-// Обновить место (можно отправлять только изменённые поля)
+// PATCH /api/places/:id – обновить место (только разрешённые поля)
 const updatePlace = async (
   id: number,
   data: Partial<Omit<Place, "id" | "created_at" | "is_new" | "is_expired">>,
@@ -115,12 +115,12 @@ const updatePlace = async (
   });
 };
 
-// Удалить одно место
+// DELETE /api/places/:id – удалить одно место
 const deletePlace = async (id: number): Promise<void> => {
   await authFetch(`/api/places/${id}`, { method: "DELETE" });
 };
 
-// Удалить несколько мест (передаём массив id)
+// DELETE /api/places – удалить несколько мест (массив id в теле)
 const deletePlaces = async (ids: number[]): Promise<{ deleted: number }> => {
   return authFetch<{ deleted: number }>("/api/places", {
     method: "DELETE",
