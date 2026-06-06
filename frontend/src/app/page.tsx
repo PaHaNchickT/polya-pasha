@@ -17,7 +17,7 @@ export default function HomePage() {
       <p>Page has been loaded</p>
       <Button
         onClick={() => {
-          fetch("https://polya-pasha.vercel.app/api/places")
+          fetch("https://polya-pasha-api.vercel.app/api/places")
             .then((res) => res.json())
             .then((places) => console.log("Places:", places))
             .catch((err) => console.error(err));
