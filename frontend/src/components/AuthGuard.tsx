@@ -1,32 +1,26 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { LOCAL_STORAGE_TOKEN_KEY } from "@/lib/constants/common";
 
 export default function AuthGuard({ children }: { children: React.ReactNode }) {
   const router = useRouter();
+  const [authorized, setAuthorized] = useState(false);
 
   useEffect(() => {
     const token = localStorage.getItem(LOCAL_STORAGE_TOKEN_KEY);
     if (!token) {
       router.replace("/login");
+    } else {
+      // Откладываем обновление состояния, чтобы избежать синхронного setState в эффекте
+      queueMicrotask(() => setAuthorized(true));
     }
-    // Если токен есть — ничего не делаем, компонент просто отрендерит children
   }, [router]);
 
-  // Пока эффект не отработал (или если токен был, но проверка ещё не прошла),
-  // мы не показываем содержимое, чтобы избежать мигания защищённых данных.
-  // Можно проверить наличие токена синхронно прямо здесь, чтобы не ждать эффекта:
-  const hasToken =
-    typeof window !== "undefined" &&
-    localStorage.getItem(LOCAL_STORAGE_TOKEN_KEY);
-
-  if (!hasToken) {
-    // Токена нет — редирект запущен в эффекте, пока возвращаем null (или спиннер)
-    return null;
+  if (!authorized) {
+    return null; // одинаково на сервере и при первом клиентском рендере
   }
 
-  // Токен есть — рендерим защищённый контент
   return <>{children}</>;
 }

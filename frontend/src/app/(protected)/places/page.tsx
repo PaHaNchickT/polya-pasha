@@ -1,5 +1,6 @@
 "use client";
 
+import { getPlaces } from "@/lib/api";
 import { Button } from "@mui/material";
 
 export default function HomePage() {
@@ -9,10 +10,7 @@ export default function HomePage() {
       <p>Page has been loaded</p>
       <Button
         onClick={() => {
-          fetch("https://polya-pasha-api.vercel.app/api/places")
-            .then((res) => res.json())
-            .then((places) => console.log("Places:", places))
-            .catch((err) => console.error(err));
+          getPlaces().then((data) => console.log(data));
           console.log("clicked");
         }}
       >
