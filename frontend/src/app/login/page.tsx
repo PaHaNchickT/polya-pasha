@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { login } from "@/lib/api";
+import { LOCAL_STORAGE_TOKEN_KEY } from "@/lib/constants/common";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -16,15 +17,17 @@ export default function LoginPage() {
     try {
       await login(l, p);
       router.push("/places");
-    } catch (err: any) {
-      setError(err.message);
+    } catch (err: unknown) {
+      const message =
+        err instanceof Error ? err.message : "Неизвестная ошибка входа";
+      setError(message);
     }
   }
 
-  // useEffect(() => {
-  //   const token = localStorage.getItem(LOCAL_STORAGE_TOKEN_KEY);
-  //   if (token) router.replace("/places");
-  // }, [router]);
+  useEffect(() => {
+    const token = localStorage.getItem(LOCAL_STORAGE_TOKEN_KEY);
+    if (token) router.replace("/places");
+  }, [router]);
 
   return (
     <form onSubmit={handleSubmit}>
