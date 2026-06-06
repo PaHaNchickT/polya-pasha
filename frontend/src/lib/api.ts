@@ -1,32 +1,35 @@
 import { LoginResponse, Place } from "@/types/api";
+import { LOCAL_STORAGE_TOKEN_KEY } from "./constants/common";
 
-const API_URL =
-  process.env.NEXT_PUBLIC_API_URL
+const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
 // --- Вспомогательная функция для защищённых запросов ---
 async function authFetch<T>(
   url: string,
   options: RequestInit = {},
 ): Promise<T> {
-  const token = localStorage.getItem("token");
+  const token = localStorage.getItem(LOCAL_STORAGE_TOKEN_KEY);
 
-  const headers: HeadersInit = {
-    "Content-Type": "application/json",
-    ...options.headers,
-  };
+  // Создаём объект Headers, который правильно обрабатывает любые ключи
+  const headers = new Headers(options.headers);
 
+  // Добавляем Content-Type, если его ещё нет
+  if (!headers.has("Content-Type")) {
+    headers.set("Content-Type", "application/json");
+  }
+
+  // Если токен есть, добавляем Authorization
   if (token) {
-    headers["Authorization"] = `Bearer ${token}`;
+    headers.set("Authorization", `Bearer ${token}`);
   }
 
   const res = await fetch(`${API_URL}${url}`, {
     ...options,
-    headers,
+    headers, // теперь это Headers, а не литерал
   });
 
   if (res.status === 401) {
-    // Токен истёк или отозван — принудительный выход
-    localStorage.removeItem("token");
+    localStorage.removeItem(LOCAL_STORAGE_TOKEN_KEY);
     window.location.href = "/login";
     throw new Error("Unauthorized");
   }
@@ -58,7 +61,7 @@ export async function login(
   }
 
   const data: LoginResponse = await res.json();
-  localStorage.setItem("token", data.token);
+  localStorage.setItem(LOCAL_STORAGE_TOKEN_KEY, data.token);
   return data;
 }
 
@@ -74,7 +77,7 @@ export async function logout(): Promise<void> {
   } catch (err) {
     console.error("Logout error:", err);
   } finally {
-    localStorage.removeItem("token");
+    localStorage.removeItem(LOCAL_STORAGE_TOKEN_KEY);
     window.location.href = "/login";
   }
 }
