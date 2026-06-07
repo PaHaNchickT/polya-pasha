@@ -3,8 +3,9 @@ import Card from "@mui/material/Card";
 import CardContent from "@mui/material/CardContent";
 import CardMedia from "@mui/material/CardMedia";
 import { Avatar, AvatarGroup, Box, Typography } from "@mui/material";
-import { useState } from "react";
 import { Place } from "@/types/place";
+import { AUTHORS_MAP, LOCATION_TYPE_MAP } from "@/lib/constants/place";
+import { useRouter } from "next/navigation";
 
 const StyledCard = styled(Card)(({ theme }) => ({
   display: "flex",
@@ -86,23 +87,17 @@ type IPlaceItem = {
 };
 
 export const PlaceItem = ({ item }: IPlaceItem) => {
-  const [focusedCardIndex, setFocusedCardIndex] = useState<number | null>(null);
+  const router = useRouter();
 
-  const handleFocus = (index: number) => {
-    setFocusedCardIndex(index);
-  };
-
-  const handleBlur = () => {
-    setFocusedCardIndex(null);
+  const handleClick = () => {
+    router.push(`places/${item.id}`);
   };
 
   return (
     <StyledCard
       variant="outlined"
-      onFocus={() => handleFocus(5)}
-      onBlur={handleBlur}
+      onClick={handleClick}
       tabIndex={0}
-      className={focusedCardIndex === 5 ? "Mui-focused" : ""}
       sx={{ height: "100%" }}
     >
       <CardMedia
@@ -116,7 +111,7 @@ export const PlaceItem = ({ item }: IPlaceItem) => {
       />
       <StyledCardContent>
         <Typography gutterBottom variant="caption" component="div">
-          {item.locationType}
+          {LOCATION_TYPE_MAP[item.locationType]}
         </Typography>
         <Typography gutterBottom variant="h6" component="div">
           {item.title}
@@ -130,7 +125,12 @@ export const PlaceItem = ({ item }: IPlaceItem) => {
         </StyledTypography>
       </StyledCardContent>
       <Author
-        authors={[{ name: item.author, avatar: "/static/images/avatar/4.jpg" }]}
+        authors={[
+          {
+            name: AUTHORS_MAP[item.author],
+            avatar: "/static/images/avatar/4.jpg",
+          },
+        ]}
       />
     </StyledCard>
   );

@@ -1,21 +1,34 @@
 "use client";
 
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { Button, Typography, AppBar, Toolbar, Container } from "@mui/material";
 import LogoutIcon from "@mui/icons-material/Logout";
 import { api } from "@/lib/api";
 import { notify } from "@/lib/utils/notify";
 import { useEffect, useState } from "react";
-import { LOCAL_STORAGE_USERNAME_KEY } from "@/lib/constants/common";
+import {
+  HEADER_TABS,
+  HEADER_TABS_MAP,
+  LOCAL_STORAGE_USERNAME_KEY,
+} from "@/lib/constants/common";
 import { UserTypes } from "@/types/common";
 import { isAuthentificated } from "@/lib/helpers/isAuthentificated";
 import { USERS_MAP } from "@/lib/constants/users";
 
 export const Header = () => {
+  const router = useRouter();
   const pathname = usePathname();
 
   const [isSignedIn, setIsSignedIn] = useState(false);
   const [username, setUsername] = useState<UserTypes>("guest");
+
+  const handleClick = (route: string) => {
+    const predictPathname = `/${route}`;
+
+    if (predictPathname !== pathname) {
+      router.push(`/${route}`);
+    }
+  };
 
   const handleLogout = () => {
     api
@@ -54,15 +67,17 @@ export const Header = () => {
             </Typography>
             <div className="grow flex justify-center items-center px-0 text-white">
               <div className="flex gap-4">
-                <Button variant="text" size="small" className="!text-white">
-                  Места
-                </Button>
-                <Button variant="text" size="small" className="!text-white">
-                  Отзывы
-                </Button>
-                <Button variant="text" size="small" className="!text-white">
-                  Рандомайзер
-                </Button>
+                {HEADER_TABS.map((route) => (
+                  <Button
+                    key={`${route}-tav`}
+                    variant="text"
+                    size="small"
+                    className="!text-white"
+                    onClick={() => handleClick(route)}
+                  >
+                    {HEADER_TABS_MAP[route]}
+                  </Button>
+                ))}
               </div>
             </div>
             <div className="flex gap-4">

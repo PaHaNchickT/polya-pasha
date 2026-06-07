@@ -1,9 +1,9 @@
 export const LOCATION_TYPE_MAP = {
   all: "Без разницы",
-  walk: "Прогулки",
-  ride: "Поездки",
-  travel_internal: "Путешествия (межгород)",
-  travel_external: "Путешествия (за границу)",
+  walk: "Прогулка",
+  ride: "Поездка",
+  travel_internal: "Путешествие (межгород)",
+  travel_external: "Путешествие (за границу)",
 };
 
 export const ACTIVITY_TYPE_MAP = {
@@ -22,4 +22,9 @@ export const COVER_TYPE_MAP = {
   open: "Улица",
   close: "Помещение",
   hybrid: "Гибрид",
+};
+
+export const AUTHORS_MAP = {
+  Pasha: "Паша",
+  Polya: "Поля",
 };
