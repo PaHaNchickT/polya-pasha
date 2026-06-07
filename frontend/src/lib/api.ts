@@ -1,12 +1,11 @@
 "use client";
 
-import { LoginResponse } from "@/types/api";
+import { LoginResponse, PlaceResponse } from "@/types/api";
 import {
   LOCAL_STORAGE_TOKEN_KEY,
   LOCAL_STORAGE_USERNAME_KEY,
 } from "./constants/common";
 import { LoginData } from "@/types/login";
-import { Place } from "@/types/place";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
@@ -85,20 +84,20 @@ const logout = async (): Promise<void> => {
 };
 
 // GET /api/places – список всех мест
-const getPlaces = async (): Promise<Place[]> => {
-  return authFetch<Place[]>("/api/places");
+const getPlaces = async (): Promise<PlaceResponse[]> => {
+  return authFetch<PlaceResponse[]>("/api/places");
 };
 
 // GET /api/places/:id – одно место
-const getPlace = async (id: number): Promise<Place> => {
-  return authFetch<Place>(`/api/places/${id}`);
+const getPlace = async (id: number): Promise<PlaceResponse> => {
+  return authFetch<PlaceResponse>(`/api/places/${id}`);
 };
 
 // POST /api/places – создать новое место
 const createPlace = async (
-  data: Omit<Place, "id" | "created_at" | "is_new" | "is_expired">,
-): Promise<Place> => {
-  return authFetch<Place>("/api/places", {
+  data: Omit<PlaceResponse, "id" | "created_at" | "is_new" | "is_expired">,
+): Promise<PlaceResponse> => {
+  return authFetch<PlaceResponse>("/api/places", {
     method: "POST",
     body: JSON.stringify(data),
   });
@@ -107,9 +106,9 @@ const createPlace = async (
 // PATCH /api/places/:id – обновить место (только разрешённые поля)
 const updatePlace = async (
   id: number,
-  data: Partial<Omit<Place, "id" | "created_at" | "is_new" | "is_expired">>,
-): Promise<Place> => {
-  return authFetch<Place>(`/api/places/${id}`, {
+  data: Partial<Omit<PlaceResponse, "id" | "created_at" | "is_new" | "is_expired">>,
+): Promise<PlaceResponse> => {
+  return authFetch<PlaceResponse>(`/api/places/${id}`, {
     method: "PATCH",
     body: JSON.stringify(data),
   });
