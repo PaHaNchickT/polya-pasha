@@ -4,11 +4,11 @@ import { useEffect, useState } from "react";
 import { PlacesPage } from "@/components/auth/PlacesPage/PlacesPage";
 import { api } from "@/lib/api";
 import { Loader } from "@/components/ui/Loader";
-import { PlaceResponse } from "@/types/api";
-import { preparePlaceData } from "@/lib/helpers/preparePlaceData";
+import { PlaceResponseData } from "@/types/api";
+import { transformPlaceData } from "@/lib/helpers/transformPlaceData";
 
 export default function PlacesPageServer() {
-  const [data, setData] = useState<PlaceResponse[]>([]);
+  const [data, setData] = useState<PlaceResponseData[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -24,7 +24,7 @@ export default function PlacesPageServer() {
       {loading ? (
         <Loader />
       ) : (
-        <PlacesPage data={data.map((item) => preparePlaceData(item))} />
+        <PlacesPage data={data.map((item) => transformPlaceData(item))} />
       )}
     </>
   );

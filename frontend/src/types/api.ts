@@ -6,7 +6,7 @@ import {
   PlaceLocationType,
 } from "./place";
 
-export interface LoginResponse {
+export interface LoginResponseData {
   token: string;
   user: {
     login: string;
@@ -14,7 +14,7 @@ export interface LoginResponse {
   };
 }
 
-export interface PlaceResponse {
+export interface PlaceResponseData {
   id: number;
   title: string;
   description: string;
@@ -34,3 +34,8 @@ export interface PlaceResponse {
   is_visited: boolean;
   is_expired: boolean | null;
 }
+
+export type PlacePostData = Omit<
+  PlaceResponseData,
+  "id" | "created_at" | "is_new" | "is_expired"
+>;

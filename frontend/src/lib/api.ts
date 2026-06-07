@@ -1,6 +1,10 @@
 "use client";
 
-import { LoginResponse, PlaceResponse } from "@/types/api";
+import {
+  LoginResponseData,
+  PlacePostData,
+  PlaceResponseData,
+} from "@/types/api";
 import {
   LOCAL_STORAGE_TOKEN_KEY,
   LOCAL_STORAGE_USERNAME_KEY,
@@ -51,7 +55,7 @@ const authFetch = async <T>(
 };
 
 // POST /api/login – логин
-const login = async (loginData: LoginData): Promise<LoginResponse> => {
+const login = async (loginData: LoginData): Promise<LoginResponseData> => {
   const res = await fetch(`${API_URL}/api/login`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
@@ -63,7 +67,7 @@ const login = async (loginData: LoginData): Promise<LoginResponse> => {
     throw new Error(errorData?.error || "Ошибка входа");
   }
 
-  const data: LoginResponse = await res.json();
+  const data: LoginResponseData = await res.json();
 
   localStorage.setItem(LOCAL_STORAGE_TOKEN_KEY, data.token);
   localStorage.setItem(LOCAL_STORAGE_USERNAME_KEY, data.user.login);
@@ -84,20 +88,18 @@ const logout = async (): Promise<void> => {
 };
 
 // GET /api/places – список всех мест
-const getPlaces = async (): Promise<PlaceResponse[]> => {
-  return authFetch<PlaceResponse[]>("/api/places");
+const getPlaces = async (): Promise<PlaceResponseData[]> => {
+  return authFetch<PlaceResponseData[]>("/api/places");
 };
 
 // GET /api/places/:id – одно место
-const getPlace = async (id: number): Promise<PlaceResponse> => {
-  return authFetch<PlaceResponse>(`/api/places/${id}`);
+const getPlace = async (id: number): Promise<PlaceResponseData> => {
+  return authFetch<PlaceResponseData>(`/api/places/${id}`);
 };
 
 // POST /api/places – создать новое место
-const createPlace = async (
-  data: Omit<PlaceResponse, "id" | "created_at" | "is_new" | "is_expired">,
-): Promise<PlaceResponse> => {
-  return authFetch<PlaceResponse>("/api/places", {
+const createPlace = async (data: PlacePostData): Promise<PlaceResponseData> => {
+  return authFetch<PlaceResponseData>("/api/places", {
     method: "POST",
     body: JSON.stringify(data),
   });
@@ -106,9 +108,9 @@ const createPlace = async (
 // PATCH /api/places/:id – обновить место (только разрешённые поля)
 const updatePlace = async (
   id: number,
-  data: Partial<Omit<PlaceResponse, "id" | "created_at" | "is_new" | "is_expired">>,
-): Promise<PlaceResponse> => {
-  return authFetch<PlaceResponse>(`/api/places/${id}`, {
+  data: Partial<PlacePostData>,
+): Promise<PlaceResponseData> => {
+  return authFetch<PlaceResponseData>(`/api/places/${id}`, {
     method: "PATCH",
     body: JSON.stringify(data),
   });
