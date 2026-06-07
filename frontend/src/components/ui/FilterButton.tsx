@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import { MouseEvent, useState } from "react";
 import IconButton from "@mui/material/IconButton";
 import Popover from "@mui/material/Popover";
 import FormControl from "@mui/material/FormControl";
@@ -7,26 +7,39 @@ import Select, { SelectChangeEvent } from "@mui/material/Select";
 import MenuItem from "@mui/material/MenuItem";
 import Button from "@mui/material/Button";
 import Box from "@mui/material/Box";
-import SortIcon from "@mui/icons-material/Sort";
+import FilterAltIcon from "@mui/icons-material/FilterAlt";
+import { PlaceCoverType, PlaceLocationType } from "@/types/place";
+import { LOCATION_TYPE_MAP, COVER_TYPE_MAP } from "@/lib/constants/place";
 
-export type SortType = "walk" | "ride" | "travel_internal" | "travel_external";
-export type SortMode = "open" | "close" | "hybrid";
+const TEMP_PLACE_COVER_LIST: (keyof typeof LOCATION_TYPE_MAP)[] = [
+  "all",
+  "walk",
+  "ride",
+  "travel_internal",
+  "travel_external",
+];
+const TEMP_PLACE_LOCATION_LIST: (keyof typeof COVER_TYPE_MAP)[] = [
+  "all",
+  "open",
+  "close",
+  "hybrid",
+];
 
-export interface SortParams {
-  type: SortType;
-  mode: SortMode;
+export interface FilterParams {
+  type: PlaceLocationType;
+  mode: PlaceCoverType;
 }
 
-interface SortPopoverProps {
-  onSortChange?: (params: SortParams) => void;
+interface IFilterButton {
+  onFilterChange?: (params: FilterParams) => void;
 }
 
-export const SortButton = ({ onSortChange }: SortPopoverProps) => {
+export const FilterButton = ({ onFilterChange }: IFilterButton) => {
   const [anchorEl, setAnchorEl] = useState<HTMLElement | null>(null);
-  const [type, setType] = useState<SortType>("walk");
-  const [mode, setMode] = useState<SortMode>("open");
+  const [type, setType] = useState<PlaceLocationType>("walk");
+  const [mode, setMode] = useState<PlaceCoverType>("open");
 
-  const handleClick = (event: React.MouseEvent<HTMLButtonElement>) => {
+  const handleClick = (event: MouseEvent<HTMLButtonElement>) => {
     setAnchorEl(event.currentTarget);
   };
 
@@ -35,24 +48,24 @@ export const SortButton = ({ onSortChange }: SortPopoverProps) => {
   };
 
   const handleApply = () => {
-    onSortChange?.({ type, mode });
+    onFilterChange?.({ type, mode });
     handleClose();
   };
 
-  const handleTypeChange = (event: SelectChangeEvent<SortType>) => {
-    setType(event.target.value as SortType);
+  const handleTypeChange = (event: SelectChangeEvent<PlaceLocationType>) => {
+    setType(event.target.value as PlaceLocationType);
   };
 
-  const handleModeChange = (event: SelectChangeEvent<SortMode>) => {
-    setMode(event.target.value as SortMode);
+  const handleModeChange = (event: SelectChangeEvent<PlaceCoverType>) => {
+    setMode(event.target.value as PlaceCoverType);
   };
 
   const open = Boolean(anchorEl);
 
   return (
     <>
-      <IconButton onClick={handleClick} aria-label="sort options">
-        <SortIcon />
+      <IconButton onClick={handleClick} aria-label="filter options">
+        <FilterAltIcon />
       </IconButton>
       <Popover
         open={open}
@@ -78,24 +91,27 @@ export const SortButton = ({ onSortChange }: SortPopoverProps) => {
               label="Тип"
               onChange={handleTypeChange}
             >
-              <MenuItem value="walk">Walk</MenuItem>
-              <MenuItem value="ride">Ride</MenuItem>
-              <MenuItem value="travel_internal">Travel Internal</MenuItem>
-              <MenuItem value="travel_external">Travel External</MenuItem>
+              {TEMP_PLACE_COVER_LIST.map((item) => (
+                <MenuItem key={`${item}-option`} value={item}>
+                  {LOCATION_TYPE_MAP[item]}
+                </MenuItem>
+              ))}
             </Select>
           </FormControl>
 
           <FormControl fullWidth size="small">
-            <InputLabel id="mode-select-label">Режим</InputLabel>
+            <InputLabel id="mode-select-label">Местность</InputLabel>
             <Select
               labelId="mode-select-label"
               value={mode}
               label="Режим"
               onChange={handleModeChange}
             >
-              <MenuItem value="open">Open</MenuItem>
-              <MenuItem value="close">Close</MenuItem>
-              <MenuItem value="hybrid">Hybrid</MenuItem>
+              {TEMP_PLACE_LOCATION_LIST.map((item) => (
+                <MenuItem key={`${item}-option`} value={item}>
+                  {COVER_TYPE_MAP[item]}
+                </MenuItem>
+              ))}
             </Select>
           </FormControl>
 

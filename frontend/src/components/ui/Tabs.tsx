@@ -1,6 +1,18 @@
 import { Box, Chip } from "@mui/material";
-import { SortButton } from "./SortButton";
+import { FilterButton } from "./FilterButton";
 import { AddButton } from "./AddButton";
+import { ACTIVITY_TYPE_MAP } from "@/lib/constants/place";
+
+export const TEMP_TABS: (keyof typeof ACTIVITY_TYPE_MAP)[] = [
+  "all",
+  "food",
+  "rich_food",
+  "movie",
+  "music",
+  "action",
+  "animals",
+  "other",
+];
 
 export const Tabs = () => {
   const handleClick = () => {
@@ -27,52 +39,18 @@ export const Tabs = () => {
           rowGap: 1,
         }}
       >
-        <Chip onClick={handleClick} size="medium" label="Все активности" />
-        <Chip
-          onClick={handleClick}
-          size="medium"
-          label="Покушать"
-          sx={{ backgroundColor: "transparent", border: "none" }}
-        />
-        <Chip
-          onClick={handleClick}
-          size="medium"
-          label="Покушать дорого"
-          sx={{ backgroundColor: "transparent", border: "none" }}
-        />
-        <Chip
-          onClick={handleClick}
-          size="medium"
-          label="Фильмы"
-          sx={{ backgroundColor: "transparent", border: "none" }}
-        />
-        <Chip
-          onClick={handleClick}
-          size="medium"
-          label="Музыка"
-          sx={{ backgroundColor: "transparent", border: "none" }}
-        />
-        <Chip
-          onClick={handleClick}
-          size="medium"
-          label="Активный отдых"
-          sx={{ backgroundColor: "transparent", border: "none" }}
-        />
-        <Chip
-          onClick={handleClick}
-          size="medium"
-          label="Зверушки"
-          sx={{ backgroundColor: "transparent", border: "none" }}
-        />
-        <Chip
-          onClick={handleClick}
-          size="medium"
-          label="Другое"
-          sx={{ backgroundColor: "transparent", border: "none" }}
-        />
+        {TEMP_TABS.map((item, idx) => (
+          <Chip
+            key={`${item}-tab`}
+            onClick={handleClick}
+            size="medium"
+            label={ACTIVITY_TYPE_MAP[item]}
+            sx={idx ? { backgroundColor: "transparent", border: "none" } : null}
+          />
+        ))}
       </Box>
       <div className="flex gap-2 h-max">
-        <SortButton />
+        <FilterButton />
         <AddButton />
       </div>
     </Box>

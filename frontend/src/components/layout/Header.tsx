@@ -6,9 +6,10 @@ import LogoutIcon from "@mui/icons-material/Logout";
 import { api } from "@/lib/api";
 import { notify } from "@/lib/utils/notify";
 import { useEffect, useState } from "react";
-import { LOCAL_STORAGE_USERNAME_KEY, USERS_MAP } from "@/lib/constants/common";
+import { LOCAL_STORAGE_USERNAME_KEY } from "@/lib/constants/common";
 import { UserTypes } from "@/types/common";
 import { isAuthentificated } from "@/lib/helpers/isAuthentificated";
+import { USERS_MAP } from "@/lib/constants/users";
 
 export const Header = () => {
   const pathname = usePathname();

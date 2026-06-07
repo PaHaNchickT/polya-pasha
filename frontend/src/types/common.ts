@@ -1,3 +1,3 @@
-import { USERS_MAP } from "@/lib/constants/common";
+import { USERS_MAP } from "@/lib/constants/users";
 
 export type UserTypes = keyof typeof USERS_MAP;
