@@ -1,7 +1,7 @@
 "use client";
 
 import { usePathname } from "next/navigation";
-import { Button, Typography } from "@mui/material";
+import { Button, Typography, AppBar, Toolbar, Container } from "@mui/material";
 import LogoutIcon from "@mui/icons-material/Logout";
 import { api } from "@/lib/api";
 import { notify } from "@/lib/utils/notify";
@@ -36,27 +36,50 @@ export const Header = () => {
   }, [pathname]);
 
   return (
-    <header className="py-5 flex justify-between items-center">
-      <Typography
-        component="h1"
-        variant="h4"
-        className="w-full h-[52px] !text-[34px]"
-      >
-        ПоляПаша❤
-      </Typography>
+    <AppBar
+      position="fixed"
+      enableColorOnDark
+      className="!shadow-none !bg-transparent !bg-none !mt-[28px]"
+    >
       {isSignedIn && (
-        <div className="flex gap-2 ">
-          <p className="whitespace-nowrap flex items-center">{`Привет, ${USERS_MAP[username]}!`}</p>
-          <Button
-            size="large"
-            disableElevation
-            onClick={handleLogout}
-            className="h-[52px] text-white opacity-90 hover:opacity-100"
+        <Container maxWidth="lg" className="!px-[32px] !m-0 !max-w-full">
+          <Toolbar
+            variant="dense"
+            disableGutters
+            className="flex items-center justify-between shrink-0 !rounded-2xl !backdrop-blur-xl !border !border-solid !border-[hsla(220,20%,25%,0.6)] !bg-[rgba(5,7,10,0.4)] !shadow-[hsla(220,30%,5%,0.7)_0px_4px_16px_0px,hsla(220,25%,10%,0.8)_0px_8px_16px_-5px] !px-3 !py-2"
           >
-            <LogoutIcon className="h-16 text-white opacity-90 hover:opacity-100" />
-          </Button>
-        </div>
+            <Typography component="h1" variant="h4">
+              ПоляПаша❤
+            </Typography>
+            <div className="grow flex justify-center items-center px-0 text-white">
+              <div className="flex gap-4">
+                <Button variant="text" size="small" className="!text-white">
+                  Места
+                </Button>
+                <Button variant="text" size="small" className="!text-white">
+                  Отзывы
+                </Button>
+                <Button variant="text" size="small" className="!text-white">
+                  Рандомайзер
+                </Button>
+              </div>
+            </div>
+            <div className="flex gap-4">
+              <p className="whitespace-nowrap flex items-center">
+                {`Привет, ${USERS_MAP[username]}!`}
+              </p>
+              <Button
+                size="large"
+                disableElevation
+                onClick={handleLogout}
+                className="text-white opacity-90 hover:opacity-100 !min-w-0"
+              >
+                <LogoutIcon className="h-16 text-white opacity-90 hover:opacity-100" />
+              </Button>
+            </div>
+          </Toolbar>
+        </Container>
       )}
-    </header>
+    </AppBar>
   );
 };

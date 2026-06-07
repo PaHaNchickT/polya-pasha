@@ -15,7 +15,9 @@ export default function RootLayout({ children }: { children: ReactNode }) {
       <body className="flex flex-col justify-between min-h-screen px-8 bg-[radial-gradient(at_50%_50%,hsla(210,100%,16%,0.5),hsl(220,30%,5%))]">
         <AppTheme>
           <Header />
-          <div className="grow flex flex-col justify-between">{children}</div>
+          <div className="grow flex flex-col justify-between my-28">
+            {children}
+          </div>
           <Footer />
         </AppTheme>
       </body>
