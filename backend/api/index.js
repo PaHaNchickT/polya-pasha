@@ -30,9 +30,19 @@ async function readJsonBlob(filename) {
   const token = process.env.BLOB_READ_WRITE_TOKEN;
   const { blobs } = await list({ prefix: filename, token });
   if (blobs.length === 0) return null;
-  const blob = blobs[0];
+
+  // сортируем по дате загрузки – сначала самый свежий
+  const sorted = blobs.sort(
+    (a, b) => new Date(b.uploadedAt) - new Date(a.uploadedAt),
+  );
+  const blob = sorted[0];
+
   const response = await fetch(blob.url, {
-    headers: { Authorization: `Bearer ${token}` },
+    headers: {
+      Authorization: `Bearer ${token}`,
+      "Cache-Control": "no-cache",
+      Pragma: "no-cache",
+    },
   });
   if (!response.ok) {
     throw new Error(`Blob fetch failed for ${filename}: ${response.status}`);
@@ -44,16 +54,16 @@ async function readJsonBlob(filename) {
 
 async function writeJsonBlob(filename, data, etag = undefined) {
   const token = process.env.BLOB_READ_WRITE_TOKEN;
-  const { blobs } = await list({ prefix: filename, token });
-  for (const blob of blobs) await del(blob.url, { token });
   const options = {
-    access: 'private',
+    access: "private",
     contentType: "application/json",
     token,
+    allowOverwrite: true, // <-- РАЗРЕШАЕМ ПЕРЕЗАПИСЬ
   };
   if (etag) {
     options.headers = { "If-Match": etag };
   }
+  // put перезапишет существующий blob (или создаст новый, если файла нет)
   await put(filename, JSON.stringify(data, null, 2), options);
 }
 
@@ -62,7 +72,13 @@ async function updateJsonBlob(filename, updateFn) {
   const MAX_RETRIES = 3;
   for (let attempt = 0; attempt < MAX_RETRIES; attempt++) {
     const result = await readJsonBlob(filename);
-    if (!result) throw new Error(`File ${filename} not found`);
+    if (!result) {
+      // Файла нет – создаём с начальными данными
+      const newData = updateFn([]); // предполагаем, что updateFn работает с массивом
+      await writeJsonBlob(filename, newData);
+      return newData;
+    }
+
     const { data, etag } = result;
     const newData = updateFn(data);
     try {
@@ -76,6 +92,7 @@ async function updateJsonBlob(filename, updateFn) {
       throw err;
     }
   }
+  throw new Error("Update failed after retries");
 }
 
 // Инициализация данных (только если файлов нет)
@@ -187,29 +204,36 @@ app.get("/api/places/:id", authMiddleware, checkRevoked, async (req, res) => {
 // POST /api/places – создать новое место
 app.post("/api/places", authMiddleware, checkRevoked, async (req, res) => {
   try {
-    const newPlace = {
-      id: Date.now(),
-      title: req.body.title,
-      description: req.body.description,
-      created_at: new Date().toISOString(),
-      event_date: req.body.event_date || null,
-      author: req.body.author,
-      location_type: req.body.location_type,
-      activity_type: req.body.activity_type || [],
-      cover_type: req.body.cover_type,
-      comment: req.body.comment || null,
-      address: req.body.address || null,
-      coordinates: req.body.coordinates || [],
-      link: req.body.link || null,
-      rating: req.body.rating || 0,
-      images: req.body.images || [],
-      is_visited: req.body.is_visited || false,
-    };
+    const updatedPlaces = await updateJsonBlob("places.json", (places) => {
+      // Вычисляем следующий ID: максимальный существующий + 1 (или 1, если массив пуст)
+      const maxId = places.reduce((max, p) => Math.max(max, p.id), 0);
+      const newId = maxId + 1;
 
-    await updateJsonBlob("places.json", (places) => {
+      const newPlace = {
+        id: newId,
+        title: req.body.title,
+        description: req.body.description,
+        created_at: new Date().toISOString(),
+        event_date: req.body.event_date || null,
+        author: req.body.author,
+        location_type: req.body.location_type,
+        activity_type: req.body.activity_type || [],
+        cover_type: req.body.cover_type,
+        comment: req.body.comment || null,
+        address: req.body.address || null,
+        coordinates: req.body.coordinates || [],
+        link: req.body.link || null,
+        rating: req.body.rating || 0,
+        images: req.body.images || [],
+        is_visited: req.body.is_visited || false,
+      };
+
       return [...places, newPlace];
     });
-    res.status(201).json(enrichPlace(newPlace));
+
+    // updateJsonBlob возвращает новый массив, последний элемент – только что созданный
+    const createdPlace = updatedPlaces[updatedPlaces.length - 1];
+    res.status(201).json(enrichPlace(createdPlace));
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
