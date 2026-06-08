@@ -9,10 +9,15 @@ import FilterAltIcon from "@mui/icons-material/FilterAlt";
 import { PlaceCoverType, PlaceLocationType } from "@/types/place";
 import { PlaceTypeSelect } from "../form/PlaceTypeSelect";
 import { PlaceCoverSelect } from "../form/PlaceCoverSelect";
+import { AuthorSelect } from "../form/AuthorSelect";
+import { UserTypes } from "@/types/common";
+import { IsVisitedSelect } from "../form/IsVisitedSelect";
 
 export interface FilterParams {
-  type: PlaceLocationType;
-  mode: PlaceCoverType;
+  type: PlaceLocationType | "all";
+  mode: PlaceCoverType | "all";
+  author: UserTypes | "all";
+  isVisited: "all" | "true" | "false";
 }
 
 export const PlacesFilterButton = () => {
@@ -20,8 +25,10 @@ export const PlacesFilterButton = () => {
 
   const { control, handleSubmit } = useForm<FilterParams>({
     defaultValues: {
-      type: "walk",
-      mode: "open",
+      type: "all",
+      mode: "all",
+      author: "all",
+      isVisited: "all",
     },
   });
 
@@ -66,6 +73,18 @@ export const PlacesFilterButton = () => {
             control={control}
             name="mode"
             label="Местность"
+            isFilter
+          />
+          <AuthorSelect
+            control={control}
+            name="author"
+            label="Автор"
+            isFilter
+          />
+          <IsVisitedSelect
+            control={control}
+            name="isVisited"
+            label="Посещение"
             isFilter
           />
 

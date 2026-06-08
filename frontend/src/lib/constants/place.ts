@@ -1,3 +1,5 @@
+import { USERS_MAP } from "./users";
+
 export const LOCATION_TYPE_MAP = {
   all: "Без разницы",
   walk: "Прогулка",
@@ -22,4 +24,15 @@ export const COVER_TYPE_MAP = {
   open: "Улица",
   close: "Помещение",
   hybrid: "Гибрид",
+};
+
+export const USERS_TYPE_MAP = {
+  ...USERS_MAP,
+  all: "Все авторы",
+};
+
+export const IS_VISITED_TYPE_MAP = {
+  all: "Без разницы",
+  true: "Были",
+  false: "Не были",
 };

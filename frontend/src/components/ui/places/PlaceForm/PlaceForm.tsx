@@ -16,6 +16,7 @@ import {
   placeFormSchema,
 } from "@/components/ui/places/PlaceForm/schema";
 import { DeleteWithConfirmButton } from "../../common/DeleteWithConfirmButton";
+import { AuthorSelect } from "../../form/AuthorSelect";
 
 interface PlaceFormProps {
   mode: "create" | "edit";
@@ -77,6 +78,7 @@ export default function PlaceForm({
                 name="coverType"
                 label="Тип покрытия"
               />
+              <AuthorSelect control={control} name="author" label="Автор" />
               <TextInput
                 control={control}
                 name="comment"

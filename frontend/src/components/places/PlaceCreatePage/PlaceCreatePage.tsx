@@ -29,6 +29,7 @@ export const PlaceCreatePage = () => {
     locationType: "walk" as const,
     activityType: [],
     coverType: "open" as const,
+    author,
     comment: "",
     address: "",
     coordinates: [0, 0] as [number, number],
@@ -44,7 +45,6 @@ export const PlaceCreatePage = () => {
     const postData = preparePlaceData({
       ...data,
       eventDate: data.eventDate ?? null,
-      author,
       comment: data.comment ?? null,
       link: data.link ?? null,
       rating: data.isVisited ? data.rating : 0,

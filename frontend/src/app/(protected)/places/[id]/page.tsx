@@ -5,23 +5,27 @@ import { Loader } from "@/components/ui/common/Loader";
 import { Button } from "@mui/material";
 import { api } from "@/lib/api";
 import { useParams, useRouter } from "next/navigation";
+import { PlaceResponseData } from "@/types/api";
 
 export default function PlacePageServer() {
-  // const [data, setData] = useState<PlaceResponseData[]>([]);
   const router = useRouter();
   const [loading, setLoading] = useState(false);
+  const [data, setData] = useState<PlaceResponseData | null>(null);
 
-  const { id } = useParams<{ id: string }>(); // id будет string или string[]
-  console.log(id);
+  const { id } = useParams<{ id: string }>();
 
   useEffect(() => {
     setLoading(false);
 
-    // api
-    //   .getPlaces()
-    //   .then(setData)
-    //   .catch((err) => console.error(err.message))
-    //   .finally(() => setLoading(false));
+    api
+      .getPlace(+id)
+      .then(setData)
+      .catch((err) => {
+        router.push("/places");
+        console.error(err.message);
+      })
+      .finally(() => setLoading(false));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const handleClick = () => {
@@ -48,9 +52,11 @@ export default function PlacePageServer() {
       .catch((err) => console.error(err.message));
   };
 
+  console.log(data);
+
   return (
     <>
-      {loading ? (
+      {loading || !data ? (
         <Loader />
       ) : (
         <div>

@@ -20,6 +20,7 @@ export const placeFormSchema = z.object({
     )
     .min(1, "Выберите хотя бы один тип активности"),
   coverType: z.enum(["open", "close", "hybrid"]),
+  author: z.enum(["admin", "polinka"]),
   comment: z.string().nullable().optional(),
   address: z.string().min(1, "Обязательное поле"),
   coordinates: z.array(z.number()).length(2),

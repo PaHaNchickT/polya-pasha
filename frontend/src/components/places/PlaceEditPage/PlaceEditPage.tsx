@@ -5,14 +5,13 @@ import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import { Paper, Typography } from "@mui/material";
 import PlaceForm from "@/components/ui/places/PlaceForm/PlaceForm";
 import { PlaceFormData } from "@/components/ui/places/PlaceForm/schema";
-import { Place, PlaceAuthorType } from "@/types/place";
+import { Place } from "@/types/place";
 import { useRouter } from "next/navigation";
 import { api } from "@/lib/api";
 import { useState } from "react";
 import { notify } from "@/lib/utils/notify";
 import { preparePlaceData } from "@/lib/helpers/preparePlaceData";
 import { PlaceResponseData } from "@/types/api";
-import { LOCAL_STORAGE_USERNAME_KEY } from "@/lib/constants/common";
 
 interface PlaceEditPageProps {
   id: string;
@@ -23,17 +22,12 @@ export const PlaceEditPage = ({ id, data }: PlaceEditPageProps) => {
   const router = useRouter();
   const [formLoading, setFormLoading] = useState(false);
 
-  const author = localStorage.getItem(
-    LOCAL_STORAGE_USERNAME_KEY,
-  ) as PlaceAuthorType;
-
   const handleSubmit = (data: PlaceFormData) => {
     setFormLoading(true);
 
     const postData = preparePlaceData({
       ...data,
       eventDate: data.eventDate ?? null,
-      author,
       comment: data.comment ?? null,
       link: data.link ?? null,
       rating: data.isVisited ? data.rating : 0,
