@@ -20,22 +20,24 @@ const authFetch = async <T>(
 ): Promise<T> => {
   const token = localStorage.getItem(LOCAL_STORAGE_TOKEN_KEY);
 
-  // Создаём объект Headers, который правильно обрабатывает любые ключи
   const headers = new Headers(options.headers);
-
-  // Добавляем Content-Type, если его ещё нет
   if (!headers.has("Content-Type")) {
     headers.set("Content-Type", "application/json");
   }
-
-  // Если токен есть, добавляем Authorization
   if (token) {
     headers.set("Authorization", `Bearer ${token}`);
   }
 
+  // Запрещаем кэширование ответа
+  headers.set("Cache-Control", "no-cache, no-store, must-revalidate");
+  headers.set("Pragma", "no-cache");
+  headers.set("Expires", "0");
+
   const res = await fetch(`${API_URL}${url}`, {
     ...options,
-    headers, // теперь это Headers, а не литерал
+    headers,
+    cache: "no-store", // для Next.js расширенного fetch
+    next: { revalidate: 0 }, // альтернативный вариант для App Router (оставь что-то одно)
   });
 
   if (res.status === 401) {
