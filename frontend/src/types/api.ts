@@ -25,7 +25,7 @@ export interface PlaceResponseData {
   activity_type: PlaceActivityType[];
   cover_type: PlaceCoverType;
   comment: string | null;
-  address: string | null;
+  address: string;
   coordinates: number[];
   link: string | null;
   rating: number;

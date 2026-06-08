@@ -23,8 +23,3 @@ export const COVER_TYPE_MAP = {
   close: "Помещение",
   hybrid: "Гибрид",
 };
-
-export const AUTHORS_MAP = {
-  Pasha: "Паша",
-  Polya: "Поля",
-};

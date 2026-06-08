@@ -1,7 +1,9 @@
 import { PlacePostData } from "@/types/api";
 import { Place } from "@/types/place";
 
-export const preparePlaceData = (data: Place): PlacePostData => ({
+export const preparePlaceData = (
+  data: Omit<Place, "id" | "createdAt" | "isNew" | "isExpired">,
+): PlacePostData => ({
   title: data.title,
   description: data.description,
   event_date: data.eventDate,

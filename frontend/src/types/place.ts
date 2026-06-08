@@ -9,7 +9,7 @@ export interface Place {
   activityType: PlaceActivityType[];
   coverType: PlaceCoverType;
   comment: string | null;
-  address: string | null;
+  address: string;
   coordinates: number[];
   link: string | null;
   rating: number;
@@ -19,7 +19,7 @@ export interface Place {
   isExpired: boolean | null;
 }
 
-export type PlaceAuthorType = "Pasha" | "Polya";
+export type PlaceAuthorType = "admin" | "polinka";
 export type PlaceLocationType =
   | "walk"
   | "ride"

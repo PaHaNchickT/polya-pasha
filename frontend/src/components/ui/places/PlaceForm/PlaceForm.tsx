@@ -20,6 +20,7 @@ import { DeleteWithConfirmButton } from "../../common/DeleteWithConfirmButton";
 interface PlaceFormProps {
   mode: "create" | "edit";
   defaultValues: PlaceFormData;
+  formLoading: boolean;
   onSubmit: (data: PlaceFormData) => void;
   onDelete?: () => void | Promise<void>;
 }
@@ -27,6 +28,7 @@ interface PlaceFormProps {
 export default function PlaceForm({
   mode,
   defaultValues,
+  formLoading,
   onSubmit,
   onDelete,
 }: PlaceFormProps) {
@@ -40,7 +42,7 @@ export default function PlaceForm({
 
   return (
     <FormProvider {...methods}>
-      <form onSubmit={handleSubmit(onSubmit)}>
+      <form onSubmit={handleSubmit(onSubmit)} className="mt-10">
         <Grid container spacing={3}>
           {/* Левая колонка */}
           <Grid size={{ xs: 12, md: 6 }}>
@@ -133,13 +135,19 @@ export default function PlaceForm({
           justifyContent="space-between"
           alignItems="center"
         >
-          <Button type="submit" variant="contained" size="large">
+          <Button
+            type="submit"
+            variant="contained"
+            size="large"
+            loading={formLoading}
+          >
             {mode === "create" ? "Создать" : "Сохранить"}
           </Button>
           {mode === "edit" && onDelete && (
             <DeleteWithConfirmButton
               onDelete={onDelete}
               dialogContentText="Вы уверены, что хотите удалить это место? Это действие нельзя отменить."
+              loading={formLoading}
             />
           )}
         </Box>

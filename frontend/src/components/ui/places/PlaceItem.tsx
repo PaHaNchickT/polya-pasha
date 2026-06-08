@@ -4,8 +4,9 @@ import CardContent from "@mui/material/CardContent";
 import CardMedia from "@mui/material/CardMedia";
 import { Avatar, AvatarGroup, Box, Typography } from "@mui/material";
 import { Place } from "@/types/place";
-import { AUTHORS_MAP, LOCATION_TYPE_MAP } from "@/lib/constants/place";
+import { LOCATION_TYPE_MAP } from "@/lib/constants/place";
 import { useRouter } from "next/navigation";
+import { USERS_MAP } from "@/lib/constants/users";
 
 const StyledCard = styled(Card)(({ theme }) => ({
   display: "flex",
@@ -127,7 +128,7 @@ export const PlaceItem = ({ item }: IPlaceItem) => {
       <Author
         authors={[
           {
-            name: AUTHORS_MAP[item.author],
+            name: USERS_MAP[item.author],
             avatar: "/static/images/avatar/4.jpg",
           },
         ]}

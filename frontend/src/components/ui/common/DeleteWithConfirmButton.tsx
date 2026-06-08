@@ -11,6 +11,7 @@ import DeleteIcon from "@mui/icons-material/Delete";
 
 interface DeleteWithConfirmButtonProps {
   onDelete: () => void | Promise<void>;
+  loading?: boolean;
   buttonText?: string;
   dialogTitle?: string;
   dialogContentText?: string;
@@ -23,6 +24,7 @@ interface DeleteWithConfirmButtonProps {
 
 export const DeleteWithConfirmButton: FC<DeleteWithConfirmButtonProps> = ({
   onDelete,
+  loading,
   buttonText = "Удалить",
   dialogTitle = "Подтверждение удаления",
   dialogContentText = "Вы уверены, что хотите удалить этот элемент? Это действие нельзя отменить.",
@@ -33,7 +35,6 @@ export const DeleteWithConfirmButton: FC<DeleteWithConfirmButtonProps> = ({
   withIcon = true,
 }) => {
   const [open, setOpen] = useState(false);
-  const [loading, setLoading] = useState(false);
 
   const handleOpen = () => setOpen(true);
   const handleClose = () => {
@@ -41,11 +42,9 @@ export const DeleteWithConfirmButton: FC<DeleteWithConfirmButtonProps> = ({
   };
 
   const handleConfirm = async () => {
-    setLoading(true);
     try {
       await onDelete();
     } finally {
-      setLoading(false);
       setOpen(false);
     }
   };
@@ -59,6 +58,7 @@ export const DeleteWithConfirmButton: FC<DeleteWithConfirmButtonProps> = ({
         onClick={handleOpen}
         startIcon={withIcon ? <DeleteIcon /> : undefined}
         disabled={disabled}
+        loading={loading}
       >
         {buttonText}
       </Button>
@@ -76,7 +76,7 @@ export const DeleteWithConfirmButton: FC<DeleteWithConfirmButtonProps> = ({
           </DialogContentText>
         </DialogContent>
         <DialogActions className="gap-2">
-          <Button onClick={handleClose} disabled={loading}>
+          <Button onClick={handleClose} disabled={loading} loading={loading}>
             {cancelText}
           </Button>
           <Button

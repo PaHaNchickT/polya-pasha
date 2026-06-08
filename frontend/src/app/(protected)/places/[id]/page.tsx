@@ -32,7 +32,7 @@ export default function PlacePageServer() {
         title: "Кафе «Ромашка»",
         description: "Уютное кафе в центре",
         event_date: "2026-06-10T18:00:00.000Z",
-        author: "Pasha",
+        author: "admin",
         location_type: "walk",
         activity_type: ["food", "action"],
         cover_type: "open",
