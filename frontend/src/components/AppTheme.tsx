@@ -4,7 +4,7 @@ import { ThemeProvider, createTheme, CssBaseline } from "@mui/material";
 import type { ThemeOptions } from "@mui/material/styles";
 import { colorSchemes, typography, shadows, shape } from "./themePrimitives";
 import { ReactNode, useEffect, useMemo, useState } from "react";
-import { Loader } from "./ui/Loader";
+import { Loader } from "./ui/common/Loader";
 import { SnackbarProvider } from "notistack";
 
 interface AppThemeProps {

@@ -1,9 +1,9 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { PlacesPage } from "@/components/auth/PlacesPage/PlacesPage";
+import { PlacesPage } from "@/components/places/PlacesPage/PlacesPage";
 import { api } from "@/lib/api";
-import { Loader } from "@/components/ui/Loader";
+import { Loader } from "@/components/ui/common/Loader";
 import { PlaceResponseData } from "@/types/api";
 import { transformPlaceData } from "@/lib/helpers/transformPlaceData";
 

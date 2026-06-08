@@ -1,25 +1,37 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Loader } from "@/components/ui/Loader";
+import { Loader } from "@/components/ui/common/Loader";
 import { useParams } from "next/navigation";
+import { PlaceEditPage } from "@/components/places/PlaceEditPage/PlaceEditPage";
+import { PlaceResponseData } from "@/types/api";
+import { api } from "@/lib/api";
+import { transformPlaceData } from "@/lib/helpers/transformPlaceData";
 
 export default function PlaceEditPageServer() {
-  // const [data, setData] = useState<PlaceResponseData[]>([]);
-  const [loading, setLoading] = useState(false);
+  const [data, setData] = useState<PlaceResponseData | null>(null);
+  const [loading, setLoading] = useState(true);
 
-  const { id } = useParams<{ id: string }>(); // id будет string или string[]
-  console.log(id);
+  const { id } = useParams<{ id: string }>();
 
   useEffect(() => {
-    setLoading(false);
+    api
+      .getPlace(+id)
+      .then(setData)
+      .catch((err) => console.error(err.message))
+      .finally(() => setLoading(false));
+  }, [id]);
 
-    // api
-    //   .getPlaces()
-    //   .then(setData)
-    //   .catch((err) => console.error(err.message))
-    //   .finally(() => setLoading(false));
-  }, []);
-
-  return <>{loading ? <Loader /> : <p>Скоро тут будет контент!</p>}</>;
+  return (
+    <>
+      {loading ? (
+        <Loader />
+      ) : (
+        <PlaceEditPage
+          id={id}
+          data={transformPlaceData(data as PlaceResponseData)}
+        />
+      )}
+    </>
+  );
 }

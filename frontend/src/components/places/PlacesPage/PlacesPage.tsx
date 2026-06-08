@@ -1,7 +1,7 @@
 "use client";
 
-import { PlaceItem } from "@/components/ui/PlaceItem";
-import { Tabs } from "@/components/ui/Tabs";
+import { PlaceItem } from "@/components/ui/places/PlaceItem";
+import { PlacesTabs } from "@/components/ui/places/PlacesTabs";
 import { LOCAL_STORAGE_USERNAME_KEY } from "@/lib/constants/common";
 import { getRandomPhrase } from "@/lib/helpers/getRandomPhrase";
 import { Place } from "@/types/place";
@@ -28,7 +28,7 @@ export const PlacesPage = ({ data }: IPlacesPage) => {
         </Typography>
         {phrase && <Typography>{phrase}</Typography>}
       </div>
-      <Tabs />
+      <PlacesTabs />
       <div
         style={{
           display: "grid",

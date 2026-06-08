@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Loader } from "@/components/ui/Loader";
+import { Loader } from "@/components/ui/common/Loader";
 
 export default function ReviewsPageServer() {
   // const [data, setData] = useState<PlaceResponseData[]>([]);

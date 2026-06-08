@@ -1,7 +1,8 @@
-import { Box, Chip } from "@mui/material";
-import { FilterButton } from "./FilterButton";
-import { AddButton } from "./AddButton";
+import { Box, Chip, IconButton } from "@mui/material";
+import { PlacesFilterButton } from "./PlacesFilterButton";
 import { ACTIVITY_TYPE_MAP } from "@/lib/constants/place";
+import { useRouter } from "next/navigation";
+import AddIcon from "@mui/icons-material/Add";
 
 export const TEMP_TABS: (keyof typeof ACTIVITY_TYPE_MAP)[] = [
   "all",
@@ -14,9 +15,15 @@ export const TEMP_TABS: (keyof typeof ACTIVITY_TYPE_MAP)[] = [
   "other",
 ];
 
-export const Tabs = () => {
+export const PlacesTabs = () => {
+  const router = useRouter();
+
   const handleClick = () => {
     console.info("You clicked the filter chip.");
+  };
+
+  const handleAddClick = () => {
+    router.push("/places/create");
   };
 
   return (
@@ -50,8 +57,10 @@ export const Tabs = () => {
         ))}
       </Box>
       <div className="flex gap-2 h-max">
-        <FilterButton />
-        <AddButton />
+        <PlacesFilterButton />
+        <IconButton onClick={handleAddClick} aria-label="add">
+          <AddIcon />
+        </IconButton>
       </div>
     </Box>
   );

@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { LoginPage } from "@/components/auth/LoginPage/LoginPage";
-import { Loader } from "@/components/ui/Loader";
+import { Loader } from "@/components/ui/common/Loader";
 import { isAuthentificated } from "@/lib/helpers/isAuthentificated";
 
 export default function LoginPageServer() {
