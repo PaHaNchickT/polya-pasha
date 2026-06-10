@@ -1,10 +1,11 @@
-import { PlaceCreateFormData } from "@/components/ui/places/PlaceForm/schema";
+import { PlaceFormData } from "@/components/ui/places/PlaceForm/schema";
 import { Box, Grid, Paper, TextField } from "@mui/material";
 import { FC } from "react";
 import { Controller, useFormContext } from "react-hook-form";
 
 export const YMPickerInput: FC = () => {
-  const { control } = useFormContext<PlaceCreateFormData>();
+  const { control } = useFormContext<PlaceFormData>();
+  
   return (
     <Controller
       name="coordinates"
