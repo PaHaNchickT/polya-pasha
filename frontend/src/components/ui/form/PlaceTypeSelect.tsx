@@ -8,6 +8,7 @@ import { LOCATION_TYPE_MAP } from "@/lib/constants/place";
 import { useMemo } from "react";
 
 const TEMP_PLACE_LOCATION_LIST = [
+  "home",
   "walk",
   "ride",
   "travel_internal",

@@ -5,7 +5,13 @@ export const placeFormSchema = z.object({
   title: z.string().min(1, "Обязательное поле"),
   description: z.string().min(1, "Обязательное поле"),
   eventDate: z.string().nullable().optional(),
-  locationType: z.enum(["walk", "ride", "travel_internal", "travel_external"]),
+  locationType: z.enum([
+    "home",
+    "walk",
+    "ride",
+    "travel_internal",
+    "travel_external",
+  ]),
   activityType: z
     .array(
       z.enum([

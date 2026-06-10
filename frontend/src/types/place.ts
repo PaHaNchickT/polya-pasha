@@ -21,6 +21,7 @@ export interface Place {
 
 export type PlaceAuthorType = "admin" | "polinka";
 export type PlaceLocationType =
+  | "home"
   | "walk"
   | "ride"
   | "travel_internal"

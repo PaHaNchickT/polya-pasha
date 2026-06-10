@@ -1,7 +1,8 @@
 import { USERS_MAP } from "./users";
 
 export const LOCATION_TYPE_MAP = {
-  all: "Без разницы",
+  all: "Не знаю 🤷🏻‍♀️",
+  home: "Дома",
   walk: "Прогулка",
   ride: "Поездка",
   travel_internal: "Путешествие (межгород)",
@@ -20,7 +21,7 @@ export const ACTIVITY_TYPE_MAP = {
 };
 
 export const COVER_TYPE_MAP = {
-  all: "Без разницы",
+  all: "Не знаю 🤷🏻‍♀️",
   open: "Улица",
   close: "Помещение",
   hybrid: "Гибрид",
@@ -32,7 +33,7 @@ export const USERS_TYPE_MAP = {
 };
 
 export const IS_VISITED_TYPE_MAP = {
-  all: "Без разницы",
+  all: "Не знаю 🤷🏻‍♀️",
   true: "Были",
   false: "Не были",
 };

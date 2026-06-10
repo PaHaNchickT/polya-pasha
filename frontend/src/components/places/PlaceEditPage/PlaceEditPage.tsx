@@ -12,6 +12,7 @@ import { useState } from "react";
 import { notify } from "@/lib/utils/notify";
 import { preparePlaceData } from "@/lib/helpers/preparePlaceData";
 import { PlaceResponseData } from "@/types/api";
+import { Breadcrumbs } from "@/components/ui/common/Breadcrumbs";
 
 interface PlaceEditPageProps {
   id: string;
@@ -65,6 +66,7 @@ export const PlaceEditPage = ({ id, data }: PlaceEditPageProps) => {
 
   return (
     <LocalizationProvider dateAdapter={AdapterDayjs}>
+      <Breadcrumbs />
       <Paper sx={{ p: 3, maxWidth: 900, mx: "auto", mt: 4 }}>
         <Typography variant="h2" gutterBottom>
           Редактировать место

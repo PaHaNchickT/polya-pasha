@@ -13,6 +13,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { PlaceResponseData } from "@/types/api";
 import { notify } from "@/lib/utils/notify";
+import { Breadcrumbs } from "@/components/ui/common/Breadcrumbs";
 
 export const PlaceCreatePage = () => {
   const router = useRouter();
@@ -66,6 +67,7 @@ export const PlaceCreatePage = () => {
 
   return (
     <LocalizationProvider dateAdapter={AdapterDayjs}>
+      <Breadcrumbs />
       <Paper sx={{ p: 3, maxWidth: 900, mx: "auto", mt: 4 }}>
         <Typography variant="h2" gutterBottom>
           Добавить место

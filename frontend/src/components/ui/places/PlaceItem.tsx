@@ -1,4 +1,3 @@
-import { styled } from "@mui/material/styles";
 import Card from "@mui/material/Card";
 import CardContent from "@mui/material/CardContent";
 import CardMedia from "@mui/material/CardMedia";
@@ -7,113 +6,102 @@ import { Place } from "@/types/place";
 import { LOCATION_TYPE_MAP } from "@/lib/constants/place";
 import { useRouter } from "next/navigation";
 import { USERS_MAP } from "@/lib/constants/users";
+import ImageNotSupportedIcon from "@mui/icons-material/ImageNotSupported";
+import { format } from "date-fns";
+import { ru } from "date-fns/locale";
+import { useMemo } from "react";
+import { LabelRating } from "../common/LabelRating";
+import { LabelNew } from "../common/LabelNew";
+import { clsx as cn } from "clsx";
+import { LabelExpired } from "../common/LabelExpired";
 
-const StyledCard = styled(Card)(({ theme }) => ({
-  display: "flex",
-  flexDirection: "column",
-  padding: 0,
-  height: "100%",
-  backgroundColor: (theme.vars || theme).palette.background.paper,
-  "&:hover": {
-    backgroundColor: "transparent",
-    cursor: "pointer",
-  },
-  "&:focus-visible": {
-    outline: "3px solid",
-    outlineColor: "hsla(210, 98%, 48%, 0.5)",
-    outlineOffset: "2px",
-  },
-}));
-
-const StyledCardContent = styled(CardContent)({
-  display: "flex",
-  flexDirection: "column",
-  gap: 4,
-  padding: 16,
-  flexGrow: 1,
-  "&:last-child": {
-    paddingBottom: 16,
-  },
-});
-
-const StyledTypography = styled(Typography)({
-  display: "-webkit-box",
-  WebkitBoxOrient: "vertical",
-  WebkitLineClamp: 2,
-  overflow: "hidden",
-  textOverflow: "ellipsis",
-});
-
-type IPlaceItem = {
+type PlaceItemProps = {
   item: Place;
 };
 
-export const PlaceItem = ({ item }: IPlaceItem) => {
+export const PlaceItem = ({ item }: PlaceItemProps) => {
   const router = useRouter();
+  const { images } = item;
+
+  console.log(item);
+
+  const formattedDate = useMemo(
+    () =>
+      item.createdAt
+        ? format(new Date(item.createdAt), "d MMMM yyyy", { locale: ru })
+        : "",
+    [item.createdAt],
+  );
 
   const handleClick = () => {
     router.push(`places/${item.id}`);
   };
 
   return (
-    <StyledCard
-      variant="outlined"
-      onClick={handleClick}
-      tabIndex={0}
-      sx={{ height: "100%" }}
-    >
-      <CardMedia
-        component="img"
-        alt="green iguana"
-        image={"https://picsum.photos/800/450?random=45"}
-        sx={{
-          height: { sm: "auto", md: "50%" },
-          aspectRatio: { sm: "16 / 9", md: "" },
-        }}
-      />
-      <StyledCardContent>
-        <Typography gutterBottom variant="caption" component="div">
-          {LOCATION_TYPE_MAP[item.locationType]}
-        </Typography>
-        {}
-        <Typography gutterBottom variant="h6" component="div">
-          {item.title}
-        </Typography>
-        <StyledTypography
-          variant="body2"
-          gutterBottom
-          sx={{ color: "text.secondary" }}
-        >
-          {item.description}
-        </StyledTypography>
-      </StyledCardContent>
-      <Box
-        sx={{
-          display: "flex",
-          flexDirection: "row",
-          gap: 2,
-          alignItems: "center",
-          justifyContent: "space-between",
-          padding: "16px",
-        }}
+    <div className="relative cursor-pointer" onClick={handleClick}>
+      {item.isExpired && <LabelExpired />}
+      <Card
+        variant="outlined"
+        tabIndex={0}
+        className={cn(
+          "relative flex flex-col p-0 h-full hover:!bg-transparent focus-visible:outline-[3px] focus-visible:outline-[hsla(210,98%,48%,0.5)] focus-visible:outline-offset-2",
+          item.isExpired ? "opacity-50" : "hover:opacity-90",
+        )}
       >
-        <Box
-          sx={{
-            display: "flex",
-            flexDirection: "row",
-            gap: 1,
-            alignItems: "center",
-          }}
-        >
-          <Avatar
-            alt={USERS_MAP[item.author]}
-            // src={author.avatar}
-            sx={{ width: 24, height: 24 }}
+        {item.isNew && <LabelNew />}
+        {item.isVisited && item.rating && <LabelRating rating={item.rating} />}
+
+        {images.length ? (
+          <CardMedia
+            component="img"
+            alt={images[0].name || "Place image"}
+            image={images[0].uri}
+            className="h-auto aspect-video md:h-1/2"
           />
-          <Typography variant="caption">{USERS_MAP[item.author]}</Typography>
+        ) : (
+          <Box className="h-auto aspect-video md:h-1/2 flex items-center justify-center">
+            <ImageNotSupportedIcon color="disabled" fontSize="large" />
+          </Box>
+        )}
+
+        <CardContent className="flex flex-col gap-1 p-4 flex-grow last:pb-4 border-t border-gray-600">
+          <Typography variant="caption" component="div" gutterBottom>
+            {LOCATION_TYPE_MAP[item.locationType]}
+          </Typography>
+
+          <Typography
+            variant="h6"
+            component="div"
+            className="line-clamp-1"
+            gutterBottom
+          >
+            {item.title}
+          </Typography>
+
+          <Typography
+            variant="body2"
+            gutterBottom
+            className="line-clamp-1 text-[var(--template-palette-text-secondary)]"
+          >
+            {item.description}
+          </Typography>
+        </CardContent>
+
+        <Box className="flex items-center justify-between gap-2 p-4">
+          <Box className="flex items-center gap-2">
+            <Avatar
+              alt={USERS_MAP[item.author]}
+              src={`images/${item.author}-avatar.png`}
+              className="!w-6 !h-6 text-xs"
+            >
+              {USERS_MAP[item.author]?.[0]}
+            </Avatar>
+            <Typography variant="caption">{USERS_MAP[item.author]}</Typography>
+          </Box>
+
+          <Typography variant="caption">{formattedDate}</Typography>
         </Box>
-        <Typography variant="caption">July 14, 2021</Typography>
-      </Box>
-    </StyledCard>
+      </Card>
+    </div>
   );
 };

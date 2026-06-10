@@ -11,3 +11,9 @@ export const HEADER_TABS_MAP = {
   reviews: "Отзывы",
   randomizer: "Рандомайзер",
 };
+
+export const BREADCRUMBS_MAP = {
+  ...HEADER_TABS_MAP,
+  create: "Создание",
+  edit: "Редактирование",
+};
