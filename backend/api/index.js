@@ -3,9 +3,8 @@ require("dotenv").config();
 const express = require("express");
 const cors = require("cors");
 const jwt = require("jsonwebtoken");
-const { put, list, del } = require("@vercel/blob");
-const { defaultPlaces, defaultReviews } = require("../defaultData");
 const { authMiddleware } = require("./auth");
+const supabase = require("../supabaseClient");
 
 const app = express();
 app.use(cors());
@@ -25,91 +24,6 @@ const USERS = [
   },
 ].filter((user) => user.login && user.password);
 
-// ---------- Blob helpers с ETag-блокировкой ----------
-async function readJsonBlob(filename) {
-  const token = process.env.BLOB_READ_WRITE_TOKEN;
-  const { blobs } = await list({ prefix: filename, token });
-  if (blobs.length === 0) return null;
-
-  // сортируем по дате загрузки – сначала самый свежий
-  const sorted = blobs.sort(
-    (a, b) => new Date(b.uploadedAt) - new Date(a.uploadedAt),
-  );
-  const blob = sorted[0];
-
-  const response = await fetch(blob.url, {
-    headers: {
-      Authorization: `Bearer ${token}`,
-      "Cache-Control": "no-cache",
-      Pragma: "no-cache",
-    },
-  });
-  if (!response.ok) {
-    throw new Error(`Blob fetch failed for ${filename}: ${response.status}`);
-  }
-  const data = await response.json();
-  const etag = response.headers.get("ETag");
-  return { data, etag };
-}
-
-async function writeJsonBlob(filename, data, etag = undefined) {
-  const token = process.env.BLOB_READ_WRITE_TOKEN;
-  const options = {
-    access: "private",
-    contentType: "application/json",
-    token,
-    allowOverwrite: true, // <-- РАЗРЕШАЕМ ПЕРЕЗАПИСЬ
-  };
-  if (etag) {
-    options.headers = { "If-Match": etag };
-  }
-  // put перезапишет существующий blob (или создаст новый, если файла нет)
-  await put(filename, JSON.stringify(data, null, 2), options);
-}
-
-// Атомарное обновление файла с повторами при конфликте
-async function updateJsonBlob(filename, updateFn) {
-  const MAX_RETRIES = 3;
-  for (let attempt = 0; attempt < MAX_RETRIES; attempt++) {
-    const result = await readJsonBlob(filename);
-    if (!result) {
-      // Файла нет – создаём с начальными данными
-      const newData = updateFn([]); // предполагаем, что updateFn работает с массивом
-      await writeJsonBlob(filename, newData);
-      return newData;
-    }
-
-    const { data, etag } = result;
-    const newData = updateFn(data);
-    try {
-      await writeJsonBlob(filename, newData, etag);
-      return newData;
-    } catch (err) {
-      // 412 Precondition Failed – файл изменился, пробуем ещё раз
-      if (err.status === 412 && attempt < MAX_RETRIES - 1) {
-        continue;
-      }
-      throw err;
-    }
-  }
-  throw new Error("Update failed after retries");
-}
-
-// Инициализация данных (только если файлов нет)
-async function initDataIfEmpty() {
-  const places = await readJsonBlob("places.json");
-  if (!places) {
-    await writeJsonBlob("places.json", defaultPlaces);
-    console.log("✅ places.json инициализирован");
-  }
-  const reviews = await readJsonBlob("reviews.json");
-  if (!reviews) {
-    await writeJsonBlob("reviews.json", defaultReviews);
-    console.log("✅ reviews.json инициализирован");
-  }
-}
-initDataIfEmpty().catch(console.error);
-
 // ---------- Вычисляемые поля ----------
 function enrichPlace(place) {
   const now = new Date();
@@ -127,24 +41,32 @@ function enrichPlace(place) {
 }
 
 // ---------- Чёрный список токенов ----------
-async function getRevokedTokens() {
-  const result = await readJsonBlob("revoked_tokens.json");
-  return result ? result.data : [];
+async function isTokenRevoked(token) {
+  const { data, error } = await supabase
+    .from("revoked_tokens")
+    .select("token")
+    .eq("token", token)
+    .maybeSingle();
+  if (error) throw error;
+  return data !== null;
 }
 
 async function addRevokedToken(token) {
-  await updateJsonBlob("revoked_tokens.json", (tokens) => {
-    tokens.push(token);
-    return tokens;
-  });
+  const { error } = await supabase.from("revoked_tokens").insert({ token });
+  if (error) throw error;
 }
 
+// Middleware для проверки отозванных токенов
 async function checkRevoked(req, res, next) {
-  const tokens = await getRevokedTokens();
-  if (tokens.includes(req.token)) {
-    return res.status(401).json({ error: "Токен был отозван" });
+  try {
+    const revoked = await isTokenRevoked(req.token);
+    if (revoked) {
+      return res.status(401).json({ error: "Токен был отозван" });
+    }
+    next();
+  } catch (err) {
+    return res.status(500).json({ error: err.message });
   }
-  next();
 }
 
 // ---------- Auth ----------
@@ -174,27 +96,38 @@ app.post("/api/logout", authMiddleware, async (req, res) => {
   }
 });
 
-// ---------- Places CRUD (защищённые, атомарные) ----------
+// ---------- Places CRUD (атомарные SQL-запросы) ----------
 
-// GET /api/places – список всех мест
+// GET /api/places – список всех мест с вычисляемыми полями
 app.get("/api/places", authMiddleware, checkRevoked, async (req, res) => {
   try {
-    const result = await readJsonBlob("places.json");
-    if (!result) return res.status(404).json({ error: "Данные не найдены" });
-    res.json(result.data.map(enrichPlace));
+    const { data: places, error } = await supabase
+      .from("places")
+      .select("*")
+      .order("created_at", { ascending: false });
+
+    if (error) throw error;
+    res.json(places.map(enrichPlace));
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
 });
 
-// GET /api/places/:id – одно место
+// GET /api/places/:id
 app.get("/api/places/:id", authMiddleware, checkRevoked, async (req, res) => {
   try {
-    const result = await readJsonBlob("places.json");
-    if (!result) return res.status(404).json({ error: "Данные не найдены" });
-    const id = Number(req.params.id);
-    const place = result.data.find((p) => p.id === id);
-    if (!place) return res.status(404).json({ error: "Место не найдено" });
+    const id = parseInt(req.params.id, 10);
+    const { data: place, error } = await supabase
+      .from("places")
+      .select("*")
+      .eq("id", id)
+      .single();
+
+    if (error) {
+      if (error.code === "PGRST116")
+        return res.status(404).json({ error: "Место не найдено" });
+      throw error;
+    }
     res.json(enrichPlace(place));
   } catch (err) {
     res.status(500).json({ error: err.message });
@@ -204,36 +137,32 @@ app.get("/api/places/:id", authMiddleware, checkRevoked, async (req, res) => {
 // POST /api/places – создать новое место
 app.post("/api/places", authMiddleware, checkRevoked, async (req, res) => {
   try {
-    const updatedPlaces = await updateJsonBlob("places.json", (places) => {
-      // Вычисляем следующий ID: максимальный существующий + 1 (или 1, если массив пуст)
-      const maxId = places.reduce((max, p) => Math.max(max, p.id), 0);
-      const newId = maxId + 1;
+    const newPlace = {
+      title: req.body.title,
+      description: req.body.description,
+      created_at: new Date().toISOString(),
+      event_date: req.body.event_date || null,
+      author: req.body.author,
+      location_type: req.body.location_type,
+      activity_type: req.body.activity_type || [],
+      cover_type: req.body.cover_type,
+      comment: req.body.comment || null,
+      address: req.body.address || null,
+      coordinates: req.body.coordinates || [],
+      link: req.body.link || null,
+      rating: req.body.rating || 0,
+      images: req.body.images || [],
+      is_visited: req.body.is_visited || false,
+    };
 
-      const newPlace = {
-        id: newId,
-        title: req.body.title,
-        description: req.body.description,
-        created_at: new Date().toISOString(),
-        event_date: req.body.event_date || null,
-        author: req.body.author,
-        location_type: req.body.location_type,
-        activity_type: req.body.activity_type || [],
-        cover_type: req.body.cover_type,
-        comment: req.body.comment || null,
-        address: req.body.address || null,
-        coordinates: req.body.coordinates || [],
-        link: req.body.link || null,
-        rating: req.body.rating || 0,
-        images: req.body.images || [],
-        is_visited: req.body.is_visited || false,
-      };
+    const { data: created, error } = await supabase
+      .from("places")
+      .insert(newPlace)
+      .select()
+      .single();
 
-      return [...places, newPlace];
-    });
-
-    // updateJsonBlob возвращает новый массив, последний элемент – только что созданный
-    const createdPlace = updatedPlaces[updatedPlaces.length - 1];
-    res.status(201).json(enrichPlace(createdPlace));
+    if (error) throw error;
+    res.status(201).json(enrichPlace(created));
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
@@ -242,65 +171,77 @@ app.post("/api/places", authMiddleware, checkRevoked, async (req, res) => {
 // PATCH /api/places/:id – обновить место
 app.patch("/api/places/:id", authMiddleware, checkRevoked, async (req, res) => {
   try {
-    const id = Number(req.params.id);
-    const updatedPlace = await updateJsonBlob("places.json", (places) => {
-      const index = places.findIndex((p) => p.id === id);
-      if (index === -1) throw { status: 404, message: "Место не найдено" };
+    const id = parseInt(req.params.id, 10);
+    // Сначала проверим, существует ли место
+    const { data: existing, error: findError } = await supabase
+      .from("places")
+      .select("id")
+      .eq("id", id)
+      .single();
+    if (findError) {
+      return res.status(404).json({ error: "Место не найдено" });
+    }
 
-      const updatable = [
-        "title",
-        "description",
-        "event_date",
-        "author",
-        "location_type",
-        "activity_type",
-        "cover_type",
-        "comment",
-        "address",
-        "coordinates",
-        "link",
-        "rating",
-        "images",
-        "is_visited",
-      ];
+    const updatableFields = [
+      "title",
+      "description",
+      "event_date",
+      "author",
+      "location_type",
+      "activity_type",
+      "cover_type",
+      "comment",
+      "address",
+      "coordinates",
+      "link",
+      "rating",
+      "images",
+      "is_visited",
+    ];
 
-      const existing = places[index];
-      const updated = { ...existing };
-      for (const field of updatable) {
-        if (req.body[field] !== undefined) {
-          updated[field] = req.body[field];
-        }
+    const updates = {};
+    for (const field of updatableFields) {
+      if (req.body[field] !== undefined) {
+        updates[field] = req.body[field];
       }
-      updated.id = existing.id;
-      updated.created_at = existing.created_at;
+    }
 
-      places[index] = updated;
-      return places;
-    });
-    res.json(enrichPlace(updatedPlace.find((p) => p.id === id)));
+    if (Object.keys(updates).length === 0) {
+      return res.status(400).json({ error: "Нет полей для обновления" });
+    }
+
+    const { data: updated, error } = await supabase
+      .from("places")
+      .update(updates)
+      .eq("id", id)
+      .select()
+      .single();
+
+    if (error) throw error;
+    res.json(enrichPlace(updated));
   } catch (err) {
-    if (err.status === 404) return res.status(404).json({ error: err.message });
     res.status(500).json({ error: err.message });
   }
 });
 
-// DELETE /api/places – удалить несколько мест (массив id в теле)
+// DELETE /api/places – удалить несколько мест
 app.delete("/api/places", authMiddleware, checkRevoked, async (req, res) => {
   try {
     const idsToDelete = req.body?.ids;
-    if (!Array.isArray(idsToDelete)) {
+    if (!Array.isArray(idsToDelete) || idsToDelete.length === 0) {
       return res.status(400).json({ error: "Необходим массив ids" });
     }
-    let deletedCount = 0;
-    await updateJsonBlob("places.json", (places) => {
-      const newPlaces = places.filter((p) => !idsToDelete.includes(p.id));
-      deletedCount = places.length - newPlaces.length;
-      return newPlaces;
-    });
-    if (deletedCount === 0) {
+
+    const { error, count } = await supabase
+      .from("places")
+      .delete({ count: "exact" })
+      .in("id", idsToDelete);
+
+    if (error) throw error;
+    if (count === 0) {
       return res.status(404).json({ error: "Ни одно место не найдено" });
     }
-    res.json({ deleted: deletedCount });
+    res.json({ deleted: count });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
@@ -313,18 +254,21 @@ app.delete(
   checkRevoked,
   async (req, res) => {
     try {
-      const id = Number(req.params.id);
-      let deletedPlace = null;
-      await updateJsonBlob("places.json", (places) => {
-        const index = places.findIndex((p) => p.id === id);
-        if (index === -1) throw { status: 404, message: "Место не найдено" };
-        [deletedPlace] = places.splice(index, 1);
-        return places;
-      });
-      res.json(enrichPlace(deletedPlace));
+      const id = parseInt(req.params.id, 10);
+      const { data: deleted, error } = await supabase
+        .from("places")
+        .delete()
+        .eq("id", id)
+        .select()
+        .single();
+
+      if (error) {
+        if (error.code === "PGRST116")
+          return res.status(404).json({ error: "Место не найдено" });
+        throw error;
+      }
+      res.json(enrichPlace(deleted));
     } catch (err) {
-      if (err.status === 404)
-        return res.status(404).json({ error: err.message });
       res.status(500).json({ error: err.message });
     }
   },
