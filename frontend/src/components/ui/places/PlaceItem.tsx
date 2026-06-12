@@ -23,8 +23,6 @@ export const PlaceItem = ({ item }: PlaceItemProps) => {
   const router = useRouter();
   const { images } = item;
 
-  console.log(item);
-
   const formattedDate = useMemo(
     () =>
       item.createdAt

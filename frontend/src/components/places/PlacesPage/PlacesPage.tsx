@@ -12,8 +12,6 @@ type IPlacesPage = {
 };
 
 export const PlacesPage = ({ data }: IPlacesPage) => {
-  console.log(data);
-
   const username = localStorage.getItem(LOCAL_STORAGE_USERNAME_KEY);
   const phrase =
     username === "admin" || username === "polinka"
