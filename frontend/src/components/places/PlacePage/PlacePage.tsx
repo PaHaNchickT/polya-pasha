@@ -55,7 +55,7 @@ export const PlacePage = ({ data }: PlaceEditPageProps) => {
             <EditIcon />
           </IconButton>
         </div>
-        <YMap center={data.coordinates} />
+        <YMap center={data.coordinates} readOnly />
       </div>
       <Button onClick={handleClickTest}>Add test place</Button>
     </main>

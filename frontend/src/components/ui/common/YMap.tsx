@@ -6,6 +6,7 @@ import {
   useMemo,
   useImperativeHandle,
   useRef,
+  useCallback,
 } from "react";
 
 interface YMapIframeProps {
@@ -13,12 +14,16 @@ interface YMapIframeProps {
   zoom?: number;
   width?: number | string;
   height?: number | string;
+  readOnly?: boolean;
 }
 
 const API_KEY = process.env.NEXT_PUBLIC_YANDEX_MAPS_API_KEY;
 
 const YMap = forwardRef<HTMLIFrameElement, YMapIframeProps>(
-  ({ center, zoom = 16, width = "100%", height = "400px" }, ref) => {
+  (
+    { center, zoom = 16, width = "100%", height = "400px", readOnly = false },
+    ref,
+  ) => {
     const iframeRef = useRef<HTMLIFrameElement>(null);
     useImperativeHandle(ref, () => iframeRef.current as HTMLIFrameElement);
 
@@ -27,7 +32,15 @@ const YMap = forwardRef<HTMLIFrameElement, YMapIframeProps>(
         <!DOCTYPE html>
         <html>
         <head>
-          <style>body,html{margin:0;padding:0;width:100%;height:100%;}</style>
+          <style>
+            body, html {
+              margin: 0;
+              padding: 0;
+              width: 100%;
+              height: 100%;
+              overflow: hidden;
+            }
+          </style>
         </head>
         <body>
           <div id="map" style="width:100%;height:100%;"></div>
@@ -38,7 +51,8 @@ const YMap = forwardRef<HTMLIFrameElement, YMapIframeProps>(
             ymaps.ready(function () {
               map = new ymaps.Map('map', {
                 center: [${center[0]}, ${center[1]}],
-                zoom: ${zoom}
+                zoom: ${zoom},
+                controls: []   // убираем все стандартные элементы управления
               });
 
               placemark = new ymaps.Placemark(
@@ -48,7 +62,8 @@ const YMap = forwardRef<HTMLIFrameElement, YMapIframeProps>(
               );
               map.geoObjects.add(placemark);
 
-              // При перетаскивании метки просто отправляем координаты
+              window.parent.postMessage({ type: 'mapReady' }, '*');
+
               placemark.events.add('dragend', function () {
                 var coords = placemark.geometry.getCoordinates();
                 window.parent.postMessage({
@@ -57,19 +72,27 @@ const YMap = forwardRef<HTMLIFrameElement, YMapIframeProps>(
                 }, '*');
               });
 
-              // Приём команд от родителя
               window.addEventListener('message', function (event) {
                 if (!event.data || !event.data.type) return;
-                if (event.data.type === 'updateMap') {
-                  var newCenter = event.data.center;
-                  var newZoom = event.data.zoom;
-                  if (newCenter) {
-                    map.setCenter(newCenter);
-                    placemark.geometry.setCoordinates(newCenter);
-                  }
-                  if (typeof newZoom === 'number') {
-                    map.setZoom(newZoom);
-                  }
+
+                switch (event.data.type) {
+                  case 'updateMap':
+                    var newCenter = event.data.center;
+                    var newZoom = event.data.zoom;
+                    if (newCenter) {
+                      map.setCenter(newCenter);
+                      placemark.geometry.setCoordinates(newCenter);
+                    }
+                    if (typeof newZoom === 'number') {
+                      map.setZoom(newZoom);
+                    }
+                    break;
+
+                  case 'setOptions':
+                    if (typeof event.data.draggable === 'boolean') {
+                      placemark.options.set({ draggable: event.data.draggable });
+                    }
+                    break;
                 }
               });
             });
@@ -77,7 +100,7 @@ const YMap = forwardRef<HTMLIFrameElement, YMapIframeProps>(
         </body>
         </html>
       `;
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+      // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
     useEffect(() => {
@@ -89,10 +112,37 @@ const YMap = forwardRef<HTMLIFrameElement, YMapIframeProps>(
       }
     }, [center, zoom]);
 
+    const sendDraggable = useCallback((draggable: boolean) => {
+      if (iframeRef.current?.contentWindow) {
+        iframeRef.current.contentWindow.postMessage(
+          { type: "setOptions", draggable },
+          "*",
+        );
+      }
+    }, []);
+
+    useEffect(() => {
+      sendDraggable(!readOnly);
+    }, [readOnly, sendDraggable]);
+
+    useEffect(() => {
+      const handler = (event: MessageEvent) => {
+        if (
+          event.source === iframeRef.current?.contentWindow &&
+          event.data?.type === "mapReady"
+        ) {
+          sendDraggable(!readOnly);
+        }
+      };
+      window.addEventListener("message", handler);
+      return () => window.removeEventListener("message", handler);
+    }, [readOnly, sendDraggable]);
+
     const style = {
       width: typeof width === "number" ? `${width}px` : width,
       height: typeof height === "number" ? `${height}px` : height,
       border: "none",
+      borderRadius: "0.5rem",
     };
 
     return <iframe ref={iframeRef} srcDoc={srcDoc} style={style} />;
