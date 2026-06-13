@@ -1,13 +1,13 @@
 "use client";
 
-import { usePathname, useRouter } from "next/navigation";
+import { usePathname } from "next/navigation";
 import { Breadcrumbs as BreadcrumbsMui, Link, Typography } from "@mui/material";
 import NavigateNextIcon from "@mui/icons-material/NavigateNext";
 import { BREADCRUMBS_MAP } from "@/lib/constants/common";
+import { ProgressLink } from "./ProgressLink";
 
 export const Breadcrumbs = () => {
   const pathname = usePathname();
-  const router = useRouter();
 
   // Убираем начальный "/" и пустые элементы
   const segments = pathname.split("/").filter(Boolean);
@@ -33,19 +33,16 @@ export const Breadcrumbs = () => {
     }
 
     return (
-      <Link
-        key={href}
-        underline="hover"
-        color="inherit"
-        href={href}
-        onClick={(e) => {
-          e.preventDefault();
-          router.push(href);
-        }}
-        className="cursor-pointer !text-lg"
-      >
-        {label}
-      </Link>
+      <ProgressLink key={href} href={href}>
+        <Link
+          underline="hover"
+          color="inherit"
+          onClick={(event) => event.preventDefault()}
+          className="cursor-pointer !text-lg"
+        >
+          {label}
+        </Link>
+      </ProgressLink>
     );
   });
 

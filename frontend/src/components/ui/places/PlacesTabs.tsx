@@ -1,8 +1,8 @@
 import { Box, Chip, IconButton } from "@mui/material";
 import { PlacesFilterButton } from "./PlacesFilterButton";
 import { ACTIVITY_TYPE_MAP } from "@/lib/constants/place";
-import { useRouter } from "next/navigation";
 import AddIcon from "@mui/icons-material/Add";
+import { ProgressLink } from "../common/ProgressLink";
 
 export const TEMP_TABS: (keyof typeof ACTIVITY_TYPE_MAP)[] = [
   "all",
@@ -16,14 +16,8 @@ export const TEMP_TABS: (keyof typeof ACTIVITY_TYPE_MAP)[] = [
 ];
 
 export const PlacesTabs = () => {
-  const router = useRouter();
-
   const handleClick = () => {
     console.info("You clicked the filter chip.");
-  };
-
-  const handleAddClick = () => {
-    router.push("/places/create");
   };
 
   return (
@@ -58,9 +52,11 @@ export const PlacesTabs = () => {
       </Box>
       <div className="flex gap-2 h-max">
         <PlacesFilterButton />
-        <IconButton onClick={handleAddClick} aria-label="add">
-          <AddIcon />
-        </IconButton>
+        <ProgressLink href="/places/create">
+          <IconButton aria-label="add">
+            <AddIcon />
+          </IconButton>
+        </ProgressLink>
       </div>
     </Box>
   );

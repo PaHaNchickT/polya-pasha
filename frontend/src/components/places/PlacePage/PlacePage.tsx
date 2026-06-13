@@ -2,23 +2,17 @@
 
 import { Button, IconButton, Typography } from "@mui/material";
 import { Place } from "@/types/place";
-import { useRouter } from "next/navigation";
 import { api } from "@/lib/api";
 import { Breadcrumbs } from "@/components/ui/common/Breadcrumbs";
 import EditIcon from "@mui/icons-material/Edit";
 import YMap from "@/components/ui/common/YMap";
+import { ProgressLink } from "@/components/ui/common/ProgressLink";
 
 interface PlaceEditPageProps {
   data: Place;
 }
 
 export const PlacePage = ({ data }: PlaceEditPageProps) => {
-  const router = useRouter();
-
-  const handleClickEdit = () => {
-    router.push(`/places/${data.id}/edit`);
-  };
-
   const handleClickTest = () => {
     console.log("clicked");
 
@@ -51,9 +45,11 @@ export const PlacePage = ({ data }: PlaceEditPageProps) => {
         </Typography>
         <div className="flex justify-between items-center">
           <Breadcrumbs />
-          <IconButton onClick={handleClickEdit} aria-label="add">
-            <EditIcon />
-          </IconButton>
+          <ProgressLink href={`/places/${data.id}/edit`}>
+            <IconButton aria-label="add">
+              <EditIcon />
+            </IconButton>
+          </ProgressLink>
         </div>
         <YMap center={data.coordinates} readOnly />
       </div>

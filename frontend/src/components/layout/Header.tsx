@@ -1,6 +1,6 @@
 "use client";
 
-import { usePathname, useRouter } from "next/navigation";
+import { usePathname } from "next/navigation";
 import { Button, Typography, AppBar, Toolbar, Container } from "@mui/material";
 import LogoutIcon from "@mui/icons-material/Logout";
 import { api } from "@/lib/api";
@@ -14,21 +14,13 @@ import {
 import { UserTypes } from "@/types/common";
 import { isAuthentificated } from "@/lib/helpers/isAuthentificated";
 import { USERS_MAP } from "@/lib/constants/users";
+import { ProgressLink } from "../ui/common/ProgressLink";
 
 export const Header = () => {
-  const router = useRouter();
   const pathname = usePathname();
 
   const [isSignedIn, setIsSignedIn] = useState(false);
   const [username, setUsername] = useState<UserTypes>("guest");
-
-  const handleClick = (route: string) => {
-    const predictPathname = `/${route}`;
-
-    if (predictPathname !== pathname) {
-      router.push(`/${route}`);
-    }
-  };
 
   const handleLogout = () => {
     api
@@ -68,15 +60,11 @@ export const Header = () => {
             <div className="grow flex justify-center items-center px-0 text-white">
               <div className="flex gap-4">
                 {HEADER_TABS.map((route) => (
-                  <Button
-                    key={`${route}-tav`}
-                    variant="text"
-                    size="small"
-                    className="!text-white"
-                    onClick={() => handleClick(route)}
-                  >
-                    {HEADER_TABS_MAP[route]}
-                  </Button>
+                  <ProgressLink key={`${route}-tav`} href={`/${route}`}>
+                    <Button variant="text" size="small" className="!text-white">
+                      {HEADER_TABS_MAP[route]}
+                    </Button>
+                  </ProgressLink>
                 ))}
               </div>
             </div>
