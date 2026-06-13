@@ -14,6 +14,7 @@ import { useRouter } from "next/navigation";
 import { PlaceResponseData } from "@/types/api";
 import { notify } from "@/lib/utils/notify";
 import { Breadcrumbs } from "@/components/ui/common/Breadcrumbs";
+import nProgress from "nprogress";
 
 export const PlaceCreatePage = () => {
   const router = useRouter();
@@ -56,6 +57,7 @@ export const PlaceCreatePage = () => {
       .createPlace(postData)
       .then((resp: PlaceResponseData) => {
         notify("Место успешно добавлено!", "success");
+        nProgress.start();
         router.push(`/places/${resp.id}`);
       })
       .catch((err) => {

@@ -17,6 +17,7 @@ import TextField from "@mui/material/TextField";
 import Typography from "@mui/material/Typography";
 import Stack from "@mui/material/Stack";
 import MuiCard from "@mui/material/Card";
+import nProgress from "nprogress";
 
 export const LoginPage = () => {
   const router = useRouter();
@@ -37,6 +38,7 @@ export const LoginPage = () => {
       .login(data)
       .then(() => {
         notify("Вы успешно вошли в аккаунт!", "success");
+        nProgress.start();
         router.push("/places");
       })
       .catch((err) => notify(err.message, "error"))

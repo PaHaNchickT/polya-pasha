@@ -13,6 +13,7 @@ import { notify } from "@/lib/utils/notify";
 import { preparePlaceData } from "@/lib/helpers/preparePlaceData";
 import { PlaceResponseData } from "@/types/api";
 import { Breadcrumbs } from "@/components/ui/common/Breadcrumbs";
+import nProgress from "nprogress";
 
 interface PlaceEditPageProps {
   id: string;
@@ -39,6 +40,7 @@ export const PlaceEditPage = ({ id, data }: PlaceEditPageProps) => {
       .updatePlace(+id, postData)
       .then((resp: PlaceResponseData) => {
         notify("Место успешно обновлено!", "success");
+        nProgress.start();
         router.push(`/places/${resp.id}`);
       })
       .catch((err) => {
@@ -55,6 +57,7 @@ export const PlaceEditPage = ({ id, data }: PlaceEditPageProps) => {
       .deletePlace(+id)
       .then(() => {
         notify("Место успешно удалено!", "success");
+        nProgress.start();
         router.push("/places");
       })
       .catch((err) => {

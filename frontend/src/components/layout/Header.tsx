@@ -15,6 +15,7 @@ import { UserTypes } from "@/types/common";
 import { isAuthentificated } from "@/lib/helpers/isAuthentificated";
 import { USERS_MAP } from "@/lib/constants/users";
 import { ProgressLink } from "../ui/common/ProgressLink";
+import nProgress from "nprogress";
 
 export const Header = () => {
   const pathname = usePathname();
@@ -26,6 +27,7 @@ export const Header = () => {
     api
       .logout()
       .then(() => {
+        nProgress.start();
         notify("Вы успешно вышли из аккаунта!", "success");
       })
       .catch((err) => notify(err.message, "error"));
