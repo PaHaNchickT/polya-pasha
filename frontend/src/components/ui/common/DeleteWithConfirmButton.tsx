@@ -6,6 +6,7 @@ import {
   DialogContent,
   DialogContentText,
   DialogTitle,
+  IconButton,
 } from "@mui/material";
 import DeleteIcon from "@mui/icons-material/Delete";
 
@@ -20,6 +21,7 @@ interface DeleteWithConfirmButtonProps {
   disabled?: boolean;
   color?: "error";
   withIcon?: boolean;
+  isIconOnly?: boolean;
 }
 
 export const DeleteWithConfirmButton: FC<DeleteWithConfirmButtonProps> = ({
@@ -33,6 +35,7 @@ export const DeleteWithConfirmButton: FC<DeleteWithConfirmButtonProps> = ({
   disabled = false,
   color = "error",
   withIcon = true,
+  isIconOnly = false,
 }) => {
   const [open, setOpen] = useState(false);
 
@@ -51,17 +54,23 @@ export const DeleteWithConfirmButton: FC<DeleteWithConfirmButtonProps> = ({
 
   return (
     <>
-      <Button
-        variant="contained"
-        color={color}
-        size="large"
-        onClick={handleOpen}
-        startIcon={withIcon ? <DeleteIcon /> : undefined}
-        disabled={disabled}
-        loading={loading}
-      >
-        {buttonText}
-      </Button>
+      {isIconOnly ? (
+        <IconButton disabled={disabled} loading={loading}>
+          <DeleteIcon color={color} onClick={handleOpen} />
+        </IconButton>
+      ) : (
+        <Button
+          variant="contained"
+          color={color}
+          size="large"
+          onClick={handleOpen}
+          startIcon={withIcon ? <DeleteIcon /> : undefined}
+          disabled={disabled}
+          loading={loading}
+        >
+          {buttonText}
+        </Button>
+      )}
 
       <Dialog
         open={open}

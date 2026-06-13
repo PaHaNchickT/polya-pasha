@@ -7,12 +7,37 @@ import { Breadcrumbs } from "@/components/ui/common/Breadcrumbs";
 import EditIcon from "@mui/icons-material/Edit";
 import YMap from "@/components/ui/common/YMap";
 import { ProgressLink } from "@/components/ui/common/ProgressLink";
+import { DeleteWithConfirmButton } from "@/components/ui/common/DeleteWithConfirmButton";
+import { notify } from "@/lib/utils/notify";
+import nProgress from "nprogress";
+import { useRouter } from "next/navigation";
+import { useState } from "react";
 
 interface PlaceEditPageProps {
   data: Place;
 }
 
 export const PlacePage = ({ data }: PlaceEditPageProps) => {
+  const router = useRouter();
+  const [loading, setLoading] = useState(false);
+
+  const handleDelete = () => {
+    setLoading(true);
+
+    api
+      .deletePlace(data.id)
+      .then(() => {
+        notify("Место успешно удалено!", "success");
+        nProgress.start();
+        router.push("/places");
+      })
+      .catch((err) => {
+        notify(err.message, "error");
+        console.error(err.message);
+      })
+      .finally(() => setLoading(false));
+  };
+
   const handleClickTest = () => {
     console.log("clicked");
 
@@ -45,11 +70,19 @@ export const PlacePage = ({ data }: PlaceEditPageProps) => {
         </Typography>
         <div className="flex justify-between items-center">
           <Breadcrumbs />
-          <ProgressLink href={`/places/${data.id}/edit`}>
-            <IconButton aria-label="add">
-              <EditIcon />
-            </IconButton>
-          </ProgressLink>
+          <div className="flex gap-2">
+            <ProgressLink href={`/places/${data.id}/edit`}>
+              <IconButton aria-label="add" loading={loading}>
+                <EditIcon />
+              </IconButton>
+            </ProgressLink>
+            <DeleteWithConfirmButton
+              isIconOnly
+              onDelete={handleDelete}
+              loading={loading}
+              dialogContentText="Вы уверены, что хотите удалить это место? Это действие нельзя отменить."
+            />
+          </div>
         </div>
         <YMap center={data.coordinates} readOnly />
       </div>
