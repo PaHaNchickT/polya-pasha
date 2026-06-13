@@ -105,13 +105,6 @@ export default function PlaceForm({
           {/* Правая колонка */}
           <Grid size={{ xs: 12, md: 6 }}>
             <Box display="flex" flexDirection="column" gap={2} height="100%">
-              <TextInput
-                control={control}
-                name="address"
-                label="Адрес"
-                fullWidth
-                nullifyEmpty
-              />
               <YMPickerInput />
               <TextInput
                 control={control}

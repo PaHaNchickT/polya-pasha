@@ -1,18 +1,24 @@
-import { Control, Controller, FieldValues, Path } from "react-hook-form";
-import TextField, { TextFieldProps } from "@mui/material/TextField";
+import { TextField, TextFieldProps } from "@mui/material";
+import {
+  Controller,
+  type FieldValues,
+  type UseControllerProps,
+} from "react-hook-form";
 
 interface TextInputProps<TFieldValues extends FieldValues>
-  extends Omit<TextFieldProps, "name" | "error" | "helperText"> {
-  control: Control<TFieldValues>;
-  name: Path<TFieldValues>;
-  /** Если true, преобразует пустую строку в null */
+  extends UseControllerProps<TFieldValues>,
+    Omit<TextFieldProps, "name" | "defaultValue" | "control"> {
   nullifyEmpty?: boolean;
+  onChangeExtra?: (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
+  ) => void;
 }
 
 export function TextInput<TFieldValues extends FieldValues>({
   control,
   name,
   nullifyEmpty,
+  onChangeExtra,
   ...rest
 }: TextInputProps<TFieldValues>) {
   return (
@@ -29,6 +35,7 @@ export function TextInput<TFieldValues extends FieldValues>({
           onChange={(e) => {
             const val = e.target.value;
             field.onChange(nullifyEmpty ? (val === "" ? null : val) : val);
+            if (onChangeExtra) onChangeExtra(e);
           }}
         />
       )}

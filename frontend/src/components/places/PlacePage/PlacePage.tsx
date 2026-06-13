@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import { api } from "@/lib/api";
 import { Breadcrumbs } from "@/components/ui/common/Breadcrumbs";
 import EditIcon from "@mui/icons-material/Edit";
+import YMap from "@/components/ui/common/YMap";
 
 interface PlaceEditPageProps {
   data: Place;
@@ -54,6 +55,7 @@ export const PlacePage = ({ data }: PlaceEditPageProps) => {
             <EditIcon />
           </IconButton>
         </div>
+        <YMap center={data.coordinates} />
       </div>
       <Button onClick={handleClickTest}>Add test place</Button>
     </main>
