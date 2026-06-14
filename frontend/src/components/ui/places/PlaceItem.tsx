@@ -1,9 +1,9 @@
 import Card from "@mui/material/Card";
 import CardContent from "@mui/material/CardContent";
 import CardMedia from "@mui/material/CardMedia";
-import { Avatar, Box, Typography } from "@mui/material";
+import { Avatar, Box, Chip, Typography } from "@mui/material";
 import { Place } from "@/types/place";
-import { LOCATION_TYPE_MAP } from "@/lib/constants/place";
+import { COVER_TYPE_MAP, LOCATION_TYPE_MAP } from "@/lib/constants/place";
 import { USERS_MAP } from "@/lib/constants/users";
 import ImageNotSupportedIcon from "@mui/icons-material/ImageNotSupported";
 import { format } from "date-fns";
@@ -14,6 +14,7 @@ import { clsx as cn } from "clsx";
 import { SignExpired } from "../common/SignExpired";
 import { ProgressLink } from "../common/ProgressLink";
 import { LabelNew } from "../common/labels/LabelNew";
+import { LabelVisited } from "../common/labels/LabelVisited";
 
 type PlaceItemProps = {
   item: Place;
@@ -42,9 +43,10 @@ export const PlaceItem = ({ item }: PlaceItemProps) => {
             item.isExpired ? "opacity-50" : "hover:opacity-90",
           )}
         >
-          {item.isNew && (
-            <LabelNew className="absolute top-2 left-2 flex items-center gap-1 bg-[#2e7d32] text-white rounded px-2 py-0.5 z-10" />
-          )}
+          <div className="absolute top-2 left-2 flex flex-col items-start gap-1 text-white rounded z-10">
+            {item.isVisited && <LabelVisited />}
+            {item.isNew && <LabelNew />}
+          </div>
           {item.isVisited && item.rating && (
             <LabelRating rating={item.rating} />
           )}
@@ -62,27 +64,34 @@ export const PlaceItem = ({ item }: PlaceItemProps) => {
             </Box>
           )}
 
-          <CardContent className="flex flex-col gap-1 p-4 flex-grow last:pb-4 border-t border-gray-600">
-            <Typography variant="caption" component="div" gutterBottom>
-              {LOCATION_TYPE_MAP[item.locationType]}
-            </Typography>
+          <CardContent className="flex flex-col gap-4 p-4 flex-grow last:pb-4 border-t border-gray-600">
+            <div className="flex gap-2">
+              <Chip
+                label={LOCATION_TYPE_MAP[item.locationType]}
+                variant="outlined"
+                size="small"
+                className="!border-lime-500 !text-[12px]"
+              />
+              <Chip
+                label={COVER_TYPE_MAP[item.coverType]}
+                variant="outlined"
+                size="small"
+                className="!border-yellow-500 !text-[12px]"
+              />
+            </div>
 
-            <Typography
-              variant="h6"
-              component="div"
-              className="line-clamp-1"
-              gutterBottom
-            >
-              {item.title}
-            </Typography>
+            <div className="flex flex-col gap-1">
+              <Typography variant="h6" component="div" className="line-clamp-1">
+                {item.title}
+              </Typography>
 
-            <Typography
-              variant="body2"
-              gutterBottom
-              className="line-clamp-1 text-[var(--template-palette-text-secondary)]"
-            >
-              {item.description}
-            </Typography>
+              <Typography
+                variant="body2"
+                className="line-clamp-1 text-[var(--template-palette-text-secondary)]"
+              >
+                {item.description}
+              </Typography>
+            </div>
           </CardContent>
 
           <Box className="flex items-center justify-between gap-2 p-4">

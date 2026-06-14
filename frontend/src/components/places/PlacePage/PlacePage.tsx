@@ -37,11 +37,9 @@ import { LabelVisited } from "@/components/ui/common/labels/LabelVisited";
 import { LabelExpired } from "@/components/ui/common/labels/LabelExpired";
 
 // common icons
-import CalendarTodayIcon from "@mui/icons-material/CalendarToday";
 import PlaceIcon from "@mui/icons-material/Place";
 import LinkIcon from "@mui/icons-material/Link";
 import PushPinIcon from "@mui/icons-material/PushPin";
-import StarIcon from "@mui/icons-material/Star";
 
 // location icons
 import HomeIcon from "@mui/icons-material/Home";
@@ -207,54 +205,64 @@ export const PlacePage = ({ data }: PlacePageProps) => {
                 />
               </div>
 
-              <div className="flex flex-col gap-2">
-                <div className="flex gap-2 items-center">
-                  <PlaceIcon color="action" />
-                  <Typography variant="body2">{data.address}</Typography>
-                </div>
-
-                <div className="flex gap-2 items-center">
-                  <PushPinIcon color="action" />
-                  <Typography variant="body2">
-                    {data.coordinates.join(" ")}
-                  </Typography>
-                </div>
-
-                {data.link && (
+              <div className="flex flex-col gap-6">
+                <div className="flex flex-col gap-2">
                   <div className="flex gap-2 items-center">
-                    <LinkIcon color="action" />
-                    <Typography
-                      variant="body1"
-                      component="a"
-                      href={data.link}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      sx={{ textDecoration: "none", color: "primary.main" }}
-                    >
-                      {data.link}
+                    <PlaceIcon color="action" sx={{ color: "#e11d48" }} />
+                    <Typography variant="body2">{data.address}</Typography>
+                  </div>
+
+                  <div className="flex gap-2 items-center">
+                    <PushPinIcon color="action" sx={{ color: "#e11d48" }} />
+                    <Typography variant="body2">
+                      {data.coordinates.join(" ")}
                     </Typography>
                   </div>
-                )}
 
-                <div className="flex gap-2 items-center">
-                  <CalendarTodayIcon color="action" />
-                  <Typography variant="body2">
-                    Дата события: {formattedEventDate}
-                  </Typography>
+                  {data.link && (
+                    <div className="flex gap-2 items-center">
+                      <LinkIcon color="action" sx={{ color: "#e11d48" }} />
+                      <Typography
+                        variant="body1"
+                        component="a"
+                        href={data.link}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        sx={{ textDecoration: "none", color: "primary.main" }}
+                      >
+                        {data.link}
+                      </Typography>
+                    </div>
+                  )}
                 </div>
 
-                {Boolean(data.rating) && (
+                <div className="flex flex-col gap-2">
                   <div className="flex gap-2 items-center">
-                    <StarIcon color="action" />
-                    <Typography variant="body2">Рейтинг:</Typography>
-                    <Rating
-                      value={(data.rating / 10) * 5}
-                      readOnly
-                      precision={0.5}
-                      size="small"
-                    />
+                    <Typography variant="body2" className="!font-bold">
+                      Дата события:
+                    </Typography>
+                    <Typography
+                      variant="body2"
+                      className="italic text-yellow-500"
+                    >
+                      {formattedEventDate}
+                    </Typography>
                   </div>
-                )}
+
+                  {Boolean(data.rating) && (
+                    <div className="flex gap-2 items-center">
+                      <Typography variant="body2" className="!font-bold">
+                        Рейтинг:
+                      </Typography>
+                      <Rating
+                        value={(data.rating / 10) * 5}
+                        readOnly
+                        precision={0.5}
+                        size="small"
+                      />
+                    </div>
+                  )}
+                </div>
               </div>
 
               <div className="flex justify-between items-center">
