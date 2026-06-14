@@ -1,36 +1,35 @@
-// components/PlacesFilterButton.tsx
-import { MouseEvent, useState } from "react";
+import { MouseEvent, useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import IconButton from "@mui/material/IconButton";
 import Popover from "@mui/material/Popover";
 import Button from "@mui/material/Button";
 import Box from "@mui/material/Box";
 import FilterAltIcon from "@mui/icons-material/FilterAlt";
-import { PlaceCoverType, PlaceLocationType } from "@/types/place";
+import { PlacesFilterParams } from "@/types/place";
 import { PlaceTypeSelect } from "../form/PlaceTypeSelect";
 import { PlaceCoverSelect } from "../form/PlaceCoverSelect";
 import { AuthorSelect } from "../form/AuthorSelect";
-import { UserTypes } from "@/types/common";
 import { IsVisitedSelect } from "../form/IsVisitedSelect";
+import { PLACES_FILTERS_DEFAULT_VALUES } from "@/components/places/PlacesPage/PlacesPage";
 
-export interface FilterParams {
-  type: PlaceLocationType | "all";
-  mode: PlaceCoverType | "all";
-  author: UserTypes | "all";
-  isVisited: "all" | "true" | "false";
+interface PlacesFilterButtonProps {
+  filters: PlacesFilterParams;
+  setFilters: (filters: PlacesFilterParams) => void;
 }
 
-export const PlacesFilterButton = () => {
+export const PlacesFilterButton = ({
+  filters,
+  setFilters,
+}: PlacesFilterButtonProps) => {
   const [anchorEl, setAnchorEl] = useState<HTMLElement | null>(null);
 
-  const { control, handleSubmit } = useForm<FilterParams>({
-    defaultValues: {
-      type: "all",
-      mode: "all",
-      author: "all",
-      isVisited: "all",
-    },
+  const { control, handleSubmit, reset } = useForm<PlacesFilterParams>({
+    defaultValues: filters,
   });
+
+  useEffect(() => {
+    reset(filters);
+  }, [filters, reset]);
 
   const handleClick = (event: MouseEvent<HTMLButtonElement>) => {
     setAnchorEl(event.currentTarget);
@@ -40,9 +39,14 @@ export const PlacesFilterButton = () => {
     setAnchorEl(null);
   };
 
-  const onSubmit = (data: FilterParams) => {
-    console.log(data);
+  const onSubmit = (data: PlacesFilterParams) => {
+    setFilters(data);
     handleClose();
+  };
+
+  const handleReset = () => {
+    setFilters(PLACES_FILTERS_DEFAULT_VALUES);
+    reset(PLACES_FILTERS_DEFAULT_VALUES);
   };
 
   const open = Boolean(anchorEl);
@@ -65,13 +69,18 @@ export const PlacesFilterButton = () => {
             display: "flex",
             flexDirection: "column",
             gap: 2,
-            minWidth: 200,
+            width: 250,
           }}
         >
-          <PlaceTypeSelect control={control} name="type" label="Тип" isFilter />
+          <PlaceTypeSelect
+            control={control}
+            name="locationType"
+            label="Тип"
+            isFilter
+          />
           <PlaceCoverSelect
             control={control}
-            name="mode"
+            name="coverType"
             label="Местность"
             isFilter
           />
@@ -94,6 +103,14 @@ export const PlacesFilterButton = () => {
             onClick={handleSubmit(onSubmit)}
           >
             Применить
+          </Button>
+          <Button
+            variant="contained"
+            size="small"
+            color="error"
+            onClick={handleReset}
+          >
+            Сбросить
           </Button>
         </Box>
       </Popover>

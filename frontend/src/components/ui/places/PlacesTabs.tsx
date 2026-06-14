@@ -3,6 +3,8 @@ import { PlacesFilterButton } from "./PlacesFilterButton";
 import { ACTIVITY_TYPE_MAP } from "@/lib/constants/place";
 import AddIcon from "@mui/icons-material/Add";
 import { ProgressLink } from "../common/ProgressLink";
+import { PlaceActivityType, PlacesFilterParams } from "@/types/place";
+import { Dispatch, SetStateAction } from "react";
 
 export const TEMP_TABS: (keyof typeof ACTIVITY_TYPE_MAP)[] = [
   "all",
@@ -15,9 +17,21 @@ export const TEMP_TABS: (keyof typeof ACTIVITY_TYPE_MAP)[] = [
   "other",
 ];
 
-export const PlacesTabs = () => {
-  const handleClick = () => {
-    console.info("You clicked the filter chip.");
+interface PlacesTabsProps {
+  activityType: PlaceActivityType | "all";
+  setActivityType: Dispatch<SetStateAction<PlaceActivityType | "all">>;
+  filters: PlacesFilterParams;
+  setFilters: (filters: PlacesFilterParams) => void;
+}
+
+export const PlacesTabs = ({
+  activityType,
+  setActivityType,
+  filters,
+  setFilters,
+}: PlacesTabsProps) => {
+  const handleClick = (item: PlaceActivityType | "all") => {
+    setActivityType(item);
   };
 
   return (
@@ -40,18 +54,25 @@ export const PlacesTabs = () => {
           rowGap: 1,
         }}
       >
-        {TEMP_TABS.map((item, idx) => (
+        {TEMP_TABS.map((item) => (
           <Chip
             key={`${item}-tab`}
-            onClick={handleClick}
+            onClick={() => handleClick(item)}
             size="medium"
             label={ACTIVITY_TYPE_MAP[item]}
-            sx={idx ? { backgroundColor: "transparent", border: "none" } : null}
+            sx={
+              activityType !== item
+                ? { backgroundColor: "transparent", border: "none" }
+                : null
+            }
           />
         ))}
       </Box>
       <div className="flex gap-2 h-max">
-        <PlacesFilterButton />
+        <PlacesFilterButton
+          filters={filters}
+          setFilters={setFilters}
+        />
         <ProgressLink href="/places/create">
           <IconButton aria-label="add">
             <AddIcon />

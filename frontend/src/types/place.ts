@@ -1,3 +1,5 @@
+import { UserTypes } from "./common";
+
 export interface Place {
   id: number;
   title: string;
@@ -41,3 +43,10 @@ export type ImageData = {
   name: string;
   type: string;
 };
+
+export interface PlacesFilterParams {
+  locationType: PlaceLocationType | "all";
+  coverType: PlaceCoverType | "all";
+  author: UserTypes | "all";
+  isVisited: "all" | "true" | "false";
+}
