@@ -3,8 +3,8 @@ import { USERS_MAP } from "./users";
 export const LOCATION_TYPE_MAP = {
   all: "Не знаю 🤷🏻‍♀️",
   home: "Дома",
-  walk: "Прогулка",
-  ride: "Поездка",
+  walk: "Пешком",
+  ride: "На машине",
   travel_internal: "Путешествие (межгород)",
   travel_external: "Путешествие (за границу)",
 };

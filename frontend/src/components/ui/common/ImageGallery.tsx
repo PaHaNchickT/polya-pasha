@@ -39,43 +39,47 @@ export const ImageGallery = ({ images }: ImageGalleryProps) => {
             />
 
             {/* Кнопки листания */}
-            <IconButton
-              className="gallery-buttons"
-              onClick={goToPrev}
-              sx={{
-                position: "absolute",
-                left: 8,
-                top: "50%",
-                transform: "translateY(-50%)",
-                backgroundColor: "rgba(0,0,0,0.75)",
-                opacity: 0.7,
-                transition: "opacity 0.2s",
-                "&:hover": {
-                  backgroundColor: "rgba(0,0,0,0.95)",
-                },
-              }}
-            >
-              <ChevronLeftIcon />
-            </IconButton>
+            {images.length > 1 && (
+              <>
+                <IconButton
+                  className="gallery-buttons"
+                  onClick={goToPrev}
+                  sx={{
+                    position: "absolute",
+                    left: 8,
+                    top: "50%",
+                    transform: "translateY(-50%)",
+                    backgroundColor: "rgba(0,0,0,0.75)",
+                    opacity: 0.7,
+                    transition: "opacity 0.2s",
+                    "&:hover": {
+                      backgroundColor: "rgba(0,0,0,0.95)",
+                    },
+                  }}
+                >
+                  <ChevronLeftIcon />
+                </IconButton>
 
-            <IconButton
-              className="gallery-buttons"
-              onClick={goToNext}
-              sx={{
-                position: "absolute",
-                right: 8,
-                top: "50%",
-                transform: "translateY(-50%)",
-                backgroundColor: "rgba(0,0,0,0.75)",
-                opacity: 0.7,
-                transition: "opacity 0.2s",
-                "&:hover": {
-                  backgroundColor: "rgba(0,0,0,0.95)",
-                },
-              }}
-            >
-              <ChevronRightIcon />
-            </IconButton>
+                <IconButton
+                  className="gallery-buttons"
+                  onClick={goToNext}
+                  sx={{
+                    position: "absolute",
+                    right: 8,
+                    top: "50%",
+                    transform: "translateY(-50%)",
+                    backgroundColor: "rgba(0,0,0,0.75)",
+                    opacity: 0.7,
+                    transition: "opacity 0.2s",
+                    "&:hover": {
+                      backgroundColor: "rgba(0,0,0,0.95)",
+                    },
+                  }}
+                >
+                  <ChevronRightIcon />
+                </IconButton>
+              </>
+            )}
 
             {/* Индикатор текущего слайда */}
             <div className="absolute bottom-2 right-2 bg-black/50 text-white px-1.5 py-0.5 rounded text-xs">
