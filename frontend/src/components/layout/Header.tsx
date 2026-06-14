@@ -61,13 +61,27 @@ export const Header = () => {
             </Typography>
             <div className="grow flex justify-center items-center px-0 text-white">
               <div className="flex gap-4">
-                {HEADER_TABS.map((route) => (
-                  <ProgressLink key={`${route}-tav`} href={`/${route}`}>
-                    <Button variant="text" size="small" className="!text-white">
+                {HEADER_TABS.map((route) =>
+                  `/${route}` === pathname ? (
+                    <Typography
+                      key={`${route}-tav`}
+                      variant="button"
+                      className="!text-white !text-[13px] px-[10px] underline decoration-white underline-offset-4 flex justify-center items-center"
+                    >
                       {HEADER_TABS_MAP[route]}
-                    </Button>
-                  </ProgressLink>
-                ))}
+                    </Typography>
+                  ) : (
+                    <ProgressLink key={`${route}-tav`} href={`/${route}`}>
+                      <Button
+                        variant="text"
+                        size="small"
+                        className="!text-white"
+                      >
+                        {HEADER_TABS_MAP[route]}
+                      </Button>
+                    </ProgressLink>
+                  ),
+                )}
               </div>
             </div>
             <div className="flex gap-4">

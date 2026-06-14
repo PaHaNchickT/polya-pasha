@@ -1,6 +1,6 @@
 "use client";
 
-import { usePathname, useRouter } from "next/navigation";
+import { useRouter } from "next/navigation";
 import NProgress from "nprogress";
 import "nprogress/nprogress.css";
 import type { AnchorHTMLAttributes, MouseEvent, ReactNode } from "react";
@@ -19,23 +19,18 @@ export const ProgressLink = ({
   ...props
 }: ProgressLinkProps) => {
   const router = useRouter();
-  const pathname = usePathname();
 
   const handleClick = (event: MouseEvent<HTMLAnchorElement>) => {
-    const predictPathname = href;
+    event.preventDefault();
 
-    if (predictPathname !== pathname) {
-      event.preventDefault();
+    NProgress.start();
+    router.push(href);
 
-      NProgress.start();
-      router.push(href);
-
-      if (onClick) onClick(event);
-    }
+    if (onClick) onClick(event);
   };
 
   return (
-    <a onClick={handleClick} className={className} {...props}>
+    <a href={href} onClick={handleClick} className={className} {...props}>
       {children}
     </a>
   );
