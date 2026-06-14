@@ -158,8 +158,10 @@ export const ImagePickerInput: FC = () => {
                             position: "absolute",
                             top: 2,
                             right: 2,
-                            bgcolor: "rgba(255,255,255,0.8)",
-                            "&:hover": { bgcolor: "rgba(255,255,255,0.95)" },
+                            backgroundColor: "rgba(0,0,0,0.75)",
+                            "&:hover": {
+                              backgroundColor: "rgba(0,0,0,0.95)",
+                            },
                             width: 24,
                             height: 24,
                           }}
