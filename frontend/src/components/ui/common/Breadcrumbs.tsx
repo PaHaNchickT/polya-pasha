@@ -41,7 +41,7 @@ export const Breadcrumbs = () => {
         href={href}
         onClick={(e) => {
           e.preventDefault();
-          nProgress.start()
+          nProgress.start();
           router.push(href);
         }}
         className="cursor-pointer !text-lg"
@@ -55,6 +55,7 @@ export const Breadcrumbs = () => {
     <BreadcrumbsMui
       separator={<NavigateNextIcon fontSize="medium" />}
       aria-label="breadcrumb"
+      className="!mb-4"
     >
       {items}
     </BreadcrumbsMui>

@@ -9,11 +9,11 @@ import ImageNotSupportedIcon from "@mui/icons-material/ImageNotSupported";
 import { format } from "date-fns";
 import { ru } from "date-fns/locale";
 import { useMemo } from "react";
-import { LabelRating } from "../common/LabelRating";
-import { LabelNew } from "../common/LabelNew";
+import { LabelRating } from "../common/labels/LabelRating";
 import { clsx as cn } from "clsx";
-import { LabelExpired } from "../common/LabelExpired";
+import { SignExpired } from "../common/SignExpired";
 import { ProgressLink } from "../common/ProgressLink";
+import { LabelNew } from "../common/labels/LabelNew";
 
 type PlaceItemProps = {
   item: Place;
@@ -33,7 +33,7 @@ export const PlaceItem = ({ item }: PlaceItemProps) => {
   return (
     <ProgressLink href={`/places/${item.id}`}>
       <div className="relative cursor-pointer">
-        {item.isExpired && <LabelExpired />}
+        {item.isExpired && <SignExpired />}
         <Card
           variant="outlined"
           tabIndex={0}
@@ -42,7 +42,9 @@ export const PlaceItem = ({ item }: PlaceItemProps) => {
             item.isExpired ? "opacity-50" : "hover:opacity-90",
           )}
         >
-          {item.isNew && <LabelNew />}
+          {item.isNew && (
+            <LabelNew className="absolute top-2 left-2 flex items-center gap-1 bg-[#2e7d32] text-white rounded px-2 py-0.5 z-10" />
+          )}
           {item.isVisited && item.rating && (
             <LabelRating rating={item.rating} />
           )}
@@ -87,7 +89,7 @@ export const PlaceItem = ({ item }: PlaceItemProps) => {
             <Box className="flex items-center gap-2">
               <Avatar
                 alt={USERS_MAP[item.author]}
-                src={`images/${item.author}-avatar.png`}
+                src={`/images/${item.author}-avatar.png`}
                 className="!w-6 !h-6 text-xs"
               >
                 {USERS_MAP[item.author]?.[0]}
