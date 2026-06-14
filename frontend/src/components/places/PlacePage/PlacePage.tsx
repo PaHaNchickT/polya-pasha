@@ -89,6 +89,7 @@ const activityIcons: Record<PlaceActivityType, React.ReactElement> = {
   action: <DirectionsRunIcon fontSize="small" />,
   animals: <PetsIcon fontSize="small" />,
   nature: <ForestIcon fontSize="small" />,
+  walk: <DirectionsWalkIcon fontSize="small" />,
   other: <MoreHorizIcon fontSize="small" />,
 };
 

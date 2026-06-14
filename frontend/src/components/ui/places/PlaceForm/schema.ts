@@ -22,6 +22,7 @@ export const placeFormSchema = z.object({
         "action",
         "animals",
         "nature",
+        "walk",
         "other",
       ]),
     )

@@ -15,6 +15,7 @@ export const TEMP_TABS: (keyof typeof ACTIVITY_TYPE_MAP)[] = [
   "action",
   "animals",
   "nature",
+  "walk",
   "other",
 ];
 

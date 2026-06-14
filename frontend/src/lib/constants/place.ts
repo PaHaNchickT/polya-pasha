@@ -18,6 +18,7 @@ export const ACTIVITY_TYPE_MAP = {
   action: "Активный отдых",
   animals: "Зверушки",
   nature: "Природа",
+  walk: "Прогулка",
   other: "Другое",
 };
 
