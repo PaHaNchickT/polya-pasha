@@ -96,7 +96,7 @@ export const ImageGallery = ({ images }: ImageGalleryProps) => {
           </Dialog>
         </>
       ) : (
-        <div className="h-auto aspect-video flex items-center justify-center">
+        <div className="h-full flex items-center justify-center">
           <ImageNotSupportedIcon color="disabled" fontSize="large" />
         </div>
       )}

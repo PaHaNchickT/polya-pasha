@@ -174,7 +174,7 @@ export const PlacePage = ({ data }: PlacePageProps) => {
 
       <div className="flex gap-4">
         {/* Левая колонка */}
-        <div className="flex flex-col gap-2 w-[70%]">
+        <div className="flex flex-col gap-2 w-[60%]">
           <Card variant="outlined">
             <CardContent className="!py-4 flex flex-col gap-8">
               <div className="flex gap-2">
@@ -285,7 +285,7 @@ export const PlacePage = ({ data }: PlacePageProps) => {
         </div>
 
         {/* Правая колонка */}
-        <div className="flex flex-col gap-2">
+        <div className="flex flex-col gap-2 w-[40%]">
           <Card variant="outlined" className="grow">
             <CardContent className="!p-0 overflow-hidden h-full">
               <ImageGallery images={data.images} />
