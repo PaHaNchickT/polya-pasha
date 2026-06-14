@@ -14,6 +14,7 @@ export const TEMP_TABS: (keyof typeof ACTIVITY_TYPE_MAP)[] = [
   "music",
   "action",
   "animals",
+  "nature",
   "other",
 ];
 
@@ -69,10 +70,7 @@ export const PlacesTabs = ({
         ))}
       </Box>
       <div className="flex gap-2 h-max">
-        <PlacesFilterButton
-          filters={filters}
-          setFilters={setFilters}
-        />
+        <PlacesFilterButton filters={filters} setFilters={setFilters} />
         <ProgressLink href="/places/create">
           <IconButton aria-label="add">
             <AddIcon />

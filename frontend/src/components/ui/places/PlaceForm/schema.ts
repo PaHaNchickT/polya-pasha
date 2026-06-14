@@ -21,6 +21,7 @@ export const placeFormSchema = z.object({
         "music",
         "action",
         "animals",
+        "nature",
         "other",
       ]),
     )

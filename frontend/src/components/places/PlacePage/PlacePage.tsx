@@ -55,6 +55,7 @@ import MovieIcon from "@mui/icons-material/Movie";
 import MusicNoteIcon from "@mui/icons-material/MusicNote";
 import DirectionsRunIcon from "@mui/icons-material/DirectionsRun";
 import PetsIcon from "@mui/icons-material/Pets";
+import ForestIcon from "@mui/icons-material/Forest";
 import MoreHorizIcon from "@mui/icons-material/MoreHoriz";
 
 // cover icons
@@ -87,6 +88,7 @@ const activityIcons: Record<PlaceActivityType, React.ReactElement> = {
   music: <MusicNoteIcon fontSize="small" />,
   action: <DirectionsRunIcon fontSize="small" />,
   animals: <PetsIcon fontSize="small" />,
+  nature: <ForestIcon fontSize="small" />,
   other: <MoreHorizIcon fontSize="small" />,
 };
 

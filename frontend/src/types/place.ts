@@ -35,6 +35,7 @@ export type PlaceActivityType =
   | "music"
   | "action"
   | "animals"
+  | "nature"
   | "other";
 export type PlaceCoverType = "open" | "close" | "hybrid";
 

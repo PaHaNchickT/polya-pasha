@@ -17,6 +17,7 @@ export const ACTIVITY_TYPE_MAP = {
   music: "Музыка",
   action: "Активный отдых",
   animals: "Зверушки",
+  nature: "Природа",
   other: "Другое",
 };
 

@@ -15,6 +15,7 @@ const TEMP_PLACE_ACTIVITIES_LIST = [
   "music",
   "action",
   "animals",
+  "nature",
   "other",
 ] as const;
 
