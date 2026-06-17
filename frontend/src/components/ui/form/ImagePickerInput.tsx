@@ -12,6 +12,7 @@ import {
 import { FC, useState } from "react";
 import { Controller, useFormContext } from "react-hook-form";
 import DeleteIcon from "@mui/icons-material/Delete";
+import DownloadIcon from "@mui/icons-material/Download";
 import InsertPhotoIcon from "@mui/icons-material/InsertPhoto";
 import { ImageData } from "@/types/place";
 
@@ -42,15 +43,6 @@ export const ImagePickerInput: FC = () => {
 
             const remainingSlots = MAX_IMAGES - images.length;
             if (files.length > remainingSlots) {
-              // Ошибка через setError, но у нас нет setError внутри render.
-              // Можно вернуть ошибку через onChange? Нет, проще показать её через поле.
-              // Используем возврат, ошибка будет видна через валидацию позже.
-              // Но лучше показать немедленно – используем setError из useFormContext.
-              // Мы не можем использовать хук useFormContext здесь, но можно получить setError из control?
-              // Лучше оставить валидацию на сабмит, а сейчас просто предупредить.
-              // Но для удобства вызовем setError из внешнего контекста.
-              // Чтобы не усложнять, можно просто не добавлять и выйти.
-              // Однако мы можем использовать control._formState, но проще сделать так:
               event.target.value = "";
               return;
             }
@@ -107,6 +99,15 @@ export const ImagePickerInput: FC = () => {
             onChange(updated);
           };
 
+          const handleDownload = (image: ImageData) => {
+            const link = document.createElement("a");
+            link.href = image.uri;
+            link.download = image.name || "image.jpg";
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+          };
+
           return (
             <Box>
               {loading && (
@@ -152,8 +153,10 @@ export const ImagePickerInput: FC = () => {
                         ) : (
                           <InsertPhotoIcon color="disabled" />
                         )}
+                        {/* Кнопка удаления (правая верхняя) */}
                         <IconButton
                           size="small"
+                          aria-label="Удалить изображение"
                           sx={{
                             position: "absolute",
                             top: 2,
@@ -169,6 +172,27 @@ export const ImagePickerInput: FC = () => {
                         >
                           <DeleteIcon sx={{ fontSize: 16 }} />
                         </IconButton>
+                        {/* Кнопка скачивания (левая верхняя) – только если есть изображение */}
+                        {img.uri && (
+                          <IconButton
+                            size="small"
+                            aria-label="Скачать изображение"
+                            sx={{
+                              position: "absolute",
+                              top: 2,
+                              left: 2,
+                              backgroundColor: "rgba(0,0,0,0.75)",
+                              "&:hover": {
+                                backgroundColor: "rgba(0,0,0,0.95)",
+                              },
+                              width: 24,
+                              height: 24,
+                            }}
+                            onClick={() => handleDownload(img)}
+                          >
+                            <DownloadIcon sx={{ fontSize: 16 }} />
+                          </IconButton>
+                        )}
                       </Box>
                     ))}
                   </Box>
