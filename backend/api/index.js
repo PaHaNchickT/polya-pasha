@@ -5,6 +5,8 @@ const cors = require("cors");
 const jwt = require("jsonwebtoken");
 const { authMiddleware } = require("./auth");
 const supabase = require("../supabaseClient");
+const multer = require("multer");
+const upload = multer({ storage: multer.memoryStorage() });
 
 const app = express();
 app.use(cors());
@@ -172,16 +174,28 @@ app.post("/api/places", authMiddleware, checkRevoked, async (req, res) => {
 app.patch("/api/places/:id", authMiddleware, checkRevoked, async (req, res) => {
   try {
     const id = parseInt(req.params.id, 10);
-    // Сначала проверим, существует ли место
+    // Получаем текущее место (чтобы знать старые картинки)
     const { data: existing, error: findError } = await supabase
       .from("places")
-      .select("id")
+      .select("images")
       .eq("id", id)
       .single();
-    if (findError) {
-      return res.status(404).json({ error: "Место не найдено" });
+    if (findError) return res.status(404).json({ error: "Место не найдено" });
+
+    // Если клиент передал новые images, удаляем старые файлы из Storage
+    if (req.body.images !== undefined) {
+      const oldUrls = existing.images || [];
+      for (const url of oldUrls) {
+        // Извлекаем имя файла из URL
+        const filePath = url.split("/").pop();
+        const { error: delError } = await supabase.storage
+          .from("place-images")
+          .remove([filePath]);
+        if (delError) console.error("Ошибка удаления файла:", delError);
+      }
     }
 
+    // Теперь обновляем поля, включая images
     const updatableFields = [
       "title",
       "description",
@@ -224,29 +238,6 @@ app.patch("/api/places/:id", authMiddleware, checkRevoked, async (req, res) => {
   }
 });
 
-// DELETE /api/places – удалить несколько мест
-app.delete("/api/places", authMiddleware, checkRevoked, async (req, res) => {
-  try {
-    const idsToDelete = req.body?.ids;
-    if (!Array.isArray(idsToDelete) || idsToDelete.length === 0) {
-      return res.status(400).json({ error: "Необходим массив ids" });
-    }
-
-    const { error, count } = await supabase
-      .from("places")
-      .delete({ count: "exact" })
-      .in("id", idsToDelete);
-
-    if (error) throw error;
-    if (count === 0) {
-      return res.status(404).json({ error: "Ни одно место не найдено" });
-    }
-    res.json({ deleted: count });
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
-});
-
 // DELETE /api/places/:id – удалить одно место
 app.delete(
   "/api/places/:id",
@@ -255,19 +246,68 @@ app.delete(
   async (req, res) => {
     try {
       const id = parseInt(req.params.id, 10);
-      const { data: deleted, error } = await supabase
+      const { data: place, error: findError } = await supabase
+        .from("places")
+        .select("images")
+        .eq("id", id)
+        .single();
+      if (findError) return res.status(404).json({ error: "Место не найдено" });
+
+      // Удаляем файлы картинок из Storage
+      if (place.images && place.images.length > 0) {
+        const filePaths = place.images.map((url) => url.split("/").pop());
+        const { error: delError } = await supabase.storage
+          .from("place-images")
+          .remove(filePaths);
+        if (delError) console.error("Ошибка удаления файлов:", delError);
+      }
+
+      const { error: deleteError } = await supabase
         .from("places")
         .delete()
-        .eq("id", id)
-        .select()
-        .single();
+        .eq("id", id);
 
-      if (error) {
-        if (error.code === "PGRST116")
-          return res.status(404).json({ error: "Место не найдено" });
-        throw error;
+      if (deleteError) throw deleteError;
+      res.json({ success: true });
+    } catch (err) {
+      res.status(500).json({ error: err.message });
+    }
+  },
+);
+
+// POST /api/upload – загрузка нескольких изображений
+app.post(
+  "/api/upload",
+  authMiddleware,
+  checkRevoked,
+  upload.array("images", 10),
+  async (req, res) => {
+    try {
+      if (!req.files || req.files.length === 0) {
+        return res.status(400).json({ error: "Файлы не найдены" });
       }
-      res.json(enrichPlace(deleted));
+
+      const uploadedUrls = [];
+
+      for (const file of req.files) {
+        const fileName = `${Date.now()}-${file.originalname}`;
+        const { data, error } = await supabase.storage
+          .from("place-images")
+          .upload(fileName, file.buffer, {
+            contentType: file.mimetype,
+            upsert: false,
+          });
+
+        if (error) throw error;
+
+        const { data: publicURL } = supabase.storage
+          .from("place-images")
+          .getPublicUrl(fileName);
+
+        uploadedUrls.push(publicURL.publicUrl);
+      }
+
+      res.json({ urls: uploadedUrls });
     } catch (err) {
       res.status(500).json({ error: err.message });
     }
