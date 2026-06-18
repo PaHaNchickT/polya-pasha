@@ -5,8 +5,7 @@ const cors = require("cors");
 const jwt = require("jsonwebtoken");
 const { authMiddleware } = require("./auth");
 const supabase = require("../supabaseClient");
-const multer = require("multer");
-const upload = multer({ storage: multer.memoryStorage() });
+const { uploadBase64Image } = require("../helpers/uploadBase64Image");
 
 const app = express();
 app.use(cors());
@@ -136,9 +135,21 @@ app.get("/api/places/:id", authMiddleware, checkRevoked, async (req, res) => {
   }
 });
 
-// POST /api/places – создать новое место
+// POST /api/places – создать новое место (с автоматической загрузкой base64)
 app.post("/api/places", authMiddleware, checkRevoked, async (req, res) => {
   try {
+    const images = req.body.images || [];
+    const processedImages = [];
+
+    for (const img of images) {
+      if (img.url && img.url.startsWith("data:image/")) {
+        const publicUrl = await uploadBase64Image(img.url, img.name, img.type);
+        processedImages.push({ ...img, url: publicUrl });
+      } else {
+        processedImages.push(img);
+      }
+    }
+
     const newPlace = {
       title: req.body.title,
       description: req.body.description,
@@ -153,7 +164,7 @@ app.post("/api/places", authMiddleware, checkRevoked, async (req, res) => {
       coordinates: req.body.coordinates || [],
       link: req.body.link || null,
       rating: req.body.rating || 0,
-      images: req.body.images || [],
+      images: processedImages,
       is_visited: req.body.is_visited || false,
     };
 
@@ -170,11 +181,10 @@ app.post("/api/places", authMiddleware, checkRevoked, async (req, res) => {
   }
 });
 
-// PATCH /api/places/:id – обновить место
+// PATCH /api/places/:id – обновить место (с обработкой base64 и удалением старых файлов)
 app.patch("/api/places/:id", authMiddleware, checkRevoked, async (req, res) => {
   try {
     const id = parseInt(req.params.id, 10);
-    // Получаем текущее место (чтобы знать старые картинки)
     const { data: existing, error: findError } = await supabase
       .from("places")
       .select("images")
@@ -182,20 +192,42 @@ app.patch("/api/places/:id", authMiddleware, checkRevoked, async (req, res) => {
       .single();
     if (findError) return res.status(404).json({ error: "Место не найдено" });
 
-    // Если клиент передал новые images, удаляем старые файлы из Storage
+    // Если клиент передал новые images, удаляем старые файлы, которых нет в новом списке
     if (req.body.images !== undefined) {
       const oldUrls = existing.images || [];
-      for (const url of oldUrls) {
-        // Извлекаем имя файла из URL
-        const filePath = url.split("/").pop();
-        const { error: delError } = await supabase.storage
-          .from("place-images")
-          .remove([filePath]);
-        if (delError) console.error("Ошибка удаления файла:", delError);
+      const newImages = req.body.images || [];
+      const newUrlSet = new Set(newImages.map((img) => img.url));
+
+      for (const oldImg of oldUrls) {
+        if (!newUrlSet.has(oldImg.url)) {
+          const filePath = oldImg.url.split("/").pop();
+          const { error: delError } = await supabase.storage
+            .from("place-images")
+            .remove([filePath]);
+          if (delError) console.error("Ошибка удаления файла:", delError);
+        }
       }
     }
 
-    // Теперь обновляем поля, включая images
+    // Обрабатываем новые base64-изображения
+    let imagesToUpdate = req.body.images;
+    if (imagesToUpdate) {
+      const processed = [];
+      for (const img of imagesToUpdate) {
+        if (img.url && img.url.startsWith("data:image/")) {
+          const publicUrl = await uploadBase64Image(
+            img.url,
+            img.name,
+            img.type,
+          );
+          processed.push({ ...img, url: publicUrl });
+        } else {
+          processed.push(img);
+        }
+      }
+      imagesToUpdate = processed;
+    }
+
     const updatableFields = [
       "title",
       "description",
@@ -215,7 +247,9 @@ app.patch("/api/places/:id", authMiddleware, checkRevoked, async (req, res) => {
 
     const updates = {};
     for (const field of updatableFields) {
-      if (req.body[field] !== undefined) {
+      if (field === "images" && imagesToUpdate !== undefined) {
+        updates.images = imagesToUpdate;
+      } else if (req.body[field] !== undefined) {
         updates[field] = req.body[field];
       }
     }
@@ -253,9 +287,8 @@ app.delete(
         .single();
       if (findError) return res.status(404).json({ error: "Место не найдено" });
 
-      // Удаляем файлы картинок из Storage
       if (place.images && place.images.length > 0) {
-        const filePaths = place.images.map((url) => url.split("/").pop());
+        const filePaths = place.images.map((img) => img.url.split("/").pop());
         const { error: delError } = await supabase.storage
           .from("place-images")
           .remove(filePaths);
@@ -275,46 +308,6 @@ app.delete(
   },
 );
 
-// POST /api/upload – загрузка нескольких изображений
-app.post(
-  "/api/upload",
-  authMiddleware,
-  checkRevoked,
-  upload.array("images", 10),
-  async (req, res) => {
-    try {
-      if (!req.files || req.files.length === 0) {
-        return res.status(400).json({ error: "Файлы не найдены" });
-      }
-
-      const uploadedUrls = [];
-
-      for (const file of req.files) {
-        const fileName = `${Date.now()}-${file.originalname}`;
-        const { data, error } = await supabase.storage
-          .from("place-images")
-          .upload(fileName, file.buffer, {
-            contentType: file.mimetype,
-            upsert: false,
-          });
-
-        if (error) throw error;
-
-        const { data: publicURL } = supabase.storage
-          .from("place-images")
-          .getPublicUrl(fileName);
-
-        uploadedUrls.push(publicURL.publicUrl);
-      }
-
-      res.json({ urls: uploadedUrls });
-    } catch (err) {
-      res.status(500).json({ error: err.message });
-    }
-  },
-);
-
-// Тестовый статус
 app.get("/api/status", (req, res) => res.json({ status: "ok" }));
 
 module.exports = app;
