@@ -69,7 +69,7 @@ export const ImagePickerInput: FC = () => {
                   const reader = new FileReader();
                   reader.onload = () => {
                     newImages.push({
-                      uri: reader.result as string,
+                      url: reader.result as string,
                       name: file.name,
                       type: file.type,
                     });
@@ -101,7 +101,7 @@ export const ImagePickerInput: FC = () => {
 
           const handleDownload = (image: ImageData) => {
             const link = document.createElement("a");
-            link.href = image.uri;
+            link.href = image.url;
             link.download = image.name || "image.jpg";
             document.body.appendChild(link);
             link.click();
@@ -139,10 +139,10 @@ export const ImagePickerInput: FC = () => {
                           justifyContent: "center",
                         }}
                       >
-                        {img.uri ? (
+                        {img.url ? (
                           <Box
                             component="img"
-                            src={img.uri}
+                            src={img.url}
                             alt={img.name}
                             sx={{
                               width: "100%",
@@ -173,7 +173,7 @@ export const ImagePickerInput: FC = () => {
                           <DeleteIcon sx={{ fontSize: 16 }} />
                         </IconButton>
                         {/* Кнопка скачивания (левая верхняя) – только если есть изображение */}
-                        {img.uri && (
+                        {img.url && (
                           <IconButton
                             size="small"
                             aria-label="Скачать изображение"

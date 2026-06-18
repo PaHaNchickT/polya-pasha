@@ -3,9 +3,10 @@ import { CardMedia, Dialog, DialogContent, IconButton } from "@mui/material";
 import ChevronLeftIcon from "@mui/icons-material/ChevronLeft";
 import ChevronRightIcon from "@mui/icons-material/ChevronRight";
 import ImageNotSupportedIcon from "@mui/icons-material/ImageNotSupported";
+import { ImageData } from "@/types/place";
 
 interface ImageGalleryProps {
-  images: { uri: string; name: string; type: string }[];
+  images: ImageData[];
 }
 
 export const ImageGallery = ({ images }: ImageGalleryProps) => {
@@ -33,7 +34,7 @@ export const ImageGallery = ({ images }: ImageGalleryProps) => {
             <CardMedia
               component="img"
               alt={currentImage.name || "Place image"}
-              image={currentImage.uri}
+              image={currentImage.url}
               className="!aspect-video !w-full !h-full !object-cover cursor-pointer"
               onClick={handleOpen}
             />
@@ -92,7 +93,7 @@ export const ImageGallery = ({ images }: ImageGalleryProps) => {
             <DialogContent sx={{ p: 0, textAlign: "center" }}>
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
-                src={currentImage.uri}
+                src={currentImage.url}
                 alt={currentImage.name || "Full size"}
                 className="max-w-full max-h-[90vh] object-contain"
               />

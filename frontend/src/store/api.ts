@@ -156,17 +156,6 @@ export const api = createApi({
       }),
       invalidatesTags: (_, __, id) => [{ type: "Places", id }, "Places"],
     }),
-
-    // ================= Upload =================
-    uploadImages: builder.mutation<{ urls: string[] }, FormData>({
-      query: (formData) => ({
-        url: "/api/upload",
-        method: "POST",
-        body: formData,
-        // Не устанавливаем Content-Type, fetch сам добавит с boundary для FormData
-        formData: true,
-      }),
-    }),
   }),
 });
 
@@ -179,5 +168,4 @@ export const {
   useCreatePlaceMutation,
   useUpdatePlaceMutation,
   useDeletePlaceMutation,
-  useUploadImagesMutation,
 } = api;

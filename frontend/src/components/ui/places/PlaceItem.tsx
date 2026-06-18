@@ -55,7 +55,7 @@ export const PlaceItem = ({ item }: PlaceItemProps) => {
             <CardMedia
               component="img"
               alt={images[0].name || "Place image"}
-              image={images[0].uri}
+              image={images[0].url}
               className="h-auto aspect-video md:h-1/2"
             />
           ) : (

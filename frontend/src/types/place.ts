@@ -41,7 +41,7 @@ export type PlaceActivityType =
 export type PlaceCoverType = "open" | "close" | "hybrid";
 
 export type ImageData = {
-  uri: string;
+  url: string;
   name: string;
   type: string;
 };
