@@ -11,13 +11,7 @@ import {
   Stack,
   Typography,
 } from "@mui/material";
-import {
-  Place,
-  PlaceActivityType,
-  PlaceCoverType,
-  PlaceLocationType,
-} from "@/types/place";
-import { api } from "@/lib/api";
+import { Place } from "@/types/place";
 import { Breadcrumbs } from "@/components/ui/common/Breadcrumbs";
 import EditIcon from "@mui/icons-material/Edit";
 import YMap from "@/components/ui/common/YMap";
@@ -26,7 +20,7 @@ import { DeleteWithConfirmButton } from "@/components/ui/common/DeleteWithConfir
 import { notify } from "@/lib/utils/notify";
 import nProgress from "nprogress";
 import { useRouter } from "next/navigation";
-import { useState, useMemo } from "react";
+import { useMemo } from "react";
 import { ImageGallery } from "@/components/ui/common/ImageGallery";
 import { format } from "date-fns";
 import { ru } from "date-fns/locale";
@@ -41,72 +35,30 @@ import PlaceIcon from "@mui/icons-material/Place";
 import LinkIcon from "@mui/icons-material/Link";
 import PushPinIcon from "@mui/icons-material/PushPin";
 
-// location icons
-import HomeIcon from "@mui/icons-material/Home";
-import DirectionsWalkIcon from "@mui/icons-material/DirectionsWalk";
-import DirectionsCarIcon from "@mui/icons-material/DirectionsCar";
-import DirectionsRailwayIcon from "@mui/icons-material/DirectionsRailway";
-import FlightTakeoffIcon from "@mui/icons-material/FlightTakeoff";
-
-// activity icons
-import RestaurantIcon from "@mui/icons-material/Restaurant";
-import DinnerDiningIcon from "@mui/icons-material/DinnerDining";
-import MovieIcon from "@mui/icons-material/Movie";
-import MusicNoteIcon from "@mui/icons-material/MusicNote";
-import DirectionsRunIcon from "@mui/icons-material/DirectionsRun";
-import PetsIcon from "@mui/icons-material/Pets";
-import ForestIcon from "@mui/icons-material/Forest";
-import MoreHorizIcon from "@mui/icons-material/MoreHoriz";
-
-// cover icons
-import WbSunnyIcon from "@mui/icons-material/WbSunny";
-import MeetingRoomIcon from "@mui/icons-material/MeetingRoom";
-import CompareArrowsIcon from "@mui/icons-material/CompareArrows";
 import {
   ACTIVITY_TYPE_MAP,
   COVER_TYPE_MAP,
   LOCATION_TYPE_MAP,
 } from "@/lib/constants/place";
+import { useDeletePlaceMutation } from "@/store/api";
+import {
+  ACTIVITY_ICONS_MAP,
+  COVER_ICONS_MAP,
+  LOCATION_ICONS_MAP,
+} from "@/lib/constants/placesIconsMapping";
 
 interface PlacePageProps {
   data: Place;
 }
 
-// Сопоставления для иконок
-const locationIcons: Record<PlaceLocationType, React.ReactElement> = {
-  home: <HomeIcon fontSize="small" />,
-  walk: <DirectionsWalkIcon fontSize="small" />,
-  ride: <DirectionsCarIcon fontSize="small" />,
-  travel_internal: <DirectionsRailwayIcon fontSize="small" />,
-  travel_external: <FlightTakeoffIcon fontSize="small" />,
-};
-
-const activityIcons: Record<PlaceActivityType, React.ReactElement> = {
-  food: <RestaurantIcon fontSize="small" />,
-  rich_food: <DinnerDiningIcon fontSize="small" />,
-  movie: <MovieIcon fontSize="small" />,
-  music: <MusicNoteIcon fontSize="small" />,
-  action: <DirectionsRunIcon fontSize="small" />,
-  animals: <PetsIcon fontSize="small" />,
-  nature: <ForestIcon fontSize="small" />,
-  walk: <DirectionsWalkIcon fontSize="small" />,
-  other: <MoreHorizIcon fontSize="small" />,
-};
-
-const coverIcons: Record<PlaceCoverType, React.ReactElement> = {
-  open: <WbSunnyIcon fontSize="small" />,
-  close: <MeetingRoomIcon fontSize="small" />,
-  hybrid: <CompareArrowsIcon fontSize="small" />,
-};
-
 export const PlacePage = ({ data }: PlacePageProps) => {
   const router = useRouter();
-  const [loading, setLoading] = useState(false);
+
+  const [deletePlace, { isLoading }] = useDeletePlaceMutation();
 
   const handleDelete = () => {
-    setLoading(true);
-    api
-      .deletePlace(data.id)
+    deletePlace(data.id)
+      .unwrap()
       .then(() => {
         notify("Место успешно удалено!", "success");
         nProgress.start();
@@ -114,9 +66,7 @@ export const PlacePage = ({ data }: PlacePageProps) => {
       })
       .catch((err) => {
         notify(err.message, "error");
-        console.error(err.message);
-      })
-      .finally(() => setLoading(false));
+      });
   };
 
   const formattedCreatedAt = useMemo(
@@ -159,14 +109,14 @@ export const PlacePage = ({ data }: PlacePageProps) => {
           </Box>
           <Stack direction="row" spacing={1}>
             <ProgressLink href={`/places/${data.id}/edit`}>
-              <IconButton aria-label="edit" loading={loading}>
+              <IconButton aria-label="edit" loading={isLoading}>
                 <EditIcon />
               </IconButton>
             </ProgressLink>
             <DeleteWithConfirmButton
               isIconOnly
               onDelete={handleDelete}
-              loading={loading}
+              loading={isLoading}
               dialogContentText="Вы уверены, что хотите удалить это место? Это действие нельзя отменить."
             />
           </Stack>
@@ -180,7 +130,7 @@ export const PlacePage = ({ data }: PlacePageProps) => {
             <CardContent className="!py-4 flex flex-col gap-8">
               <div className="flex gap-2">
                 <Chip
-                  icon={locationIcons[data.locationType]}
+                  icon={LOCATION_ICONS_MAP[data.locationType]}
                   label={LOCATION_TYPE_MAP[data.locationType]}
                   variant="outlined"
                   size="small"
@@ -190,7 +140,7 @@ export const PlacePage = ({ data }: PlacePageProps) => {
                 {data.activityType.map((act) => (
                   <Chip
                     key={act}
-                    icon={activityIcons[act]}
+                    icon={ACTIVITY_ICONS_MAP[act]}
                     label={ACTIVITY_TYPE_MAP[act]}
                     variant="outlined"
                     size="small"
@@ -199,7 +149,7 @@ export const PlacePage = ({ data }: PlacePageProps) => {
                   />
                 ))}
                 <Chip
-                  icon={coverIcons[data.coverType]}
+                  icon={COVER_ICONS_MAP[data.coverType]}
                   label={COVER_TYPE_MAP[data.coverType]}
                   variant="outlined"
                   size="small"

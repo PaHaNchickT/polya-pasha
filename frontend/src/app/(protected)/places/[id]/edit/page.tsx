@@ -1,35 +1,31 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { Loader } from "@/components/ui/common/Loader";
 import { useParams, useRouter } from "next/navigation";
 import { PlaceEditPage } from "@/components/places/PlaceEditPage/PlaceEditPage";
 import { PlaceResponseData } from "@/types/api";
-import { api } from "@/lib/api";
 import { transformPlaceData } from "@/lib/helpers/transformPlaceData";
+import { useGetPlaceQuery } from "@/store/api";
+import { notify } from "@/lib/utils/notify";
 
 export default function PlaceEditPageServer() {
   const router = useRouter();
-  const [data, setData] = useState<PlaceResponseData | null>(null);
-  const [loading, setLoading] = useState(true);
 
   const { id } = useParams<{ id: string }>();
+  const { data, error, isLoading } = useGetPlaceQuery(+id);
 
   useEffect(() => {
-    api
-      .getPlace(+id)
-      .then(setData)
-      .catch((err) => {
-        console.error(err.message);
-        router.push(`/places/${id}`);
-      })
-      .finally(() => setLoading(false));
+    if (error) {
+      router.push("/places");
+      notify(error.message || "Не удалось загрузить место", "error");
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [error]);
 
   return (
     <>
-      {loading || !data ? (
+      {isLoading || !data ? (
         <Loader />
       ) : (
         <PlaceEditPage

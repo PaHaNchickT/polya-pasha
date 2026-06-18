@@ -6,6 +6,11 @@ import {
   PlaceLocationType,
 } from "./place";
 
+export type CustomError = {
+  status: number | string;
+  message: string;
+};
+
 export interface LoginResponseData {
   token: string;
   user: {

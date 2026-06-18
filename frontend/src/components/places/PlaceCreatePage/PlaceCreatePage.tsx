@@ -8,17 +8,16 @@ import { PlaceFormData } from "@/components/ui/places/PlaceForm/schema";
 import { LOCAL_STORAGE_USERNAME_KEY } from "@/lib/constants/common";
 import { preparePlaceData } from "@/lib/helpers/preparePlaceData";
 import { PlaceAuthorType } from "@/types/place";
-import { api } from "@/lib/api";
-import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { PlaceResponseData } from "@/types/api";
 import { notify } from "@/lib/utils/notify";
 import { Breadcrumbs } from "@/components/ui/common/Breadcrumbs";
 import nProgress from "nprogress";
+import { useCreatePlaceMutation } from "@/store/api";
 
 export const PlaceCreatePage = () => {
   const router = useRouter();
-  const [formLoading, setFormLoading] = useState(false);
+  const [createPlace, { isLoading }] = useCreatePlaceMutation();
 
   const author = localStorage.getItem(
     LOCAL_STORAGE_USERNAME_KEY,
@@ -42,8 +41,6 @@ export const PlaceCreatePage = () => {
   };
 
   const handleSubmit = (data: PlaceFormData) => {
-    setFormLoading(true);
-
     const postData = preparePlaceData({
       ...data,
       eventDate: data.eventDate ?? null,
@@ -53,8 +50,8 @@ export const PlaceCreatePage = () => {
       images: data.images ?? [],
     });
 
-    api
-      .createPlace(postData)
+    createPlace(postData)
+      .unwrap()
       .then((resp: PlaceResponseData) => {
         notify("Место успешно добавлено!", "success");
         nProgress.start();
@@ -63,8 +60,7 @@ export const PlaceCreatePage = () => {
       .catch((err) => {
         notify(err.message, "error");
         console.error(err.message);
-      })
-      .finally(() => setFormLoading(false));
+      });
   };
 
   return (
@@ -78,7 +74,7 @@ export const PlaceCreatePage = () => {
           mode="create"
           defaultValues={defaultValues}
           onSubmit={handleSubmit}
-          formLoading={formLoading}
+          formLoading={isLoading}
         />
       </Paper>
     </LocalizationProvider>

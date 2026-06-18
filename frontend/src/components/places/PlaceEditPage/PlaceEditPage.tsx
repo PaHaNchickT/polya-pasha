@@ -7,13 +7,12 @@ import PlaceForm from "@/components/ui/places/PlaceForm/PlaceForm";
 import { PlaceFormData } from "@/components/ui/places/PlaceForm/schema";
 import { Place } from "@/types/place";
 import { useRouter } from "next/navigation";
-import { api } from "@/lib/api";
-import { useState } from "react";
 import { notify } from "@/lib/utils/notify";
 import { preparePlaceData } from "@/lib/helpers/preparePlaceData";
 import { PlaceResponseData } from "@/types/api";
 import { Breadcrumbs } from "@/components/ui/common/Breadcrumbs";
 import nProgress from "nprogress";
+import { useDeletePlaceMutation, useUpdatePlaceMutation } from "@/store/api";
 
 interface PlaceEditPageProps {
   id: string;
@@ -22,11 +21,13 @@ interface PlaceEditPageProps {
 
 export const PlaceEditPage = ({ id, data }: PlaceEditPageProps) => {
   const router = useRouter();
-  const [formLoading, setFormLoading] = useState(false);
+
+  const [deletePlace, { isLoading: isDeleteLoading }] =
+    useDeletePlaceMutation();
+  const [updatePlace, { isLoading: isUpdateLoading }] =
+    useUpdatePlaceMutation();
 
   const handleSubmit = (data: PlaceFormData) => {
-    setFormLoading(true);
-
     const postData = preparePlaceData({
       ...data,
       eventDate: data.eventDate ?? null,
@@ -36,8 +37,8 @@ export const PlaceEditPage = ({ id, data }: PlaceEditPageProps) => {
       images: data.images ?? [],
     });
 
-    api
-      .updatePlace(+id, postData)
+    updatePlace({ id: +id, data: postData })
+      .unwrap()
       .then((resp: PlaceResponseData) => {
         notify("Место успешно обновлено!", "success");
         nProgress.start();
@@ -45,16 +46,12 @@ export const PlaceEditPage = ({ id, data }: PlaceEditPageProps) => {
       })
       .catch((err) => {
         notify(err.message, "error");
-        console.error(err.message);
-      })
-      .finally(() => setFormLoading(false));
+      });
   };
 
   const handleDelete = () => {
-    setFormLoading(true);
-
-    api
-      .deletePlace(+id)
+    deletePlace(data.id)
+      .unwrap()
       .then(() => {
         notify("Место успешно удалено!", "success");
         nProgress.start();
@@ -62,9 +59,7 @@ export const PlaceEditPage = ({ id, data }: PlaceEditPageProps) => {
       })
       .catch((err) => {
         notify(err.message, "error");
-        console.error(err.message);
-      })
-      .finally(() => setFormLoading(false));
+      });
   };
 
   return (
@@ -79,7 +74,7 @@ export const PlaceEditPage = ({ id, data }: PlaceEditPageProps) => {
           defaultValues={data}
           onSubmit={handleSubmit}
           onDelete={handleDelete}
-          formLoading={formLoading}
+          formLoading={isUpdateLoading || isDeleteLoading}
         />
       </Paper>
     </LocalizationProvider>

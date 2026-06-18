@@ -1,8 +1,6 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useState } from "react";
-import { api } from "@/lib/api";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { LoginFormData, loginSchema } from "./schema";
@@ -18,10 +16,11 @@ import Typography from "@mui/material/Typography";
 import Stack from "@mui/material/Stack";
 import MuiCard from "@mui/material/Card";
 import nProgress from "nprogress";
+import { useLoginMutation } from "@/store/api";
 
 export const LoginPage = () => {
   const router = useRouter();
-  const [formLoading, isFormLoading] = useState(false);
+  const [login, { isLoading }] = useLoginMutation();
 
   const {
     register,
@@ -32,17 +31,14 @@ export const LoginPage = () => {
   });
 
   const onSubmit = (data: LoginFormData) => {
-    isFormLoading(true);
-
-    api
-      .login(data)
+    login(data)
+      .unwrap()
       .then(() => {
         notify("Вы успешно вошли в аккаунт!", "success");
         nProgress.start();
         router.push("/places");
       })
-      .catch((err) => notify(err.message, "error"))
-      .finally(() => isFormLoading(false));
+      .catch((err) => notify(err.message || "Ошибка входа", "error"));
   };
 
   return (
@@ -114,7 +110,7 @@ export const LoginPage = () => {
             type="submit"
             fullWidth
             variant="contained"
-            loading={formLoading}
+            loading={isLoading}
             sx={{ marginTop: 2 }}
           >
             Войти

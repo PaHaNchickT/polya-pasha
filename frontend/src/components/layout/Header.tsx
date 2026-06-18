@@ -3,7 +3,6 @@
 import { usePathname } from "next/navigation";
 import { Button, Typography, AppBar, Toolbar, Container } from "@mui/material";
 import LogoutIcon from "@mui/icons-material/Logout";
-import { api } from "@/lib/api";
 import { notify } from "@/lib/utils/notify";
 import { useEffect, useState } from "react";
 import {
@@ -16,16 +15,18 @@ import { isAuthentificated } from "@/lib/helpers/isAuthentificated";
 import { USERS_MAP } from "@/lib/constants/users";
 import { ProgressLink } from "../ui/common/ProgressLink";
 import nProgress from "nprogress";
+import { useLogoutMutation } from "@/store/api";
 
 export const Header = () => {
   const pathname = usePathname();
+  const [logout, { isLoading }] = useLogoutMutation();
 
   const [isSignedIn, setIsSignedIn] = useState(false);
   const [username, setUsername] = useState<UserTypes>("guest");
 
   const handleLogout = () => {
-    api
-      .logout()
+    logout()
+      .unwrap()
       .then(() => {
         nProgress.start();
         notify("Вы успешно вышли из аккаунта!", "success");
@@ -92,6 +93,7 @@ export const Header = () => {
                 size="large"
                 disableElevation
                 onClick={handleLogout}
+                loading={isLoading}
                 className="text-white opacity-90 hover:opacity-100 !min-w-0"
               >
                 <LogoutIcon className="h-16 text-white opacity-90 hover:opacity-100" />
