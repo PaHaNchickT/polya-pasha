@@ -5,7 +5,10 @@ const cors = require("cors");
 const jwt = require("jsonwebtoken");
 const { authMiddleware } = require("./auth");
 const supabase = require("../supabaseClient");
-const { uploadBase64Image } = require("../helpers/uploadBase64Image");
+const {
+  uploadBase64Image,
+  batchGetImagesBase64,
+} = require("../helpers/imageUtils");
 
 const app = express();
 app.use(cors());
@@ -108,7 +111,35 @@ app.get("/api/places", authMiddleware, checkRevoked, async (req, res) => {
       .order("created_at", { ascending: false });
 
     if (error) throw error;
-    res.json(places.map(enrichPlace));
+
+    // Собираем первые ID изображений для всех мест
+    const firstImageIds = places
+      .map((p) => (p.images && p.images.length > 0 ? p.images[0] : null))
+      .filter((id) => id != null);
+
+    // Подгружаем base64 для этих ID
+    const base64Map = await batchGetImagesBase64(firstImageIds);
+
+    // Преобразуем каждое место
+    const enriched = places.map((place) => {
+      const firstId = place.images?.[0];
+      const imageData =
+        firstId && base64Map[firstId]
+          ? [
+              {
+                id: firstId,
+                uri: base64Map[firstId], // data:image/...
+                // name и type мы можем не знать на этом этапе – при желании можно не заполнять или доставать из images
+                name: "image",
+                type: "image/jpeg", // можно из images не тянуть, оставим generic
+              },
+            ]
+          : [];
+
+      return enrichPlace({ ...place, images: imageData });
+    });
+
+    res.json(enriched);
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
@@ -129,7 +160,18 @@ app.get("/api/places/:id", authMiddleware, checkRevoked, async (req, res) => {
         return res.status(404).json({ error: "Место не найдено" });
       throw error;
     }
-    res.json(enrichPlace(place));
+
+    const imageIds = place.images || [];
+    const base64Map = await batchGetImagesBase64(imageIds);
+
+    const fullImages = imageIds.map((imgId) => ({
+      id: imgId,
+      uri: base64Map[imgId] || "",
+      name: "image",
+      type: "image/jpeg",
+    }));
+
+    res.json(enrichPlace({ ...place, images: fullImages }));
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
@@ -138,15 +180,19 @@ app.get("/api/places/:id", authMiddleware, checkRevoked, async (req, res) => {
 // POST /api/places – создать новое место (с автоматической загрузкой base64)
 app.post("/api/places", authMiddleware, checkRevoked, async (req, res) => {
   try {
-    const images = req.body.images || [];
-    const processedImages = [];
+    const inputImages = req.body.images || [];
+    const imageIds = [];
 
-    for (const img of images) {
-      if (img.url && img.url.startsWith("data:image/")) {
-        const publicUrl = await uploadBase64Image(img.url, img.name, img.type);
-        processedImages.push({ ...img, url: publicUrl });
+    for (const img of inputImages) {
+      if (img.id && typeof img.id === "number" && img.id > 0) {
+        // Уже существующее изображение (при создании маловероятно, но вдруг)
+        imageIds.push(img.id);
+      } else if (img.uri && img.uri.startsWith("data:image/")) {
+        const newId = await uploadBase64Image(img.uri, img.name, img.type);
+        imageIds.push(newId);
       } else {
-        processedImages.push(img);
+        // Игнорируем или ошибка
+        console.warn("Пропущено изображение без id и не base64:", img);
       }
     }
 
@@ -164,7 +210,7 @@ app.post("/api/places", authMiddleware, checkRevoked, async (req, res) => {
       coordinates: req.body.coordinates || [],
       link: req.body.link || null,
       rating: req.body.rating || 0,
-      images: processedImages,
+      images: imageIds, // массив чисел
       is_visited: req.body.is_visited || false,
     };
 
@@ -175,7 +221,17 @@ app.post("/api/places", authMiddleware, checkRevoked, async (req, res) => {
       .single();
 
     if (error) throw error;
-    res.status(201).json(enrichPlace(created));
+
+    // Отдаём ответ – нужно вернуть полные base64, как будто сделали GET
+    const base64Map = await batchGetImagesBase64(imageIds);
+    const fullImages = imageIds.map((id) => ({
+      id,
+      uri: base64Map[id] || "",
+      name: "image",
+      type: "image/jpeg",
+    }));
+
+    res.status(201).json(enrichPlace({ ...created, images: fullImages }));
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
@@ -192,42 +248,43 @@ app.patch("/api/places/:id", authMiddleware, checkRevoked, async (req, res) => {
       .single();
     if (findError) return res.status(404).json({ error: "Место не найдено" });
 
-    // Если клиент передал новые images, удаляем старые файлы, которых нет в новом списке
+    const oldImageIds = existing.images || [];
+
+    // Обработка новых изображений (если переданы)
+    let newImageIds = oldImageIds; // по умолчанию оставляем старые
     if (req.body.images !== undefined) {
-      const oldUrls = existing.images || [];
-      const newImages = req.body.images || [];
-      const newUrlSet = new Set(newImages.map((img) => img.url));
+      const inputImages = req.body.images || [];
+      const processedIds = [];
 
-      for (const oldImg of oldUrls) {
-        if (!newUrlSet.has(oldImg.url)) {
-          const filePath = oldImg.url.split("/").pop();
-          const { error: delError } = await supabase.storage
-            .from("place-images")
-            .remove([filePath]);
-          if (delError) console.error("Ошибка удаления файла:", delError);
-        }
-      }
-    }
-
-    // Обрабатываем новые base64-изображения
-    let imagesToUpdate = req.body.images;
-    if (imagesToUpdate) {
-      const processed = [];
-      for (const img of imagesToUpdate) {
-        if (img.url && img.url.startsWith("data:image/")) {
-          const publicUrl = await uploadBase64Image(
-            img.url,
-            img.name,
-            img.type,
-          );
-          processed.push({ ...img, url: publicUrl });
+      for (const img of inputImages) {
+        if (img.id && typeof img.id === "number" && img.id > 0) {
+          // Существующее – оставляем
+          processedIds.push(img.id);
+        } else if (img.uri && img.uri.startsWith("data:image/")) {
+          const newId = await uploadBase64Image(img.uri, img.name, img.type);
+          processedIds.push(newId);
         } else {
-          processed.push(img);
+          console.warn("Пропущено изображение:", img);
         }
       }
-      imagesToUpdate = processed;
+
+      // Определяем, какие ID удалить (те, что были, но не пришли)
+      const idsToDelete = oldImageIds.filter(
+        (oldId) => !processedIds.includes(oldId),
+      );
+      if (idsToDelete.length > 0) {
+        const { error: delError } = await supabase
+          .from("images")
+          .delete()
+          .in("id", idsToDelete);
+        if (delError)
+          console.error("Ошибка удаления старых изображений:", delError);
+      }
+
+      newImageIds = processedIds;
     }
 
+    // Обновление остальных полей
     const updatableFields = [
       "title",
       "description",
@@ -241,22 +298,13 @@ app.patch("/api/places/:id", authMiddleware, checkRevoked, async (req, res) => {
       "coordinates",
       "link",
       "rating",
-      "images",
       "is_visited",
     ];
-
     const updates = {};
     for (const field of updatableFields) {
-      if (field === "images" && imagesToUpdate !== undefined) {
-        updates.images = imagesToUpdate;
-      } else if (req.body[field] !== undefined) {
-        updates[field] = req.body[field];
-      }
+      if (req.body[field] !== undefined) updates[field] = req.body[field];
     }
-
-    if (Object.keys(updates).length === 0) {
-      return res.status(400).json({ error: "Нет полей для обновления" });
-    }
+    updates.images = newImageIds;
 
     const { data: updated, error } = await supabase
       .from("places")
@@ -266,7 +314,17 @@ app.patch("/api/places/:id", authMiddleware, checkRevoked, async (req, res) => {
       .single();
 
     if (error) throw error;
-    res.json(enrichPlace(updated));
+
+    // Ответ с полными base64
+    const base64Map = await batchGetImagesBase64(newImageIds);
+    const fullImages = newImageIds.map((id) => ({
+      id,
+      uri: base64Map[id] || "",
+      name: "image",
+      type: "image/jpeg",
+    }));
+
+    res.json(enrichPlace({ ...updated, images: fullImages }));
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
@@ -287,20 +345,21 @@ app.delete(
         .single();
       if (findError) return res.status(404).json({ error: "Место не найдено" });
 
-      if (place.images && place.images.length > 0) {
-        const filePaths = place.images.map((img) => img.url.split("/").pop());
-        const { error: delError } = await supabase.storage
-          .from("place-images")
-          .remove(filePaths);
-        if (delError) console.error("Ошибка удаления файлов:", delError);
+      const imageIds = place.images || [];
+      if (imageIds.length > 0) {
+        const { error: delError } = await supabase
+          .from("images")
+          .delete()
+          .in("id", imageIds);
+        if (delError) console.error("Ошибка удаления изображений:", delError);
       }
 
       const { error: deleteError } = await supabase
         .from("places")
         .delete()
         .eq("id", id);
-
       if (deleteError) throw deleteError;
+
       res.json({ success: true });
     } catch (err) {
       res.status(500).json({ error: err.message });

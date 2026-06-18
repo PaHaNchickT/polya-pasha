@@ -42,7 +42,8 @@ export const placeFormSchema = z.object({
   images: z
     .array(
       z.object({
-        url: z.string(),
+        id: z.number(),
+        uri: z.string(),
         name: z.string(),
         type: z.string(),
       }),

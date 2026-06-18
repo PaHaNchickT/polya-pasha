@@ -68,8 +68,12 @@ export const ImagePickerInput: FC = () => {
 
                   const reader = new FileReader();
                   reader.onload = () => {
+                    // Генерируем временный отрицательный id для нового изображения
+                    const tempId =
+                      -Date.now() - Math.floor(Math.random() * 1000);
                     newImages.push({
-                      url: reader.result as string,
+                      id: tempId, // уникальное отрицательное число
+                      uri: reader.result as string,
                       name: file.name,
                       type: file.type,
                     });
@@ -93,15 +97,15 @@ export const ImagePickerInput: FC = () => {
             event.target.value = "";
           };
 
-          const handleRemove = (index: number) => {
-            const updated = [...images];
-            updated.splice(index, 1);
+          // Удаление теперь по id (стабильно)
+          const handleRemove = (imageId: number) => {
+            const updated = images.filter((img) => img.id !== imageId);
             onChange(updated);
           };
 
           const handleDownload = (image: ImageData) => {
             const link = document.createElement("a");
-            link.href = image.url;
+            link.href = image.uri;
             link.download = image.name || "image.jpg";
             document.body.appendChild(link);
             link.click();
@@ -122,9 +126,9 @@ export const ImagePickerInput: FC = () => {
               {images.length > 0 && (
                 <>
                   <Box display="flex" flexWrap="wrap" gap={1.5} mb={1}>
-                    {images.map((img, idx) => (
+                    {images.map((img) => (
                       <Box
-                        key={idx}
+                        key={img.id.toString()} // стабильный ключ (id уникально)
                         position="relative"
                         sx={{
                           width: 80,
@@ -139,10 +143,10 @@ export const ImagePickerInput: FC = () => {
                           justifyContent: "center",
                         }}
                       >
-                        {img.url ? (
+                        {img.uri ? (
                           <Box
                             component="img"
-                            src={img.url}
+                            src={img.uri}
                             alt={img.name}
                             sx={{
                               width: "100%",
@@ -153,7 +157,7 @@ export const ImagePickerInput: FC = () => {
                         ) : (
                           <InsertPhotoIcon color="disabled" />
                         )}
-                        {/* Кнопка удаления (правая верхняя) */}
+                        {/* Кнопка удаления */}
                         <IconButton
                           size="small"
                           aria-label="Удалить изображение"
@@ -168,12 +172,12 @@ export const ImagePickerInput: FC = () => {
                             width: 24,
                             height: 24,
                           }}
-                          onClick={() => handleRemove(idx)}
+                          onClick={() => handleRemove(img.id)} // передаём id
                         >
                           <DeleteIcon sx={{ fontSize: 16 }} />
                         </IconButton>
-                        {/* Кнопка скачивания (левая верхняя) – только если есть изображение */}
-                        {img.url && (
+                        {/* Кнопка скачивания */}
+                        {img.uri && (
                           <IconButton
                             size="small"
                             aria-label="Скачать изображение"

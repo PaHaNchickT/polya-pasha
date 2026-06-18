@@ -34,7 +34,7 @@ export const ImageGallery = ({ images }: ImageGalleryProps) => {
             <CardMedia
               component="img"
               alt={currentImage.name || "Place image"}
-              image={currentImage.url}
+              image={currentImage.uri}
               className="!aspect-video !w-full !h-full !object-cover cursor-pointer"
               onClick={handleOpen}
             />
@@ -93,7 +93,7 @@ export const ImageGallery = ({ images }: ImageGalleryProps) => {
             <DialogContent sx={{ p: 0, textAlign: "center" }}>
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
-                src={currentImage.url}
+                src={currentImage.uri}
                 alt={currentImage.name || "Full size"}
                 className="max-w-full max-h-[90vh] object-contain"
               />
