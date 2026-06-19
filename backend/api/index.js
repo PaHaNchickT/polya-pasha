@@ -116,6 +116,7 @@ app.get("/api/places", authMiddleware, checkRevoked, async (req, res) => {
       : "created_at";
     const order = req.query.order === "asc" ? "asc" : "desc";
     const search = req.query.search?.trim() || "";
+    const activityType = req.query.activity_type?.trim();
     const locationType = req.query.location_type?.trim();
     const coverType = req.query.cover_type?.trim();
     const author = req.query.author?.trim();
@@ -125,6 +126,13 @@ app.get("/api/places", authMiddleware, checkRevoked, async (req, res) => {
     let query = supabase.from("places").select("*", { count: "exact" });
 
     // Фильтры
+    if (activityType) {
+      query = query.filter(
+        "activity_type",
+        "cs",
+        JSON.stringify([activityType]),
+      );
+    }
     if (locationType) {
       query = query.eq("location_type", locationType);
     }
