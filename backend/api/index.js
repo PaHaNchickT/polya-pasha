@@ -102,25 +102,70 @@ app.post("/api/logout", authMiddleware, async (req, res) => {
 
 // ---------- Places CRUD (атомарные SQL-запросы) ----------
 
-// GET /api/places – список всех мест с вычисляемыми полями
+// GET /api/places – список с поиском, сортировкой, фильтрацией и пагинацией
 app.get("/api/places", authMiddleware, checkRevoked, async (req, res) => {
   try {
-    const { data: places, error } = await supabase
-      .from("places")
-      .select("*")
-      .order("created_at", { ascending: false });
+    // --- Параметры запроса с валидацией ---
+    const page = Math.max(1, parseInt(req.query.page, 10) || 1);
+    const limit = Math.min(
+      100,
+      Math.max(1, parseInt(req.query.limit, 10) || 10),
+    );
+    const sortField = ["title", "created_at"].includes(req.query.sort)
+      ? req.query.sort
+      : "created_at";
+    const order = req.query.order === "asc" ? "asc" : "desc";
+    const search = req.query.search?.trim() || "";
+    const locationType = req.query.location_type?.trim();
+    const coverType = req.query.cover_type?.trim();
+    const author = req.query.author?.trim();
+    const isVisitedParam = req.query.is_visited?.trim().toLowerCase();
+
+    // Строим запрос
+    let query = supabase.from("places").select("*", { count: "exact" });
+
+    // Фильтры
+    if (locationType) {
+      query = query.eq("location_type", locationType);
+    }
+    if (coverType) {
+      query = query.eq("cover_type", coverType);
+    }
+    if (author) {
+      query = query.eq("author", author);
+    }
+    if (isVisitedParam === "true") {
+      query = query.eq("is_visited", true);
+    } else if (isVisitedParam === "false") {
+      query = query.eq("is_visited", false);
+    }
+
+    // Поиск по нескольким полям
+    if (search) {
+      query = query.or(
+        `title.ilike.%:search%,description.ilike.%:search%,address.ilike.%:search%,comment.ilike.%:search%`,
+        { search },
+      );
+    }
+
+    // Сортировка
+    query = query.order(sortField, { ascending: order === "asc" });
+
+    // Пагинация
+    const from = (page - 1) * limit;
+    const to = from + limit - 1;
+    query = query.range(from, to);
+
+    const { data: places, error, count } = await query;
 
     if (error) throw error;
 
-    // Собираем первые ID изображений для всех мест
+    // Обработка изображений (первые для списка)
     const firstImageIds = places
       .map((p) => (p.images && p.images.length > 0 ? p.images[0] : null))
       .filter((id) => id != null);
-
-    // Подгружаем base64 для этих ID
     const base64Map = await batchGetImagesBase64(firstImageIds);
 
-    // Преобразуем каждое место
     const enriched = places.map((place) => {
       const firstId = place.images?.[0];
       const imageData =
@@ -128,18 +173,28 @@ app.get("/api/places", authMiddleware, checkRevoked, async (req, res) => {
           ? [
               {
                 id: firstId,
-                uri: base64Map[firstId], // data:image/...
-                // name и type мы можем не знать на этом этапе – при желании можно не заполнять или доставать из images
+                uri: base64Map[firstId],
                 name: "image",
-                type: "image/jpeg", // можно из images не тянуть, оставим generic
+                type: "image/jpeg",
               },
             ]
           : [];
-
       return enrichPlace({ ...place, images: imageData });
     });
 
-    res.json(enriched);
+    // Мета-информация пагинации
+    const totalItems = count || 0;
+    const totalPages = Math.ceil(totalItems / limit);
+
+    res.json({
+      data: enriched,
+      meta: {
+        page,
+        limit,
+        totalItems,
+        totalPages,
+      },
+    });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
@@ -177,7 +232,7 @@ app.get("/api/places/:id", authMiddleware, checkRevoked, async (req, res) => {
   }
 });
 
-// POST /api/places – создать новое место (с автоматической загрузкой base64)
+// POST /api/places
 app.post("/api/places", authMiddleware, checkRevoked, async (req, res) => {
   try {
     const inputImages = req.body.images || [];
@@ -185,13 +240,11 @@ app.post("/api/places", authMiddleware, checkRevoked, async (req, res) => {
 
     for (const img of inputImages) {
       if (img.id && typeof img.id === "number" && img.id > 0) {
-        // Уже существующее изображение (при создании маловероятно, но вдруг)
         imageIds.push(img.id);
       } else if (img.uri && img.uri.startsWith("data:image/")) {
         const newId = await uploadBase64Image(img.uri, img.name, img.type);
         imageIds.push(newId);
       } else {
-        // Игнорируем или ошибка
         console.warn("Пропущено изображение без id и не base64:", img);
       }
     }
@@ -210,7 +263,7 @@ app.post("/api/places", authMiddleware, checkRevoked, async (req, res) => {
       coordinates: req.body.coordinates || [],
       link: req.body.link || null,
       rating: req.body.rating || 0,
-      images: imageIds, // массив чисел
+      images: imageIds,
       is_visited: req.body.is_visited || false,
     };
 
@@ -222,7 +275,6 @@ app.post("/api/places", authMiddleware, checkRevoked, async (req, res) => {
 
     if (error) throw error;
 
-    // Отдаём ответ – нужно вернуть полные base64, как будто сделали GET
     const base64Map = await batchGetImagesBase64(imageIds);
     const fullImages = imageIds.map((id) => ({
       id,
@@ -237,7 +289,7 @@ app.post("/api/places", authMiddleware, checkRevoked, async (req, res) => {
   }
 });
 
-// PATCH /api/places/:id – обновить место (с обработкой base64 и удалением старых файлов)
+// PATCH /api/places/:id
 app.patch("/api/places/:id", authMiddleware, checkRevoked, async (req, res) => {
   try {
     const id = parseInt(req.params.id, 10);
@@ -250,15 +302,13 @@ app.patch("/api/places/:id", authMiddleware, checkRevoked, async (req, res) => {
 
     const oldImageIds = existing.images || [];
 
-    // Обработка новых изображений (если переданы)
-    let newImageIds = oldImageIds; // по умолчанию оставляем старые
+    let newImageIds = oldImageIds;
     if (req.body.images !== undefined) {
       const inputImages = req.body.images || [];
       const processedIds = [];
 
       for (const img of inputImages) {
         if (img.id && typeof img.id === "number" && img.id > 0) {
-          // Существующее – оставляем
           processedIds.push(img.id);
         } else if (img.uri && img.uri.startsWith("data:image/")) {
           const newId = await uploadBase64Image(img.uri, img.name, img.type);
@@ -268,7 +318,6 @@ app.patch("/api/places/:id", authMiddleware, checkRevoked, async (req, res) => {
         }
       }
 
-      // Определяем, какие ID удалить (те, что были, но не пришли)
       const idsToDelete = oldImageIds.filter(
         (oldId) => !processedIds.includes(oldId),
       );
@@ -284,7 +333,6 @@ app.patch("/api/places/:id", authMiddleware, checkRevoked, async (req, res) => {
       newImageIds = processedIds;
     }
 
-    // Обновление остальных полей
     const updatableFields = [
       "title",
       "description",
@@ -315,7 +363,6 @@ app.patch("/api/places/:id", authMiddleware, checkRevoked, async (req, res) => {
 
     if (error) throw error;
 
-    // Ответ с полными base64
     const base64Map = await batchGetImagesBase64(newImageIds);
     const fullImages = newImageIds.map((id) => ({
       id,
@@ -330,7 +377,7 @@ app.patch("/api/places/:id", authMiddleware, checkRevoked, async (req, res) => {
   }
 });
 
-// DELETE /api/places/:id – удалить одно место
+// DELETE /api/places/:id
 app.delete(
   "/api/places/:id",
   authMiddleware,
