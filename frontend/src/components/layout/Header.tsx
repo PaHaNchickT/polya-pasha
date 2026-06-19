@@ -16,6 +16,7 @@ import { USERS_MAP } from "@/lib/constants/users";
 import { ProgressLink } from "../ui/common/ProgressLink";
 import nProgress from "nprogress";
 import { useLogoutMutation } from "@/store/api";
+import Image from "next/image";
 
 export const Header = () => {
   const pathname = usePathname();
@@ -57,9 +58,28 @@ export const Header = () => {
             disableGutters
             className="flex items-center justify-between shrink-0 !rounded-2xl !backdrop-blur-xl !border !border-solid !border-[hsla(220,20%,25%,0.6)] !bg-[rgba(5,7,10,0.4)] !shadow-[hsla(220,30%,5%,0.7)_0px_4px_16px_0px,hsla(220,25%,10%,0.8)_0px_8px_16px_-5px] !px-3 !py-2"
           >
-            <Typography component="h1" variant="h4">
-              ПоляПаша❤
-            </Typography>
+            {pathname === "/places" ? (
+              <Image
+                src="/images/logo.png"
+                alt="ПоляПаша"
+                width={782}
+                height={500}
+                priority
+                className="cursor-pointer w-[62px]"
+              />
+            ) : (
+              <ProgressLink href="/places">
+                <Image
+                  src="/images/logo.png"
+                  alt="ПоляПаша"
+                  width={782}
+                  height={500}
+                  priority
+                  className="cursor-pointer w-[62px]"
+                />
+              </ProgressLink>
+            )}
+
             <div className="grow flex justify-center items-center px-0 text-white">
               <div className="flex gap-4">
                 {HEADER_TABS.map((route) =>
