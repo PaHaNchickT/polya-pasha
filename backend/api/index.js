@@ -186,6 +186,11 @@ app.get("/api/places", authMiddleware, checkRevoked, async (req, res) => {
     const totalItems = count || 0;
     const totalPages = Math.ceil(totalItems / limit);
 
+    // Счетчики
+    const { data: counters, error: countersError } = await supabase.rpc(
+      "get_activity_counts",
+    );
+
     res.json({
       data: enriched,
       meta: {
@@ -193,6 +198,7 @@ app.get("/api/places", authMiddleware, checkRevoked, async (req, res) => {
         limit,
         totalItems,
         totalPages,
+        counters,
       },
     });
   } catch (err) {
