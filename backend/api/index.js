@@ -105,7 +105,6 @@ app.post("/api/logout", authMiddleware, async (req, res) => {
 // GET /api/places – список с поиском, сортировкой, фильтрацией и пагинацией
 app.get("/api/places", authMiddleware, checkRevoked, async (req, res) => {
   try {
-    // --- Параметры запроса с валидацией ---
     const page = Math.max(1, parseInt(req.query.page, 10) || 1);
     const limit = Math.min(
       100,
@@ -115,60 +114,38 @@ app.get("/api/places", authMiddleware, checkRevoked, async (req, res) => {
       ? req.query.sort
       : "created_at";
     const order = req.query.order === "asc" ? "asc" : "desc";
-    const search = req.query.search?.trim() || "";
-    const activityType = req.query.activity_type?.trim();
-    const locationType = req.query.location_type?.trim();
-    const coverType = req.query.cover_type?.trim();
-    const author = req.query.author?.trim();
+    const search = req.query.search?.trim() || null;
+    const activityType = req.query.activity_type?.trim() || null;
+    const locationType = req.query.location_type?.trim() || null;
+    const coverType = req.query.cover_type?.trim() || null;
+    const author = req.query.author?.trim() || null;
     const isVisitedParam = req.query.is_visited?.trim().toLowerCase();
+    const isVisited =
+      isVisitedParam === "true"
+        ? true
+        : isVisitedParam === "false"
+          ? false
+          : null;
 
-    // Строим запрос
-    let query = supabase.from("places").select("*", { count: "exact" });
-
-    // Фильтры
-    if (activityType) {
-      query = query.filter(
-        "activity_type",
-        "cs",
-        JSON.stringify([activityType]),
-      );
-    }
-    if (locationType) {
-      query = query.eq("location_type", locationType);
-    }
-    if (coverType) {
-      query = query.eq("cover_type", coverType);
-    }
-    if (author) {
-      query = query.eq("author", author);
-    }
-    if (isVisitedParam === "true") {
-      query = query.eq("is_visited", true);
-    } else if (isVisitedParam === "false") {
-      query = query.eq("is_visited", false);
-    }
-
-    // Поиск по нескольким полям
-    if (search) {
-      query = query.or(
-        `title.ilike.%:search%,description.ilike.%:search%,address.ilike.%:search%,comment.ilike.%:search%`,
-        { search },
-      );
-    }
-
-    // Сортировка
-    query = query.order(sortField, { ascending: order === "asc" });
-
-    // Пагинация
-    const from = (page - 1) * limit;
-    const to = from + limit - 1;
-    query = query.range(from, to);
-
-    const { data: places, error, count } = await query;
+    const { data, error } = await supabase.rpc("search_places", {
+      search_term: search,
+      activity_type_filter: activityType,
+      location_type_filter: locationType,
+      cover_type_filter: coverType,
+      author_filter: author,
+      is_visited_filter: isVisited,
+      sort_field: sortField,
+      sort_order: order,
+      page_num: page,
+      page_limit: limit,
+    });
 
     if (error) throw error;
 
-    // Обработка изображений (первые для списка)
+    const places = data?.data || [];
+    const meta = data?.meta || {};
+
+    // Подгрузка первых изображений
     const firstImageIds = places
       .map((p) => (p.images && p.images.length > 0 ? p.images[0] : null))
       .filter((id) => id != null);
@@ -190,29 +167,7 @@ app.get("/api/places", authMiddleware, checkRevoked, async (req, res) => {
       return enrichPlace({ ...place, images: imageData });
     });
 
-    // Мета-информация пагинации
-    const totalItems = count || 0;
-    const totalPages = Math.ceil(totalItems / limit);
-
-    // Счетчики
-    const { data: counters, error: countersError } = await supabase.rpc(
-      "get_activity_counts",
-    );
-
-    const { count: totalAll, error: totalError } = await supabase
-      .from("places")
-      .select("*", { count: "exact", head: true });
-
-    res.json({
-      data: enriched,
-      meta: {
-        page,
-        limit,
-        totalItems,
-        totalPages,
-        counters: { ...counters, all: totalAll },
-      },
-    });
+    res.json({ data: enriched, meta });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
