@@ -149,8 +149,8 @@ export const YMPickerInput = () => {
                 />
               </Grid>
             </Grid>
-            <Box sx={{ height: 140 }}>
-              <YMap ref={mapIframeRef} center={[lat, lng]} height={140} />
+            <Box sx={{ height: 300 }}>
+              <YMap ref={mapIframeRef} center={[lat, lng]} height={300} />
             </Box>
           </Box>
         );
