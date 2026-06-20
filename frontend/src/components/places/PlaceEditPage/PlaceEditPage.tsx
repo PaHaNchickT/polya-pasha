@@ -65,7 +65,7 @@ export const PlaceEditPage = ({ id, data }: PlaceEditPageProps) => {
   return (
     <LocalizationProvider dateAdapter={AdapterDayjs}>
       <Breadcrumbs />
-      <Paper sx={{ p: 3, maxWidth: 900, mx: "auto", mt: 4 }}>
+      <Paper sx={{ p: 3, width: "100%", mx: "auto", mt: 4 }}>
         <Typography variant="h2" gutterBottom>
           Редактировать место
         </Typography>
