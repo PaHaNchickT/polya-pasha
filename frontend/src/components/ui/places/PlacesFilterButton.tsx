@@ -60,6 +60,7 @@ export const PlacesFilterButton = ({
     });
 
     reset(PLACES_FILTERS_DEFAULT_VALUES);
+    handleClose();
   };
 
   const open = Boolean(anchorEl);

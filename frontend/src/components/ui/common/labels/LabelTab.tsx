@@ -1,4 +1,4 @@
-import { Chip } from "@mui/material";
+import { Box, Chip } from "@mui/material";
 import { ACTIVITY_TYPE_MAP } from "@/lib/constants/place";
 import { PlaceActivityType } from "@/types/place";
 
@@ -12,7 +12,7 @@ interface LabelTabProps {
 export const LabelTab = ({
   activityType,
   tabName,
-  // counters,
+  counters,
   handleClick,
 }: LabelTabProps) => (
   <Chip
@@ -21,11 +21,11 @@ export const LabelTab = ({
     label={
       <div className="flex gap-2">
         {ACTIVITY_TYPE_MAP[tabName]}
-        {/* {counters[tabName] != null && (
+        {counters[tabName] != null && (
           <Box className="ml-1 inline-flex items-center justify-center rounded-full bg-white px-1 text-xs text-black">
             {counters[tabName]}
           </Box>
-        )} */}
+        )}
       </div>
     }
     sx={
