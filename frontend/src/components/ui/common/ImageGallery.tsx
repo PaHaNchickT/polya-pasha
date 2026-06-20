@@ -1,9 +1,8 @@
-import { useState } from "react";
-import { CardMedia, Dialog, DialogContent, IconButton } from "@mui/material";
-import ChevronLeftIcon from "@mui/icons-material/ChevronLeft";
-import ChevronRightIcon from "@mui/icons-material/ChevronRight";
+import { useCallback, useEffect, useState } from "react";
+import { CardMedia, Dialog, DialogContent } from "@mui/material";
 import ImageNotSupportedIcon from "@mui/icons-material/ImageNotSupported";
 import { ImageData } from "@/types/place";
+import { ImageGalleryControlButtons } from "./ImageGalleryControlButtons";
 
 interface ImageGalleryProps {
   images: ImageData[];
@@ -15,21 +14,37 @@ export const ImageGallery = ({ images }: ImageGalleryProps) => {
 
   const currentImage = images[currentIndex];
 
-  const goToPrev = () => {
+  const goToPrev = useCallback(() => {
     setCurrentIndex((prev) => (prev === 0 ? images.length - 1 : prev - 1));
-  };
+  }, [images.length]);
 
-  const goToNext = () => {
+  const goToNext = useCallback(() => {
     setCurrentIndex((prev) => (prev === images.length - 1 ? 0 : prev + 1));
-  };
+  }, [images.length]);
 
   const handleOpen = () => setOpen(true);
   const handleClose = () => setOpen(false);
 
+  useEffect(() => {
+    if (!open) return;
+
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "ArrowLeft") {
+        goToPrev();
+      } else if (e.key === "ArrowRight") {
+        goToNext();
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [open, goToPrev, goToNext]);
+
   return (
     <>
-      {Boolean(images.length && images) ? (
+      {Boolean(images.length) ? (
         <>
+          {/* Превью */}
           <div className="group relative h-full overflow-hidden">
             <CardMedia
               component="img"
@@ -39,47 +54,11 @@ export const ImageGallery = ({ images }: ImageGalleryProps) => {
               onClick={handleOpen}
             />
 
-            {/* Кнопки листания */}
             {images.length > 1 && (
-              <>
-                <IconButton
-                  className="gallery-buttons"
-                  onClick={goToPrev}
-                  sx={{
-                    position: "absolute",
-                    left: 8,
-                    top: "50%",
-                    transform: "translateY(-50%)",
-                    backgroundColor: "rgba(0,0,0,0.75)",
-                    opacity: 0.7,
-                    transition: "opacity 0.2s",
-                    "&:hover": {
-                      backgroundColor: "rgba(0,0,0,0.95)",
-                    },
-                  }}
-                >
-                  <ChevronLeftIcon />
-                </IconButton>
-
-                <IconButton
-                  className="gallery-buttons"
-                  onClick={goToNext}
-                  sx={{
-                    position: "absolute",
-                    right: 8,
-                    top: "50%",
-                    transform: "translateY(-50%)",
-                    backgroundColor: "rgba(0,0,0,0.75)",
-                    opacity: 0.7,
-                    transition: "opacity 0.2s",
-                    "&:hover": {
-                      backgroundColor: "rgba(0,0,0,0.95)",
-                    },
-                  }}
-                >
-                  <ChevronRightIcon />
-                </IconButton>
-              </>
+              <ImageGalleryControlButtons
+                goToPrev={goToPrev}
+                goToNext={goToNext}
+              />
             )}
 
             {/* Индикатор текущего слайда */}
@@ -88,15 +67,34 @@ export const ImageGallery = ({ images }: ImageGalleryProps) => {
             </div>
           </div>
 
-          {/* Модальное окно с оригинальным размером */}
-          <Dialog open={open} onClose={handleClose} maxWidth="lg">
-            <DialogContent sx={{ p: 0, textAlign: "center" }}>
+          {/* Полноразмерный просмотр */}
+          <Dialog
+            open={open}
+            onClose={handleClose}
+            maxWidth="lg"
+            BackdropProps={{
+              sx: {
+                backdropFilter: "blur(8px)",
+                backgroundColor: "rgba(0,0,0,0.5)",
+              },
+            }}
+          >
+            <DialogContent
+              sx={{ p: 0, position: "relative", textAlign: "center" }}
+            >
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
                 src={currentImage.uri}
                 alt={currentImage.name || "Full size"}
                 className="max-w-full max-h-[90vh] object-contain"
               />
+
+              {images.length > 1 && (
+                <ImageGalleryControlButtons
+                  goToPrev={goToPrev}
+                  goToNext={goToNext}
+                />
+              )}
             </DialogContent>
           </Dialog>
         </>
