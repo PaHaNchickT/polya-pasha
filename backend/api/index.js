@@ -199,6 +199,10 @@ app.get("/api/places", authMiddleware, checkRevoked, async (req, res) => {
       "get_activity_counts",
     );
 
+    const { count: totalAll, error: totalError } = await supabase
+      .from("places")
+      .select("*", { count: "exact", head: true });
+
     res.json({
       data: enriched,
       meta: {
@@ -206,7 +210,7 @@ app.get("/api/places", authMiddleware, checkRevoked, async (req, res) => {
         limit,
         totalItems,
         totalPages,
-        counters,
+        counters: { ...counters, all: totalAll },
       },
     });
   } catch (err) {
