@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -15,12 +16,17 @@ import TextField from "@mui/material/TextField";
 import Typography from "@mui/material/Typography";
 import Stack from "@mui/material/Stack";
 import MuiCard from "@mui/material/Card";
+import IconButton from "@mui/material/IconButton";
+import InputAdornment from "@mui/material/InputAdornment";
+import Visibility from "@mui/icons-material/Visibility";
+import VisibilityOff from "@mui/icons-material/VisibilityOff";
 import nProgress from "nprogress";
 import { useLoginMutation } from "@/store/api";
 
 export const LoginPage = () => {
   const router = useRouter();
   const [login, { isLoading }] = useLoginMutation();
+  const [showPassword, setShowPassword] = useState(false);
 
   const {
     register,
@@ -40,6 +46,8 @@ export const LoginPage = () => {
       })
       .catch((err) => notify(err.message || "Ошибка входа", "error"));
   };
+
+  const handleClickShowPassword = () => setShowPassword((show) => !show);
 
   return (
     <Stack
@@ -93,7 +101,7 @@ export const LoginPage = () => {
             <FormLabel htmlFor="password">Пароль</FormLabel>
             <TextField
               id="password"
-              type="password"
+              type={showPassword ? "text" : "password"}
               placeholder="••••••"
               autoComplete="current-password"
               required
@@ -103,6 +111,20 @@ export const LoginPage = () => {
               error={!!errors.password}
               helperText={errors.password?.message}
               color={errors.password ? "error" : "primary"}
+              InputProps={{
+                endAdornment: (
+                  <InputAdornment position="end">
+                    <IconButton
+                      aria-label="toggle password visibility"
+                      onClick={handleClickShowPassword}
+                      edge="end"
+                      tabIndex={-1}
+                    >
+                      {showPassword ? <VisibilityOff /> : <Visibility />}
+                    </IconButton>
+                  </InputAdornment>
+                ),
+              }}
             />
           </FormControl>
 
