@@ -114,6 +114,7 @@ export const PlacesPage = ({
         page={meta.page}
         totalItems={meta.totalItems}
         limit={meta.limit}
+        isFetching={isFetching}
         onPageChange={onPageChange}
       />
     </main>
