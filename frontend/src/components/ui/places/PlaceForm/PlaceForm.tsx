@@ -59,7 +59,7 @@ export default function PlaceForm({
                 name="description"
                 label="Описание"
                 multiline
-                rows={4}
+                rows={7}
                 fullWidth
               />
               <DatePickerInput control={control} name="eventDate" />
