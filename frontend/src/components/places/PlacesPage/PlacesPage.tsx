@@ -64,7 +64,6 @@ export const PlacesPage = ({
     [...Object.keys(PLACES_FILTERS_DEFAULT_VALUES), "activityType"].forEach(
       (key) => {
         onFilterChange(camelToSnake(key) as keyof GetPlacesParams, "all");
-        console.log(key);
       },
     );
     onSearchChange("");
