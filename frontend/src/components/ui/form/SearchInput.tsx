@@ -53,7 +53,13 @@ export const SearchInput = ({
           </InputAdornment>
         ) : null,
       }}
-      sx={{ minWidth: 200, maxWidth: 300 }}
+      sx={{
+        minWidth: 200,
+        maxWidth: 300,
+        "& .MuiOutlinedInput-root": {
+          height: "100%",
+        },
+      }}
     />
   );
 };

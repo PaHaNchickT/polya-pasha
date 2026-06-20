@@ -23,14 +23,8 @@ export const Pagination = ({
 
   return (
     <Box
+      className="flex flex-col sm:flex-row justify-between items-center gap-4 py-4 border-t-1"
       sx={{
-        display: "flex",
-        flexDirection: { xs: "column", sm: "row" },
-        justifyContent: "space-between",
-        alignItems: "center",
-        gap: 2,
-        py: 2,
-        borderTop: 1,
         borderColor: "divider",
       }}
     >

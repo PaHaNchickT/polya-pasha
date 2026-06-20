@@ -56,15 +56,7 @@ export const PlacesTabs = ({
         gap: 4,
       }}
     >
-      <Box
-        sx={{
-          display: "flex",
-          flexWrap: "wrap",
-          flexDirection: "row",
-          columnGap: 1,
-          rowGap: 1,
-        }}
-      >
+      <div className="flex flex-wrap gap-2">
         {TEMP_TABS.map((tabName) => (
           <LabelTab
             key={`${tabName}-tab`}
@@ -74,8 +66,8 @@ export const PlacesTabs = ({
             handleClick={handleClick}
           />
         ))}
-      </Box>
-      <div className="flex gap-2 h-max">
+      </div>
+      <div className="flex gap-2">
         <SearchInput
           searchValue={searchValue}
           onSearchChange={onSearchChange}
