@@ -53,7 +53,7 @@ export const YMPickerInput = () => {
       if (lat === 0 && lng === 0) return; // игнорируем нулевые координаты по умолчанию
       debounced(async () => {
         try {
-          const result = await reverseGeocode([lng, lat], GEOCODER_KEY);
+          const result = await reverseGeocode([lat, lng], GEOCODER_KEY);
           if (result) {
             setValue("address", result.address, { shouldValidate: true });
           }
@@ -78,7 +78,7 @@ export const YMPickerInput = () => {
           // Обратное геокодирование для получения адреса
           try {
             const result = await reverseGeocode(
-              [coords[1], coords[0]],
+              [coords[0], coords[1]],
               GEOCODER_KEY,
             );
             if (result) {
