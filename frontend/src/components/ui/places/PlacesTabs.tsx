@@ -8,19 +8,6 @@ import { LabelTab } from "../common/labels/LabelTab";
 import { GetPlacesParams } from "@/types/api";
 import { SearchInput } from "../form/SearchInput";
 
-export const TEMP_TABS: (keyof typeof ACTIVITY_TYPE_MAP)[] = [
-  "all",
-  "food",
-  "rich_food",
-  "movie",
-  "music",
-  "action",
-  "animals",
-  "nature",
-  "walk",
-  "other",
-];
-
 interface PlacesTabsProps {
   activityType: PlaceActivityType | "all";
   filters: PlacesFilterParams;
@@ -41,6 +28,11 @@ export const PlacesTabs = ({
   onFilterChange,
   counters,
 }: PlacesTabsProps) => {
+  const TABS_LIST = Object.keys(ACTIVITY_TYPE_MAP) as (
+    | PlaceActivityType
+    | "all"
+  )[];
+
   const handleClick = (item: PlaceActivityType | "all") => {
     onFilterChange("activity_type", item);
   };
@@ -57,7 +49,7 @@ export const PlacesTabs = ({
       }}
     >
       <div className="flex flex-wrap gap-2">
-        {TEMP_TABS.map((tabName) => (
+        {TABS_LIST.map((tabName) => (
           <LabelTab
             key={`${tabName}-tab`}
             activityType={activityType}

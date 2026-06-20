@@ -21,7 +21,6 @@ export interface Place {
   isExpired: boolean | null;
 }
 
-export type PlaceAuthorType = "admin" | "polinka";
 export type PlaceLocationType =
   | "home"
   | "walk"
@@ -39,6 +38,7 @@ export type PlaceActivityType =
   | "walk"
   | "other";
 export type PlaceCoverType = "open" | "close" | "hybrid";
+export type PlaceAuthorType = "admin" | "polinka";
 
 export type ImageData = {
   id: number;

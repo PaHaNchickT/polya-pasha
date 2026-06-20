@@ -6,19 +6,7 @@ import MenuItem from "@mui/material/MenuItem";
 import Chip from "@mui/material/Chip";
 import Box from "@mui/material/Box";
 import FormHelperText from "@mui/material/FormHelperText";
-import { ACTIVITY_TYPE_MAP } from "@/lib/constants/place";
-
-const TEMP_PLACE_ACTIVITIES_LIST = [
-  "food",
-  "rich_food",
-  "movie",
-  "music",
-  "action",
-  "animals",
-  "nature",
-  "walk",
-  "other",
-] as const;
+import { ACTIVITY_TYPE_KEYS, ACTIVITY_TYPE_MAP } from "@/lib/constants/place";
 
 interface ActivityTypeSelectProps<TFieldValues extends FieldValues> {
   control: Control<TFieldValues>;
@@ -33,9 +21,7 @@ export function ActivityTypeSelect<TFieldValues extends FieldValues>({
   control,
   name,
   label = "Активности",
-  options = TEMP_PLACE_ACTIVITIES_LIST as unknown as ReadonlyArray<
-    keyof typeof ACTIVITY_TYPE_MAP
-  >,
+  options = ACTIVITY_TYPE_KEYS,
   size = "small",
   fullWidth = true,
 }: ActivityTypeSelectProps<TFieldValues>) {

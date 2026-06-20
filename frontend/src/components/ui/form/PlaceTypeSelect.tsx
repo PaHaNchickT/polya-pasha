@@ -4,16 +4,8 @@ import InputLabel from "@mui/material/InputLabel";
 import Select from "@mui/material/Select";
 import MenuItem from "@mui/material/MenuItem";
 import { SelectChangeEvent } from "@mui/material/Select";
-import { LOCATION_TYPE_MAP } from "@/lib/constants/place";
+import { LOCATION_TYPE_KEYS, LOCATION_TYPE_MAP } from "@/lib/constants/place";
 import { useMemo } from "react";
-
-const TEMP_PLACE_LOCATION_LIST = [
-  "home",
-  "walk",
-  "ride",
-  "travel_internal",
-  "travel_external",
-] as const;
 
 interface PlaceTypeSelectProps<TFieldValues extends FieldValues> {
   control: Control<TFieldValues>;
@@ -33,10 +25,7 @@ export function PlaceTypeSelect<TFieldValues extends FieldValues>({
   isFilter = false,
 }: PlaceTypeSelectProps<TFieldValues>) {
   const tabsData: ReadonlyArray<keyof typeof LOCATION_TYPE_MAP> = useMemo(
-    () =>
-      isFilter
-        ? ["all", ...TEMP_PLACE_LOCATION_LIST]
-        : TEMP_PLACE_LOCATION_LIST,
+    () => (isFilter ? ["all", ...LOCATION_TYPE_KEYS] : LOCATION_TYPE_KEYS),
     [isFilter],
   );
 

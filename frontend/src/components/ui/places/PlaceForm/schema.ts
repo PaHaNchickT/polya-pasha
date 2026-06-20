@@ -1,33 +1,20 @@
 import { z } from "zod";
 import { MAX_IMAGES } from "../../form/ImagePickerInput";
+import {
+  ACTIVITY_TYPE_KEYS,
+  COVER_TYPE_KEYS,
+  LOCATION_TYPE_KEYS,
+} from "@/lib/constants/place";
 
 export const placeFormSchema = z.object({
   title: z.string().min(1, "Обязательное поле"),
   description: z.string().min(1, "Обязательное поле"),
   eventDate: z.string().nullable().optional(),
-  locationType: z.enum([
-    "home",
-    "walk",
-    "ride",
-    "travel_internal",
-    "travel_external",
-  ]),
+  locationType: z.enum(LOCATION_TYPE_KEYS),
   activityType: z
-    .array(
-      z.enum([
-        "food",
-        "rich_food",
-        "movie",
-        "music",
-        "action",
-        "animals",
-        "nature",
-        "walk",
-        "other",
-      ]),
-    )
+    .array(z.enum(ACTIVITY_TYPE_KEYS))
     .min(1, "Выберите хотя бы один тип активности"),
-  coverType: z.enum(["open", "close", "hybrid"]),
+  coverType: z.enum(COVER_TYPE_KEYS),
   author: z.enum(["admin", "polinka"]),
   comment: z.string().nullable().optional(),
   address: z.string("Обязательное поле").min(1, "Обязательное поле"),

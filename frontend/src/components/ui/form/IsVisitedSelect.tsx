@@ -5,9 +5,10 @@ import Select from "@mui/material/Select";
 import MenuItem from "@mui/material/MenuItem";
 import { SelectChangeEvent } from "@mui/material/Select";
 import { useMemo } from "react";
-import { IS_VISITED_TYPE_MAP } from "@/lib/constants/place";
-
-const TEMP_IS_VISITED_LIST = ["true", "false"] as const;
+import {
+  IS_VISITED_TYPE_KEYS,
+  IS_VISITED_TYPE_MAP,
+} from "@/lib/constants/place";
 
 interface IsVisitedSelectProps<TFieldValues extends FieldValues> {
   control: Control<TFieldValues>;
@@ -27,7 +28,7 @@ export function IsVisitedSelect<TFieldValues extends FieldValues>({
   isFilter = false,
 }: IsVisitedSelectProps<TFieldValues>) {
   const tabsData: ReadonlyArray<keyof typeof IS_VISITED_TYPE_MAP> = useMemo(
-    () => (isFilter ? ["all", ...TEMP_IS_VISITED_LIST] : TEMP_IS_VISITED_LIST),
+    () => (isFilter ? ["all", ...IS_VISITED_TYPE_KEYS] : IS_VISITED_TYPE_KEYS),
     [isFilter],
   );
 

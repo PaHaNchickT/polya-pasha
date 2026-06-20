@@ -4,10 +4,8 @@ import InputLabel from "@mui/material/InputLabel";
 import Select from "@mui/material/Select";
 import MenuItem from "@mui/material/MenuItem";
 import { SelectChangeEvent } from "@mui/material/Select";
-import { COVER_TYPE_MAP } from "@/lib/constants/place";
+import { COVER_TYPE_KEYS, COVER_TYPE_MAP } from "@/lib/constants/place";
 import { useMemo } from "react";
-
-const TEMP_PLACE_COVER_LIST = ["open", "close", "hybrid"] as const;
 
 interface PlaceCoverSelectProps<TFieldValues extends FieldValues> {
   control: Control<TFieldValues>;
@@ -27,8 +25,7 @@ export function PlaceCoverSelect<TFieldValues extends FieldValues>({
   isFilter = false,
 }: PlaceCoverSelectProps<TFieldValues>) {
   const tabsData: ReadonlyArray<keyof typeof COVER_TYPE_MAP> = useMemo(
-    () =>
-      isFilter ? ["all", ...TEMP_PLACE_COVER_LIST] : TEMP_PLACE_COVER_LIST,
+    () => (isFilter ? ["all", ...COVER_TYPE_KEYS] : COVER_TYPE_KEYS),
     [isFilter],
   );
 
