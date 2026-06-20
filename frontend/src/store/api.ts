@@ -9,6 +9,8 @@ import {
   LoginResponseData,
   PlacePostData,
   PlaceResponseData,
+  PlacesListResponse,
+  GetPlacesParams,
 } from "@/types/api";
 import {
   LOCAL_STORAGE_TOKEN_KEY,
@@ -44,7 +46,6 @@ const baseQueryWithAuth: BaseQueryFn<
   const result = await baseQuery(args, api, extraOptions);
 
   if (result.error) {
-    // Формируем читаемое сообщение
     let message = `Ошибка запроса (статус: ${result.error.status})`;
     const errorData = result.error.data as { error: string; message: string };
 
@@ -56,7 +57,6 @@ const baseQueryWithAuth: BaseQueryFn<
       message = errorData.message;
     }
 
-    // Обработка 401
     if (result.error.status === 401) {
       const isLoginPage =
         typeof window !== "undefined" && window.location.pathname === "/login";
@@ -69,14 +69,13 @@ const baseQueryWithAuth: BaseQueryFn<
     return { error: { status: result.error.status, message } };
   }
 
-  // Успех – возвращаем data
   return { data: result.data };
 };
 
 export const api = createApi({
   reducerPath: "api",
   baseQuery: baseQueryWithAuth,
-  tagTypes: ["Places", "Place"], // теги для инвалидации кэша
+  tagTypes: ["Places", "Place"],
   endpoints: (builder) => ({
     // ================= Auth =================
     login: builder.mutation<LoginResponseData, LoginData>({
@@ -100,7 +99,6 @@ export const api = createApi({
         url: "/api/logout",
         method: "POST",
       }),
-      // после разлогина чистим токен и редиректим
       onQueryStarted: async (_, { queryFulfilled }) => {
         try {
           await queryFulfilled;
@@ -112,12 +110,33 @@ export const api = createApi({
     }),
 
     // ================= Places =================
-    getPlaces: builder.query<PlaceResponseData[], void>({
-      query: () => "/api/places",
+    getPlaces: builder.query<PlacesListResponse, GetPlacesParams>({
+      query: (params) => {
+        // Собираем только переданные параметры
+        const searchParams = new URLSearchParams();
+        if (params?.page) searchParams.set("page", String(params.page));
+        if (params?.limit) searchParams.set("limit", String(params.limit));
+        if (params?.sort) searchParams.set("sort", params.sort);
+        if (params?.order) searchParams.set("order", params.order);
+        if (params?.search) searchParams.set("search", params.search);
+        if (params?.activity_type)
+          searchParams.set("activity_type", params.activity_type);
+        if (params?.location_type)
+          searchParams.set("location_type", params.location_type);
+        if (params?.cover_type)
+          searchParams.set("cover_type", params.cover_type);
+        if (params?.author) searchParams.set("author", params.author);
+        if (params?.is_visited !== undefined) {
+          searchParams.set("is_visited", String(params.is_visited));
+        }
+
+        const queryString = searchParams.toString();
+        return `/api/places${queryString ? `?${queryString}` : ""}`;
+      },
       providesTags: (result) =>
-        result
+        result?.data
           ? [
-              ...result.map(({ id }) => ({ type: "Places" as const, id })),
+              ...result.data.map(({ id }) => ({ type: "Places" as const, id })),
               "Places",
             ]
           : ["Places"],
@@ -125,7 +144,7 @@ export const api = createApi({
 
     getPlace: builder.query<PlaceResponseData, number>({
       query: (id) => `/api/places/${id}`,
-      providesTags: (_, __, id) => [{ type: "Places", id }],
+      providesTags: (_, __, id) => [{ type: "Place", id }],
     }),
 
     createPlace: builder.mutation<PlaceResponseData, PlacePostData>({
@@ -146,7 +165,7 @@ export const api = createApi({
         method: "PATCH",
         body: data,
       }),
-      invalidatesTags: (_, __, { id }) => [{ type: "Places", id }, "Places"],
+      invalidatesTags: (_, __, { id }) => [{ type: "Place", id }, "Places"],
     }),
 
     deletePlace: builder.mutation<void, number>({
@@ -154,12 +173,11 @@ export const api = createApi({
         url: `/api/places/${id}`,
         method: "DELETE",
       }),
-      invalidatesTags: (_, __, id) => [{ type: "Places", id }, "Places"],
+      invalidatesTags: (_, __, id) => [{ type: "Place", id }, "Places"],
     }),
   }),
 });
 
-// Готовые хуки для использования в компонентах
 export const {
   useLoginMutation,
   useLogoutMutation,

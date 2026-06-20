@@ -19,7 +19,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
           <ProgressBarController />
           <AppTheme>
             <Header />
-            <div className="grow flex flex-col justify-between my-28">
+            <div className="grow flex flex-col justify-between mt-28 mb-10">
               {children}
             </div>
             <Footer />

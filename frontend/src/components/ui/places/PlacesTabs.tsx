@@ -1,10 +1,12 @@
-import { Box, Chip, IconButton } from "@mui/material";
+import { Box, IconButton } from "@mui/material";
 import { PlacesFilterButton } from "./PlacesFilterButton";
 import { ACTIVITY_TYPE_MAP } from "@/lib/constants/place";
 import AddIcon from "@mui/icons-material/Add";
 import { ProgressLink } from "../common/ProgressLink";
 import { PlaceActivityType, PlacesFilterParams } from "@/types/place";
-import { Dispatch, SetStateAction } from "react";
+import { LabelTab } from "../common/labels/LabelTab";
+import { GetPlacesParams } from "@/types/api";
+import { SearchInput } from "../form/SearchInput";
 
 export const TEMP_TABS: (keyof typeof ACTIVITY_TYPE_MAP)[] = [
   "all",
@@ -21,19 +23,26 @@ export const TEMP_TABS: (keyof typeof ACTIVITY_TYPE_MAP)[] = [
 
 interface PlacesTabsProps {
   activityType: PlaceActivityType | "all";
-  setActivityType: Dispatch<SetStateAction<PlaceActivityType | "all">>;
   filters: PlacesFilterParams;
-  setFilters: (filters: PlacesFilterParams) => void;
+  searchValue?: string;
+  onSearchChange: (search: string) => void;
+  onFilterChange: (
+    key: keyof GetPlacesParams,
+    value: string | boolean | undefined,
+  ) => void;
+  counters: Record<PlaceActivityType | "all", number>;
 }
 
 export const PlacesTabs = ({
   activityType,
-  setActivityType,
   filters,
-  setFilters,
+  searchValue,
+  onSearchChange,
+  onFilterChange,
+  counters,
 }: PlacesTabsProps) => {
   const handleClick = (item: PlaceActivityType | "all") => {
-    setActivityType(item);
+    onFilterChange("activity_type", item);
   };
 
   return (
@@ -52,26 +61,26 @@ export const PlacesTabs = ({
           display: "flex",
           flexWrap: "wrap",
           flexDirection: "row",
-          columnGap: 3,
+          columnGap: 1,
           rowGap: 1,
         }}
       >
-        {TEMP_TABS.map((item) => (
-          <Chip
-            key={`${item}-tab`}
-            onClick={() => handleClick(item)}
-            size="medium"
-            label={ACTIVITY_TYPE_MAP[item]}
-            sx={
-              activityType !== item
-                ? { backgroundColor: "transparent", border: "none" }
-                : null
-            }
+        {TEMP_TABS.map((tabName) => (
+          <LabelTab
+            key={`${tabName}-tab`}
+            activityType={activityType}
+            tabName={tabName}
+            counters={counters}
+            handleClick={handleClick}
           />
         ))}
       </Box>
       <div className="flex gap-2 h-max">
-        <PlacesFilterButton filters={filters} setFilters={setFilters} />
+        <SearchInput
+          searchValue={searchValue}
+          onSearchChange={onSearchChange}
+        />
+        <PlacesFilterButton filters={filters} onFilterChange={onFilterChange} />
         <ProgressLink href="/places/create">
           <IconButton aria-label="add">
             <AddIcon />

@@ -19,6 +19,32 @@ export interface LoginResponseData {
   };
 }
 
+export interface PaginationMeta {
+  page: number;
+  limit: number;
+  totalItems: number;
+  totalPages: number;
+  counters: Record<PlaceActivityType | "all", number>;
+}
+
+export interface PlacesListResponse {
+  data: PlaceResponseData[];
+  meta: PaginationMeta;
+}
+
+export interface GetPlacesParams {
+  page?: number;
+  limit?: number;
+  sort?: "title" | "created_at";
+  order?: "asc" | "desc";
+  search?: string;
+  activity_type?: string;
+  location_type?: string;
+  cover_type?: string;
+  author?: string;
+  is_visited?: boolean | "all";
+}
+
 export interface PlaceResponseData {
   id: number;
   title: string;

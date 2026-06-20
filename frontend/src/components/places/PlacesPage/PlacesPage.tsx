@@ -5,11 +5,14 @@ import { PlacesEmptyList } from "@/components/ui/places/PlacesEmptyList";
 import { PlacesTabs } from "@/components/ui/places/PlacesTabs";
 import { LOCAL_STORAGE_USERNAME_KEY } from "@/lib/constants/common";
 import { getRandomPhrase } from "@/lib/helpers/getRandomPhrase";
-import { placesFiltersApplying } from "@/lib/helpers/placesFiltersApplying";
 import { Place, PlaceActivityType, PlacesFilterParams } from "@/types/place";
 import { Typography } from "@mui/material";
-import { useMemo, useState } from "react";
+import { useMemo } from "react";
 import isEqual from "lodash/isEqual";
+import { GetPlacesParams, PaginationMeta } from "@/types/api";
+import { Pagination } from "@/components/ui/common/Pagination";
+import { Loader } from "@/components/ui/common/Loader";
+import { camelToSnake } from "@/lib/helpers/camelToSnake";
 
 export const PLACES_FILTERS_DEFAULT_VALUES: PlacesFilterParams = {
   locationType: "all",
@@ -18,32 +21,53 @@ export const PLACES_FILTERS_DEFAULT_VALUES: PlacesFilterParams = {
   isVisited: "all",
 };
 
-type IPlacesPage = {
+type PlacesPageProps = {
   data: Place[];
+  meta: PaginationMeta;
+  params: GetPlacesParams;
+  isFetching: boolean;
+  onPageChange: (page: number) => void;
+  onSearchChange: (search: string) => void;
+  onFilterChange: (
+    key: keyof GetPlacesParams,
+    value: string | boolean | undefined,
+  ) => void;
 };
 
-export const PlacesPage = ({ data }: IPlacesPage) => {
+export const PlacesPage = ({
+  data,
+  meta,
+  params,
+  isFetching,
+  onPageChange,
+  onSearchChange,
+  onFilterChange,
+}: PlacesPageProps) => {
   const username = localStorage.getItem(LOCAL_STORAGE_USERNAME_KEY);
   const phrase =
     username === "admin" || username === "polinka"
       ? getRandomPhrase(username)
       : null;
 
-  const [activityType, setActivityType] = useState<PlaceActivityType | "all">(
-    "all",
-  );
-  const [filters, setFilters] = useState<PlacesFilterParams>(
-    PLACES_FILTERS_DEFAULT_VALUES,
-  );
-
-  const modifiedData = useMemo(
-    () => placesFiltersApplying(data, activityType, filters),
-    [data, activityType, filters],
+  const filters = useMemo(
+    () =>
+      ({
+        locationType: params?.location_type || "all",
+        coverType: params?.cover_type || "all",
+        author: params?.author || "all",
+        isVisited: params?.is_visited || "all",
+      }) as PlacesFilterParams,
+    [params],
   );
 
   const handleResetFilters = () => {
-    setActivityType("all");
-    setFilters(PLACES_FILTERS_DEFAULT_VALUES);
+    [...Object.keys(PLACES_FILTERS_DEFAULT_VALUES), "activityType"].forEach(
+      (key) => {
+        onFilterChange(camelToSnake(key) as keyof GetPlacesParams, "all");
+        console.log(key);
+      },
+    );
+    onSearchChange("");
   };
 
   return (
@@ -55,12 +79,18 @@ export const PlacesPage = ({ data }: IPlacesPage) => {
         {phrase && <Typography>{phrase}</Typography>}
       </div>
       <PlacesTabs
-        activityType={activityType}
-        setActivityType={setActivityType}
+        activityType={
+          (params?.activity_type || "all") as PlaceActivityType | "all"
+        }
         filters={filters}
-        setFilters={setFilters}
+        searchValue={params?.search}
+        onSearchChange={onSearchChange}
+        onFilterChange={onFilterChange}
+        counters={meta.counters}
       />
-      {modifiedData.length ? (
+      {isFetching ? (
+        <Loader />
+      ) : data.length ? (
         <div
           style={{
             display: "grid",
@@ -68,7 +98,7 @@ export const PlacesPage = ({ data }: IPlacesPage) => {
             gap: "16px",
           }}
         >
-          {modifiedData.map((item) => (
+          {data.map((item) => (
             <PlaceItem key={item.id} item={item} />
           ))}
         </div>
@@ -76,11 +106,17 @@ export const PlacesPage = ({ data }: IPlacesPage) => {
         <PlacesEmptyList
           isFiltersActive={
             !isEqual(filters, PLACES_FILTERS_DEFAULT_VALUES) ||
-            activityType !== "all"
+            params?.activity_type !== "all"
           }
           resetFilters={handleResetFilters}
         />
       )}
+      <Pagination
+        page={meta.page}
+        totalItems={meta.totalItems}
+        limit={meta.limit}
+        onPageChange={onPageChange}
+      />
     </main>
   );
 };

@@ -11,15 +11,20 @@ import { PlaceCoverSelect } from "../form/PlaceCoverSelect";
 import { AuthorSelect } from "../form/AuthorSelect";
 import { IsVisitedSelect } from "../form/IsVisitedSelect";
 import { PLACES_FILTERS_DEFAULT_VALUES } from "@/components/places/PlacesPage/PlacesPage";
+import { GetPlacesParams } from "@/types/api";
+import { camelToSnake } from "@/lib/helpers/camelToSnake";
 
 interface PlacesFilterButtonProps {
   filters: PlacesFilterParams;
-  setFilters: (filters: PlacesFilterParams) => void;
+  onFilterChange: (
+    key: keyof GetPlacesParams,
+    value: string | boolean | undefined,
+  ) => void;
 }
 
 export const PlacesFilterButton = ({
   filters,
-  setFilters,
+  onFilterChange,
 }: PlacesFilterButtonProps) => {
   const [anchorEl, setAnchorEl] = useState<HTMLElement | null>(null);
 
@@ -40,12 +45,20 @@ export const PlacesFilterButton = ({
   };
 
   const onSubmit = (data: PlacesFilterParams) => {
-    setFilters(data);
+    Object.entries(data).forEach((item) => {
+      const [key, value] = item;
+
+      onFilterChange(camelToSnake(key) as keyof GetPlacesParams, value);
+    });
+
     handleClose();
   };
 
   const handleReset = () => {
-    setFilters(PLACES_FILTERS_DEFAULT_VALUES);
+    Object.keys(PLACES_FILTERS_DEFAULT_VALUES).forEach((key) => {
+      onFilterChange(camelToSnake(key) as keyof GetPlacesParams, "all");
+    });
+
     reset(PLACES_FILTERS_DEFAULT_VALUES);
   };
 
