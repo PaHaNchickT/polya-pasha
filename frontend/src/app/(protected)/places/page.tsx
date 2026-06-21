@@ -9,6 +9,7 @@ import { useGetPlacesQuery } from "@/store/api";
 import { notify } from "@/lib/utils/notify";
 import type { GetPlacesParams } from "@/types/api";
 import { placesSearchParamsBuilder } from "@/lib/helpers/placesSearchParamsBuilder";
+import { PlacesSortParams } from "@/types/place";
 
 export default function PlacesPageServer() {
   const router = useRouter();
@@ -70,13 +71,9 @@ export default function PlacesPageServer() {
     [],
   );
 
-  // На будущее
-  // const setSorting = useCallback(
-  //   (sort: "title" | "created_at", order: "asc" | "desc") => {
-  //     setParams((prev) => ({ ...prev, sort, order }));
-  //   },
-  //   [],
-  // );
+  const setSorting = useCallback((sortParams: PlacesSortParams) => {
+    setParams((prev) => ({ ...prev, ...sortParams }));
+  }, []);
 
   return (
     <>
@@ -91,6 +88,7 @@ export default function PlacesPageServer() {
           onPageChange={setPage}
           onSearchChange={setSearch}
           onFilterChange={setFilter}
+          onSortChange={setSorting}
         />
       )}
     </>

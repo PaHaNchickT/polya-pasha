@@ -3,14 +3,20 @@ import { PlacesFilterButton } from "./PlacesFilterButton";
 import { ACTIVITY_TYPE_MAP } from "@/lib/constants/place";
 import AddIcon from "@mui/icons-material/Add";
 import { ProgressLink } from "../common/ProgressLink";
-import { PlaceActivityType, PlacesFilterParams } from "@/types/place";
+import {
+  PlaceActivityType,
+  PlacesFilterParams,
+  PlacesSortParams,
+} from "@/types/place";
 import { LabelTab } from "../common/labels/LabelTab";
 import { GetPlacesParams } from "@/types/api";
 import { SearchInput } from "../form/SearchInput";
+import { PlacesSortButton } from "./PlacesSortButton";
 
 interface PlacesTabsProps {
   activityType: PlaceActivityType | "all";
   filters: PlacesFilterParams;
+  sortParams: PlacesSortParams;
   counters: Record<PlaceActivityType | "all", number>;
   searchValue?: string;
   isFetching?: boolean;
@@ -19,16 +25,19 @@ interface PlacesTabsProps {
     key: keyof GetPlacesParams,
     value: string | boolean | undefined,
   ) => void;
+  onSortChange: (sortParams: PlacesSortParams) => void;
 }
 
 export const PlacesTabs = ({
   activityType,
   filters,
+  sortParams,
   counters,
   searchValue,
   isFetching = false,
   onSearchChange,
   onFilterChange,
+  onSortChange,
 }: PlacesTabsProps) => {
   const TABS_LIST = Object.keys(ACTIVITY_TYPE_MAP) as (
     | PlaceActivityType
@@ -68,6 +77,7 @@ export const PlacesTabs = ({
           onSearchChange={onSearchChange}
         />
         <PlacesFilterButton filters={filters} onFilterChange={onFilterChange} />
+        <PlacesSortButton sortParams={sortParams} onSortChange={onSortChange} />
         <ProgressLink href="/places/create">
           <IconButton aria-label="add">
             <AddIcon />

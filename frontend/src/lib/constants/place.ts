@@ -3,6 +3,8 @@ import {
   PlaceAuthorType,
   PlaceCoverType,
   PlaceLocationType,
+  PlaceSortOrder,
+  PlaceSortType,
 } from "@/types/place";
 import { USERS_MAP } from "./users";
 import { DefaultBooleanKeys } from "@/types/common";
@@ -82,3 +84,21 @@ export const IS_EXPIRED_MAP: Record<DefaultBooleanKeys | "all", string> = {
 export const IS_EXPIRED_KEYS = Object.keys(IS_EXPIRED_MAP).filter(
   (key) => key !== "all",
 ) as DefaultBooleanKeys[];
+
+export const SORTING_TYPE_MAP: Record<PlaceSortType, string> = {
+  title: "По названию места",
+  created_at: "По дате создания",
+};
+
+export const SORTING_TYPE_KEYS = Object.keys(
+  SORTING_TYPE_MAP,
+) as PlaceSortType[];
+
+export const SORTING_ORDER_MAP: Record<PlaceSortOrder, string> = {
+  asc: "По возрастанию",
+  desc: "По убыванию",
+};
+
+export const SORTING_ORDER_KEYS = Object.keys(
+  SORTING_ORDER_MAP,
+) as PlaceSortOrder[];

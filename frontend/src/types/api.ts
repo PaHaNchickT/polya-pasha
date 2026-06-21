@@ -4,6 +4,8 @@ import {
   PlaceAuthorType,
   PlaceCoverType,
   PlaceLocationType,
+  PlaceSortOrder,
+  PlaceSortType,
 } from "./place";
 
 export type CustomError = {
@@ -35,8 +37,8 @@ export interface PlacesListResponse {
 export interface GetPlacesParams {
   page?: number;
   limit?: number;
-  sort?: "title" | "created_at";
-  order?: "asc" | "desc";
+  sort?: PlaceSortType;
+  order?: PlaceSortOrder;
   search?: string;
   activity_type?: string;
   location_type?: string;

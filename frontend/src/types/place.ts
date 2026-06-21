@@ -1,4 +1,4 @@
-import { DefaultBooleanKeys, UserTypes } from "./common";
+import { DefaultBooleanKeys, DefaultSortingOrder, UserTypes } from "./common";
 
 export interface Place {
   id: number;
@@ -54,4 +54,12 @@ export interface PlacesFilterParams {
   eventDate: DefaultBooleanKeys | "all";
   isVisited: DefaultBooleanKeys | "all";
   isExpired: DefaultBooleanKeys | "all";
+}
+
+export type PlaceSortType = "title" | "created_at";
+export type PlaceSortOrder = DefaultSortingOrder;
+
+export interface PlacesSortParams {
+  sort: PlaceSortType;
+  order: PlaceSortOrder;
 }

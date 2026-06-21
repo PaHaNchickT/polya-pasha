@@ -9,11 +9,19 @@ import { PlaceTypeSelect } from "../form/PlaceTypeSelect";
 import { PlaceCoverSelect } from "../form/PlaceCoverSelect";
 import { AuthorSelect } from "../form/AuthorSelect";
 import { IsVisitedSelect } from "../form/IsVisitedSelect";
-import { PLACES_FILTERS_DEFAULT_VALUES } from "@/components/places/PlacesPage/PlacesPage";
 import { GetPlacesParams } from "@/types/api";
 import { camelToSnake } from "@/lib/helpers/camelToSnake";
 import { IsEventDateSelect } from "../form/IsEventDateSelect";
 import { IsExpiredSelect } from "../form/IsExpiredSelect";
+
+export const PLACES_FILTERS_DEFAULT_VALUES: PlacesFilterParams = {
+  locationType: "all",
+  coverType: "all",
+  author: "all",
+  eventDate: "all",
+  isVisited: "all",
+  isExpired: "all",
+};
 
 interface PlacesFilterButtonProps {
   filters: PlacesFilterParams;

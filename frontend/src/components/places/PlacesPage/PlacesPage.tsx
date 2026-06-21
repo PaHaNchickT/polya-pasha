@@ -5,7 +5,12 @@ import { PlacesEmptyList } from "@/components/ui/places/PlacesEmptyList";
 import { PlacesTabs } from "@/components/ui/places/PlacesTabs";
 import { LOCAL_STORAGE_USERNAME_KEY } from "@/lib/constants/common";
 import { getRandomPhrase } from "@/lib/helpers/getRandomPhrase";
-import { Place, PlaceActivityType, PlacesFilterParams } from "@/types/place";
+import {
+  Place,
+  PlaceActivityType,
+  PlacesFilterParams,
+  PlacesSortParams,
+} from "@/types/place";
 import { Typography } from "@mui/material";
 import { useMemo } from "react";
 import isEqual from "lodash/isEqual";
@@ -13,15 +18,7 @@ import { GetPlacesParams, PaginationMeta } from "@/types/api";
 import { Pagination } from "@/components/ui/common/Pagination";
 import { camelToSnake } from "@/lib/helpers/camelToSnake";
 import { PlaceItemSkeleton } from "@/components/ui/places/PlaceItemSkeleton";
-
-export const PLACES_FILTERS_DEFAULT_VALUES: PlacesFilterParams = {
-  locationType: "all",
-  coverType: "all",
-  author: "all",
-  eventDate: "all",
-  isVisited: "all",
-  isExpired: "all",
-};
+import { PLACES_FILTERS_DEFAULT_VALUES } from "@/components/ui/places/PlacesFilterButton";
 
 type PlacesPageProps = {
   data: Place[];
@@ -34,6 +31,7 @@ type PlacesPageProps = {
     key: keyof GetPlacesParams,
     value: string | boolean | undefined,
   ) => void;
+  onSortChange: (sortParams: PlacesSortParams) => void;
 };
 
 export const PlacesPage = ({
@@ -44,6 +42,7 @@ export const PlacesPage = ({
   onPageChange,
   onSearchChange,
   onFilterChange,
+  onSortChange,
 }: PlacesPageProps) => {
   const username = localStorage.getItem(LOCAL_STORAGE_USERNAME_KEY);
   const phrase =
@@ -61,6 +60,15 @@ export const PlacesPage = ({
         isVisited: params?.is_visited || "all",
         isExpired: params?.is_expired || "all",
       }) as PlacesFilterParams,
+    [params],
+  );
+
+  const sortParams = useMemo(
+    () =>
+      ({
+        sort: params?.sort || "created_at",
+        order: params?.order || "asc",
+      }) as PlacesSortParams,
     [params],
   );
 
@@ -91,11 +99,13 @@ export const PlacesPage = ({
           (params?.activity_type || "all") as PlaceActivityType | "all"
         }
         filters={filters}
+        sortParams={sortParams}
         counters={meta.counters}
         searchValue={params?.search}
         isFetching={isFetching}
         onSearchChange={onSearchChange}
         onFilterChange={onFilterChange}
+        onSortChange={onSortChange}
       />
       {data.length ? (
         <div
