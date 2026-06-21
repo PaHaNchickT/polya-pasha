@@ -15,6 +15,7 @@ import { SignExpired } from "../common/SignExpired";
 import { ProgressLink } from "../common/ProgressLink";
 import { LabelNew } from "../common/labels/LabelNew";
 import { LabelVisited } from "../common/labels/LabelVisited";
+import { LabelCouldExpired } from "../common/labels/LabelCouldExpired";
 
 type PlaceItemProps = {
   item: Place;
@@ -47,9 +48,14 @@ export const PlaceItem = ({ item }: PlaceItemProps) => {
             {item.isVisited && <LabelVisited />}
             {item.isNew && <LabelNew />}
           </div>
-          {item.isVisited && item.rating && (
-            <LabelRating rating={item.rating} />
-          )}
+          <div className="absolute top-2 right-2 flex flex-col items-end gap-1 text-white rounded z-10">
+            {item.isVisited && item.rating && (
+              <LabelRating rating={item.rating} />
+            )}
+            {item.eventDate && !item.isExpired && !item.isVisited && (
+              <LabelCouldExpired eventDate={item.eventDate} />
+            )}
+          </div>
 
           {images.length ? (
             <CardMedia
