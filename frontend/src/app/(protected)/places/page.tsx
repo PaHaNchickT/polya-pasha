@@ -28,6 +28,8 @@ export default function PlacesPageServer() {
     author: searchParams.get("author") || undefined,
 
     is_visited: Boolean(searchParams.get("is_visited")) || undefined,
+    event_date: Boolean(searchParams.get("event_date")) || undefined,
+    is_expired: Boolean(searchParams.get("is_expired")) || undefined,
   };
 
   const [params, setParams] = useState<GetPlacesParams>(initialParams);

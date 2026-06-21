@@ -29,8 +29,14 @@ export const placesSearchParamsBuilder = (params: GetPlacesParams) => {
   if (params.author && params.author !== "all")
     newSearchParams.set("author", params.author);
 
+  if (params.event_date && params.event_date !== "all")
+    newSearchParams.set("event_date", String(params.event_date));
+
   if (params.is_visited && params.is_visited !== "all")
     newSearchParams.set("is_visited", String(params.is_visited));
+
+  if (params.is_expired && params.is_expired !== "all")
+    newSearchParams.set("is_expired", String(params.is_expired));
 
   return newSearchParams;
 };

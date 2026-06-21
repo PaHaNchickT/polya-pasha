@@ -1,3 +1,5 @@
 import { USERS_MAP } from "@/lib/constants/users";
 
 export type UserTypes = keyof typeof USERS_MAP;
+
+export type DefaultBooleanKeys = "true" | "false";

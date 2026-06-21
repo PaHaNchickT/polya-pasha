@@ -129,6 +129,10 @@ export const api = createApi({
         if (params?.is_visited !== undefined) {
           searchParams.set("is_visited", String(params.is_visited));
         }
+        if (params?.event_date)
+          searchParams.set("event_date", String(params.event_date));
+        if (params?.is_expired)
+          searchParams.set("is_expired", String(params.is_expired));
 
         const queryString = searchParams.toString();
         return `/api/places${queryString ? `?${queryString}` : ""}`;

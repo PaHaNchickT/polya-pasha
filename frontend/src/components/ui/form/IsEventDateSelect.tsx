@@ -5,9 +5,9 @@ import Select from "@mui/material/Select";
 import MenuItem from "@mui/material/MenuItem";
 import { SelectChangeEvent } from "@mui/material/Select";
 import { useMemo } from "react";
-import { IS_VISITED_KEYS, IS_VISITED_MAP } from "@/lib/constants/place";
+import { IS_EVENT_DATE_KEYS, IS_EVENT_DATE_MAP } from "@/lib/constants/place";
 
-interface IsVisitedSelectProps<TFieldValues extends FieldValues> {
+interface IsEventDateSelectProps<TFieldValues extends FieldValues> {
   control: Control<TFieldValues>;
   name: Path<TFieldValues>;
   label?: string;
@@ -16,16 +16,16 @@ interface IsVisitedSelectProps<TFieldValues extends FieldValues> {
   isFilter?: boolean;
 }
 
-export function IsVisitedSelect<TFieldValues extends FieldValues>({
+export function IsEventDateSelect<TFieldValues extends FieldValues>({
   control,
   name,
-  label = "Автор",
+  label = "Ограничения по дате",
   size = "small",
   fullWidth = true,
   isFilter = false,
-}: IsVisitedSelectProps<TFieldValues>) {
-  const tabsData: ReadonlyArray<keyof typeof IS_VISITED_MAP> = useMemo(
-    () => (isFilter ? ["all", ...IS_VISITED_KEYS] : IS_VISITED_KEYS),
+}: IsEventDateSelectProps<TFieldValues>) {
+  const tabsData: ReadonlyArray<keyof typeof IS_EVENT_DATE_MAP> = useMemo(
+    () => (isFilter ? ["all", ...IS_EVENT_DATE_KEYS] : IS_EVENT_DATE_KEYS),
     [isFilter],
   );
 
@@ -47,7 +47,7 @@ export function IsVisitedSelect<TFieldValues extends FieldValues>({
           >
             {tabsData.map((item) => (
               <MenuItem key={item} value={item}>
-                {IS_VISITED_MAP[item]}
+                {IS_EVENT_DATE_MAP[item]}
               </MenuItem>
             ))}
           </Select>

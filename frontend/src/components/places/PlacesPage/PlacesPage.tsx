@@ -18,7 +18,9 @@ export const PLACES_FILTERS_DEFAULT_VALUES: PlacesFilterParams = {
   locationType: "all",
   coverType: "all",
   author: "all",
+  eventDate: "all",
   isVisited: "all",
+  isExpired: "all",
 };
 
 type PlacesPageProps = {
@@ -55,7 +57,9 @@ export const PlacesPage = ({
         locationType: params?.location_type || "all",
         coverType: params?.cover_type || "all",
         author: params?.author || "all",
+        eventDate: params?.event_date || "all",
         isVisited: params?.is_visited || "all",
+        isExpired: params?.is_expired || "all",
       }) as PlacesFilterParams,
     [params],
   );

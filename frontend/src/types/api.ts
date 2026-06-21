@@ -42,7 +42,9 @@ export interface GetPlacesParams {
   location_type?: string;
   cover_type?: string;
   author?: string;
+  event_date?: boolean | "all";
   is_visited?: boolean | "all";
+  is_expired?: boolean | "all";
 }
 
 export interface PlaceResponseData {

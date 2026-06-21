@@ -1,4 +1,4 @@
-import { UserTypes } from "./common";
+import { DefaultBooleanKeys, UserTypes } from "./common";
 
 export interface Place {
   id: number;
@@ -38,7 +38,7 @@ export type PlaceActivityType =
   | "walk"
   | "other";
 export type PlaceCoverType = "open" | "close" | "hybrid";
-export type PlaceAuthorType = "admin" | "polinka";
+export type PlaceAuthorType = UserTypes;
 
 export type ImageData = {
   id: number;
@@ -51,5 +51,7 @@ export interface PlacesFilterParams {
   locationType: PlaceLocationType | "all";
   coverType: PlaceCoverType | "all";
   author: UserTypes | "all";
-  isVisited: "all" | "true" | "false";
+  eventDate: DefaultBooleanKeys | "all";
+  isVisited: DefaultBooleanKeys | "all";
+  isExpired: DefaultBooleanKeys | "all";
 }
