@@ -11,22 +11,24 @@ import { SearchInput } from "../form/SearchInput";
 interface PlacesTabsProps {
   activityType: PlaceActivityType | "all";
   filters: PlacesFilterParams;
+  counters: Record<PlaceActivityType | "all", number>;
   searchValue?: string;
+  isFetching?: boolean;
   onSearchChange: (search: string) => void;
   onFilterChange: (
     key: keyof GetPlacesParams,
     value: string | boolean | undefined,
   ) => void;
-  counters: Record<PlaceActivityType | "all", number>;
 }
 
 export const PlacesTabs = ({
   activityType,
   filters,
+  counters,
   searchValue,
+  isFetching = false,
   onSearchChange,
   onFilterChange,
-  counters,
 }: PlacesTabsProps) => {
   const TABS_LIST = Object.keys(ACTIVITY_TYPE_MAP) as (
     | PlaceActivityType
@@ -55,6 +57,7 @@ export const PlacesTabs = ({
             activityType={activityType}
             tabName={tabName}
             counters={counters}
+            isLoading={isFetching}
             handleClick={handleClick}
           />
         ))}

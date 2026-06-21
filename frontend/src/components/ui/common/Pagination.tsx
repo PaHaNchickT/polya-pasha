@@ -5,23 +5,22 @@ import {
   Skeleton,
 } from "@mui/material";
 import { ChangeEvent } from "react";
+import { PaginationSkeleton } from "./PaginationSkeleton";
+import { PaginationMeta } from "@/types/api";
 
 interface PaginationProps {
-  page: number;
-  totalItems: number;
-  limit: number;
+  meta: PaginationMeta;
   isFetching: boolean;
   onPageChange: (page: number) => void;
 }
 
 export const Pagination = ({
-  page,
-  totalItems,
-  limit,
+  meta,
   isFetching,
   onPageChange,
 }: PaginationProps) => {
-  const totalPages = Math.max(1, Math.ceil(totalItems / limit));
+  const { page, limit, totalItems, totalPages } = meta;
+
   const from = totalItems === 0 ? 0 : (page - 1) * limit + 1;
   const to = Math.min(page * limit, totalItems);
 
@@ -34,7 +33,7 @@ export const Pagination = ({
       sx={{ borderColor: "divider" }}
     >
       {isFetching ? (
-        <Skeleton variant="text" width={120} height={30} />
+        <Skeleton variant="rounded" width={77} height={18} />
       ) : (
         <Typography variant="body2" color="text.secondary">
           {totalItems > 0 ? `${from}–${to} из ${totalItems}` : "Нет записей"}
@@ -42,30 +41,27 @@ export const Pagination = ({
       )}
 
       {isFetching ? (
-        <Skeleton
-          variant="rounded"
-          width={300}
-          height={32}
-          sx={{ borderRadius: 1 }}
-        />
+        <PaginationSkeleton totalPages={totalPages} />
       ) : (
-        <MuiPagination
-          page={page}
-          count={totalPages}
-          onChange={handlePageChange}
-          color="primary"
-          shape="rounded"
-          size="medium"
-          showFirstButton
-          showLastButton
-          siblingCount={1}
-          boundaryCount={1}
-          sx={{
-            "& .MuiPaginationItem-root": {
-              transition: "all 0.2s",
-            },
-          }}
-        />
+        Boolean(totalPages) && (
+          <MuiPagination
+            page={page}
+            count={totalPages}
+            onChange={handlePageChange}
+            color="primary"
+            shape="rounded"
+            size="medium"
+            showFirstButton
+            showLastButton
+            siblingCount={1}
+            boundaryCount={1}
+            sx={{
+              "& .MuiPaginationItem-root": {
+                transition: "all 0.2s",
+              },
+            }}
+          />
+        )
       )}
     </Box>
   );

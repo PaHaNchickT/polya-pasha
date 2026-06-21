@@ -11,8 +11,8 @@ import { useMemo } from "react";
 import isEqual from "lodash/isEqual";
 import { GetPlacesParams, PaginationMeta } from "@/types/api";
 import { Pagination } from "@/components/ui/common/Pagination";
-import { Loader } from "@/components/ui/common/Loader";
 import { camelToSnake } from "@/lib/helpers/camelToSnake";
+import { PlaceItemSkeleton } from "@/components/ui/places/PlaceItemSkeleton";
 
 export const PLACES_FILTERS_DEFAULT_VALUES: PlacesFilterParams = {
   locationType: "all",
@@ -73,6 +73,11 @@ export const PlacesPage = ({
     onSearchChange("");
   };
 
+  const emptyArray = useMemo(
+    () => Array.from({ length: 4 }, (_, index) => index + 1),
+    [],
+  );
+
   return (
     <main className="grow flex flex-col gap-4">
       <div>
@@ -86,14 +91,13 @@ export const PlacesPage = ({
           (params?.activity_type || "all") as PlaceActivityType | "all"
         }
         filters={filters}
+        counters={meta.counters}
         searchValue={params?.search}
+        isFetching={isFetching}
         onSearchChange={onSearchChange}
         onFilterChange={onFilterChange}
-        counters={meta.counters}
       />
-      {isFetching ? (
-        <Loader />
-      ) : data.length ? (
+      {data.length ? (
         <div
           style={{
             display: "grid",
@@ -101,9 +105,9 @@ export const PlacesPage = ({
             gap: "16px",
           }}
         >
-          {data.map((item) => (
-            <PlaceItem key={item.id} item={item} />
-          ))}
+          {isFetching
+            ? emptyArray.map((index) => <PlaceItemSkeleton key={index} />)
+            : data.map((item) => <PlaceItem key={item.id} item={item} />)}
         </div>
       ) : (
         <PlacesEmptyList
@@ -114,10 +118,9 @@ export const PlacesPage = ({
           resetFilters={handleResetFilters}
         />
       )}
+
       <Pagination
-        page={meta.page}
-        totalItems={meta.totalItems}
-        limit={meta.limit}
+        meta={meta}
         isFetching={isFetching}
         onPageChange={onPageChange}
       />
