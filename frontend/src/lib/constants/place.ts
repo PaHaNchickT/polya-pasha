@@ -3,7 +3,6 @@ import {
   PlaceAuthorType,
   PlaceCoverType,
   PlaceLocationType,
-  PlaceSortOrder,
   PlaceSortType,
 } from "@/types/place";
 import { USERS_MAP } from "./users";
@@ -93,12 +92,3 @@ export const SORTING_TYPE_MAP: Record<PlaceSortType, string> = {
 export const SORTING_TYPE_KEYS = Object.keys(
   SORTING_TYPE_MAP,
 ) as PlaceSortType[];
-
-export const SORTING_ORDER_MAP: Record<PlaceSortOrder, string> = {
-  asc: "По возрастанию",
-  desc: "По убыванию",
-};
-
-export const SORTING_ORDER_KEYS = Object.keys(
-  SORTING_ORDER_MAP,
-) as PlaceSortOrder[];

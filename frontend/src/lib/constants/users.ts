@@ -1,3 +1,5 @@
+import { UserTypes } from "@/types/common";
+
 export const USER_PHRASES = {
   polinka: [
     "Я рад, что именно ты стала моей спутницей для посещения всех этих мест!",
@@ -15,3 +17,5 @@ export const USERS_MAP = {
   polinka: "Поля",
   guest: "Гость",
 };
+
+export const USERS_KEYS = Object.keys(USERS_MAP) as UserTypes[];

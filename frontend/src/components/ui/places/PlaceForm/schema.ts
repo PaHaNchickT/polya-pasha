@@ -5,6 +5,7 @@ import {
   COVER_TYPE_KEYS,
   LOCATION_TYPE_KEYS,
 } from "@/lib/constants/place";
+import { USERS_KEYS } from "@/lib/constants/users";
 
 export const placeFormSchema = z.object({
   title: z.string().min(1, "Обязательное поле"),
@@ -15,7 +16,7 @@ export const placeFormSchema = z.object({
     .array(z.enum(ACTIVITY_TYPE_KEYS))
     .min(1, "Выберите хотя бы один тип активности"),
   coverType: z.enum(COVER_TYPE_KEYS),
-  author: z.enum(["admin", "polinka"]),
+  author: z.enum(USERS_KEYS),
   comment: z.string().nullable().optional(),
   address: z.string("Обязательное поле").min(1, "Обязательное поле"),
   coordinates: z.array(z.number()).length(2),

@@ -4,7 +4,7 @@ import InputLabel from "@mui/material/InputLabel";
 import Select from "@mui/material/Select";
 import MenuItem from "@mui/material/MenuItem";
 import { SelectChangeEvent } from "@mui/material/Select";
-import { SORTING_ORDER_KEYS, SORTING_ORDER_MAP } from "@/lib/constants/place";
+import { SORTING_ORDER_KEYS, SORTING_ORDER_MAP } from "@/lib/constants/common";
 
 interface PlaceSortOrderSelectProps<TFieldValues extends FieldValues> {
   control: Control<TFieldValues>;

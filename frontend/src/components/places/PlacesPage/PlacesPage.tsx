@@ -107,7 +107,7 @@ export const PlacesPage = ({
         onFilterChange={onFilterChange}
         onSortChange={onSortChange}
       />
-      {data.length ? (
+      {isFetching && (
         <div
           style={{
             display: "grid",
@@ -115,19 +115,33 @@ export const PlacesPage = ({
             gap: "16px",
           }}
         >
-          {isFetching
-            ? emptyArray.map((index) => <PlaceItemSkeleton key={index} />)
-            : data.map((item) => <PlaceItem key={item.id} item={item} />)}
+          {emptyArray.map((index) => (
+            <PlaceItemSkeleton key={index} />
+          ))}
         </div>
-      ) : (
-        <PlacesEmptyList
-          isFiltersActive={
-            !isEqual(filters, PLACES_FILTERS_DEFAULT_VALUES) ||
-            params?.activity_type !== "all"
-          }
-          resetFilters={handleResetFilters}
-        />
       )}
+      {!isFetching &&
+        (data.length ? (
+          <div
+            style={{
+              display: "grid",
+              gridTemplateColumns: "repeat(4, 1fr)",
+              gap: "16px",
+            }}
+          >
+            {data.map((item) => (
+              <PlaceItem key={item.id} item={item} />
+            ))}
+          </div>
+        ) : (
+          <PlacesEmptyList
+            isFiltersActive={
+              !isEqual(filters, PLACES_FILTERS_DEFAULT_VALUES) ||
+              params?.activity_type !== "all"
+            }
+            resetFilters={handleResetFilters}
+          />
+        ))}
 
       <Pagination
         meta={meta}

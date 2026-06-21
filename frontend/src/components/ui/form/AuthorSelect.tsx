@@ -6,8 +6,7 @@ import MenuItem from "@mui/material/MenuItem";
 import { SelectChangeEvent } from "@mui/material/Select";
 import { useMemo } from "react";
 import { USERS_TYPE_MAP } from "@/lib/constants/place";
-
-const TEMP_AUTHORS_LIST = ["admin", "polinka"] as const;
+import { USERS_KEYS } from "@/lib/constants/users";
 
 interface AuthorSelectProps<TFieldValues extends FieldValues> {
   control: Control<TFieldValues>;
@@ -27,7 +26,7 @@ export function AuthorSelect<TFieldValues extends FieldValues>({
   isFilter = false,
 }: AuthorSelectProps<TFieldValues>) {
   const tabsData: ReadonlyArray<keyof typeof USERS_TYPE_MAP> = useMemo(
-    () => (isFilter ? ["all", ...TEMP_AUTHORS_LIST] : TEMP_AUTHORS_LIST),
+    () => (isFilter ? ["all", ...USERS_KEYS] : USERS_KEYS),
     [isFilter],
   );
 

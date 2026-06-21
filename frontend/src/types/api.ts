@@ -1,3 +1,4 @@
+import { DefaultBooleanKeys } from "./common";
 import {
   ImageData,
   PlaceActivityType,
@@ -44,9 +45,9 @@ export interface GetPlacesParams {
   location_type?: string;
   cover_type?: string;
   author?: string;
-  event_date?: boolean | "all";
-  is_visited?: boolean | "all";
-  is_expired?: boolean | "all";
+  event_date?: DefaultBooleanKeys | "all";
+  is_visited?: DefaultBooleanKeys | "all";
+  is_expired?: DefaultBooleanKeys | "all";
 }
 
 export interface PlaceResponseData {
