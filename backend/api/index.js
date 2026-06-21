@@ -126,6 +126,21 @@ app.get("/api/places", authMiddleware, checkRevoked, async (req, res) => {
         : isVisitedParam === "false"
           ? false
           : null;
+    const eventDateParam = req.query.event_date?.trim().toLowerCase();
+    const eventDateFilter =
+      eventDateParam === "true"
+        ? "true"
+        : eventDateParam === "false"
+          ? "false"
+          : null;
+
+    const isExpiredParam = req.query.is_expired?.trim().toLowerCase();
+    const isExpiredFilter =
+      isExpiredParam === "true"
+        ? "true"
+        : isExpiredParam === "false"
+          ? "false"
+          : null;
 
     const { data, error } = await supabase.rpc("search_places", {
       search_term: search,
@@ -134,6 +149,8 @@ app.get("/api/places", authMiddleware, checkRevoked, async (req, res) => {
       cover_type_filter: coverType,
       author_filter: author,
       is_visited_filter: isVisited,
+      event_date_filter: eventDateFilter,
+      is_expired_filter: isExpiredFilter,
       sort_field: sortField,
       sort_order: order,
       page_num: page,
