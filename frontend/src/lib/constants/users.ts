@@ -15,7 +15,6 @@ export const USER_PHRASES = {
 export const USERS_MAP = {
   admin: "Паша",
   polinka: "Поля",
-  guest: "Гость",
 };
 
 export const USERS_KEYS = Object.keys(USERS_MAP) as UserTypes[];
