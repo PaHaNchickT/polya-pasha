@@ -22,9 +22,15 @@ import Visibility from "@mui/icons-material/Visibility";
 import VisibilityOff from "@mui/icons-material/VisibilityOff";
 import nProgress from "nprogress";
 import { useLoginMutation } from "@/store/api";
+import { useTheme } from "@mui/material/styles";
+import { useMediaQuery } from "@mui/material";
 
 export const LoginPage = () => {
   const router = useRouter();
+
+  const theme = useTheme();
+  const isSmUp = useMediaQuery(theme.breakpoints.up("sm"));
+
   const [login, { isLoading }] = useLoginMutation();
   const [showPassword, setShowPassword] = useState(false);
 
@@ -53,18 +59,24 @@ export const LoginPage = () => {
     <Stack
       direction="column"
       sx={{ justifyContent: "space-between" }}
-      className="relative min-h-full grow flex !justify-center items-center p-2 sm:p-4"
+      className="relative min-h-full grow flex !justify-center items-center sm:p-4"
     >
       <MuiCard
         variant="outlined"
-        className="flex flex-col self-center w-full p-8 gap-4 mx-auto 
+        className="flex flex-col self-center w-full p-4 sm:p-8 gap-4 mx-auto 
           sm:max-w-[450px]
           shadow-[hsla(220,30%,5%,0.5)_0px_5px_15px_0px,hsla(220,25%,10%,0.08)_0px_15px_35px_-5px]"
       >
         <Typography
-          component="h1"
-          variant="h4"
-          className="w-full !text-[clamp(2rem,10vw,2.15rem)]"
+          component={isSmUp ? "h1" : "h3"}
+          variant={isSmUp ? "h4" : "h3"}
+          sx={{
+            fontSize: {
+              xs: "1.5rem",
+              sm: "clamp(2rem, 10vw, 2.15rem)",
+            },
+            width: "100%",
+          }}
         >
           Вход в аккаунт
         </Typography>

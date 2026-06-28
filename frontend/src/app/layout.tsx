@@ -14,7 +14,7 @@ export const metadata = {
 export default function RootLayout({ children }: { children: ReactNode }) {
   return (
     <html lang="ru" data-mui-color-scheme="dark" suppressHydrationWarning>
-      <body className="flex flex-col justify-between min-h-screen px-8 bg-[radial-gradient(at_50%_50%,hsla(210,100%,16%,0.5),hsl(220,30%,5%))]">
+      <body className="flex flex-col justify-between min-h-screen px-4 sm:px-8 bg-[radial-gradient(at_50%_50%,hsla(210,100%,16%,0.5),hsl(220,30%,5%))]">
         <ReduxProvider>
           <ProgressBarController />
           <AppTheme>
@@ -29,5 +29,3 @@ export default function RootLayout({ children }: { children: ReactNode }) {
     </html>
   );
 }
-
-// ReduxProvider
