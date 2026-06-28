@@ -1,4 +1,4 @@
-import { Box, IconButton } from "@mui/material";
+import { IconButton } from "@mui/material";
 import { PlacesFilterButton } from "./PlacesFilterButton";
 import { ACTIVITY_TYPE_MAP } from "@/lib/constants/place";
 import AddIcon from "@mui/icons-material/Add";
@@ -49,16 +49,7 @@ export const PlacesTabs = ({
   };
 
   return (
-    <Box
-      sx={{
-        display: "flex",
-        flexDirection: { xs: "column-reverse", md: "row" },
-        width: "100%",
-        justifyContent: "space-between",
-        alignItems: "start",
-        gap: 4,
-      }}
-    >
+    <div className="flex flex-col-reverse md:flex-row w-full justify-between items-start gap-8">
       <div className="flex flex-wrap gap-2">
         {TABS_LIST.map((tabName) => (
           <LabelTab
@@ -84,6 +75,6 @@ export const PlacesTabs = ({
           </IconButton>
         </ProgressLink>
       </div>
-    </Box>
+    </div>
   );
 };
