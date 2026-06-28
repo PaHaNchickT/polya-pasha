@@ -1,15 +1,11 @@
 "use client";
 
 import { usePathname } from "next/navigation";
-import { Button, Typography, AppBar, Toolbar, Container } from "@mui/material";
+import { Button, AppBar, Toolbar, Container } from "@mui/material";
 import LogoutIcon from "@mui/icons-material/Logout";
 import { notify } from "@/lib/utils/notify";
 import { useEffect, useState } from "react";
-import {
-  HEADER_TABS,
-  HEADER_TABS_MAP,
-  LOCAL_STORAGE_USERNAME_KEY,
-} from "@/lib/constants/common";
+import { LOCAL_STORAGE_USERNAME_KEY } from "@/lib/constants/common";
 import { UserTypes } from "@/types/common";
 import { isAuthentificated } from "@/lib/helpers/isAuthentificated";
 import { USERS_MAP } from "@/lib/constants/users";
@@ -17,10 +13,17 @@ import { ProgressLink } from "../ui/common/ProgressLink";
 import nProgress from "nprogress";
 import { useLogoutMutation } from "@/store/api";
 import Image from "next/image";
+import { useTheme } from "@mui/material/styles";
+import { useMediaQuery } from "@mui/material";
+import { HeaderTabs } from "./HeaderTabs";
+import { BurgerMenu } from "./BurgerMenu";
 
 export const Header = () => {
   const pathname = usePathname();
   const [logout, { isLoading }] = useLogoutMutation();
+
+  const theme = useTheme();
+  const isSmUp = useMediaQuery(theme.breakpoints.up("sm"));
 
   const [isSignedIn, setIsSignedIn] = useState(false);
   const [username, setUsername] = useState<UserTypes | null>(null);
@@ -52,7 +55,7 @@ export const Header = () => {
       className="!shadow-none !bg-transparent !bg-none !mt-[28px]"
     >
       {isSignedIn && (
-        <Container maxWidth="lg" className="!px-[32px] !m-0 !max-w-full">
+        <Container maxWidth="lg" className="px-4 sm:px-8 !m-0 !max-w-full">
           <Toolbar
             variant="dense"
             disableGutters
@@ -80,47 +83,29 @@ export const Header = () => {
               </ProgressLink>
             )}
 
-            <div className="grow flex justify-center items-center px-0 text-white">
+            {isSmUp && <HeaderTabs />}
+            {isSmUp && (
               <div className="flex gap-4">
-                {HEADER_TABS.map((route) =>
-                  `/${route}` === pathname ? (
-                    <Typography
-                      key={`${route}-tav`}
-                      variant="button"
-                      className="!text-white !text-[13px] px-[10px] underline decoration-white underline-offset-4 flex justify-center items-center"
-                    >
-                      {HEADER_TABS_MAP[route]}
-                    </Typography>
-                  ) : (
-                    <ProgressLink key={`${route}-tav`} href={`/${route}`}>
-                      <Button
-                        variant="text"
-                        size="small"
-                        className="!text-white"
-                      >
-                        {HEADER_TABS_MAP[route]}
-                      </Button>
-                    </ProgressLink>
-                  ),
+                {username && (
+                  <p className="whitespace-nowrap flex items-center">
+                    {`Привет, ${USERS_MAP[username]}!`}
+                  </p>
                 )}
+                <Button
+                  size="large"
+                  disableElevation
+                  onClick={handleLogout}
+                  loading={isLoading}
+                  className="text-white opacity-90 hover:opacity-100 !min-w-0"
+                >
+                  <LogoutIcon className="h-16 text-white opacity-90 hover:opacity-100" />
+                </Button>
               </div>
-            </div>
-            <div className="flex gap-4">
-              {username && (
-                <p className="whitespace-nowrap flex items-center">
-                  {`Привет, ${USERS_MAP[username]}!`}
-                </p>
-              )}
-              <Button
-                size="large"
-                disableElevation
-                onClick={handleLogout}
-                loading={isLoading}
-                className="text-white opacity-90 hover:opacity-100 !min-w-0"
-              >
-                <LogoutIcon className="h-16 text-white opacity-90 hover:opacity-100" />
-              </Button>
-            </div>
+            )}
+
+            {!isSmUp && (
+              <BurgerMenu username={username} onLogout={handleLogout} />
+            )}
           </Toolbar>
         </Container>
       )}
