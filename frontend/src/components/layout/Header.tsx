@@ -23,7 +23,7 @@ export const Header = () => {
   const [logout, { isLoading }] = useLogoutMutation();
 
   const [isSignedIn, setIsSignedIn] = useState(false);
-  const [username, setUsername] = useState<UserTypes>("guest");
+  const [username, setUsername] = useState<UserTypes | null>(null);
 
   const handleLogout = () => {
     logout()
@@ -106,9 +106,11 @@ export const Header = () => {
               </div>
             </div>
             <div className="flex gap-4">
-              <p className="whitespace-nowrap flex items-center">
-                {`Привет, ${USERS_MAP[username]}!`}
-              </p>
+              {username && (
+                <p className="whitespace-nowrap flex items-center">
+                  {`Привет, ${USERS_MAP[username]}!`}
+                </p>
+              )}
               <Button
                 size="large"
                 disableElevation
