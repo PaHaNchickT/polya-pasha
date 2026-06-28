@@ -1,4 +1,4 @@
-import { MouseEvent, useEffect, useState } from "react";
+import { MouseEvent, useEffect, useMemo, useState } from "react";
 import { useForm } from "react-hook-form";
 import IconButton from "@mui/material/IconButton";
 import Popover from "@mui/material/Popover";
@@ -13,6 +13,7 @@ import { GetPlacesParams } from "@/types/api";
 import { camelToSnake } from "@/lib/helpers/camelToSnake";
 import { IsEventDateSelect } from "../form/IsEventDateSelect";
 import { IsExpiredSelect } from "../form/IsExpiredSelect";
+import { Badge } from "@mui/material";
 
 export const PLACES_FILTERS_DEFAULT_VALUES: PlacesFilterParams = {
   locationType: "all",
@@ -40,6 +41,11 @@ export const PlacesFilterButton = ({
   const { control, handleSubmit, reset } = useForm<PlacesFilterParams>({
     defaultValues: filters,
   });
+
+  const isFiltersInactive = useMemo(
+    () => Object.values(filters).every((value) => value === "all"),
+    [filters],
+  );
 
   useEffect(() => {
     reset(filters);
@@ -77,8 +83,15 @@ export const PlacesFilterButton = ({
   return (
     <>
       <IconButton onClick={handleClick} aria-label="filter options">
-        <FilterAltIcon />
+        {isFiltersInactive ? (
+          <FilterAltIcon />
+        ) : (
+          <Badge variant="dot" color="primary">
+            <FilterAltIcon />
+          </Badge>
+        )}
       </IconButton>
+
       <Popover
         open={open}
         anchorEl={anchorEl}

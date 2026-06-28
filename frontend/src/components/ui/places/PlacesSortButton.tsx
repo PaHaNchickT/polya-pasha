@@ -1,4 +1,4 @@
-import { MouseEvent, useEffect, useState } from "react";
+import { MouseEvent, useEffect, useMemo, useState } from "react";
 import { useForm } from "react-hook-form";
 import IconButton from "@mui/material/IconButton";
 import Popover from "@mui/material/Popover";
@@ -7,6 +7,7 @@ import FilterListIcon from "@mui/icons-material/FilterList";
 import { PlacesSortParams } from "@/types/place";
 import { PlaceSortTypeSelect } from "../form/PlaceSortTypeSelect";
 import { PlaceSortOrderSelect } from "../form/PlaceSortOrderSelect";
+import { Badge } from "@mui/material";
 
 const PLACES_SORTING_DEFAULT_VALUES: PlacesSortParams = {
   sort: "created_at",
@@ -27,6 +28,11 @@ export const PlacesSortButton = ({
   const { control, handleSubmit, reset } = useForm<PlacesSortParams>({
     defaultValues: sortParams,
   });
+
+  const isSortInactive = useMemo(
+    () => sortParams.sort === "created_at" && sortParams.order === "desc",
+    [sortParams],
+  );
 
   useEffect(() => {
     reset(sortParams);
@@ -56,8 +62,15 @@ export const PlacesSortButton = ({
   return (
     <>
       <IconButton onClick={handleClick} aria-label="sort options">
-        <FilterListIcon />
+        {isSortInactive ? (
+          <FilterListIcon />
+        ) : (
+          <Badge variant="dot" color="primary">
+            <FilterListIcon />
+          </Badge>
+        )}
       </IconButton>
+
       <Popover
         open={open}
         anchorEl={anchorEl}
