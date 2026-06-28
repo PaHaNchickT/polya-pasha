@@ -79,23 +79,25 @@ export const ImageGallery = ({ images }: ImageGalleryProps) => {
               },
             }}
           >
-            <DialogContent
-              sx={{ p: 0, position: "relative", textAlign: "center" }}
-            >
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img
-                src={currentImage.uri}
-                alt={currentImage.name || "Full size"}
-                className="max-w-full max-h-[90vh] object-contain"
-              />
+            <DialogContent sx={{ p: 0, textAlign: "center" }}>
+              <div className="relative w-full h-[90vh]">
+                <CardMedia
+                  component="img"
+                  alt={currentImage.name || "Full size Place Image"}
+                  image={currentImage.uri}
+                  className="max-w-full max-h-[90vh] object-contain"
+                />
+              </div>
+            </DialogContent>
 
-              {images.length > 1 && (
+            {images.length > 1 && (
+              <div className="fixed top-1/2 left-0 right-0 -translate-y-1/2 z-[999]">
                 <ImageGalleryControlButtons
                   goToPrev={goToPrev}
                   goToNext={goToNext}
                 />
-              )}
-            </DialogContent>
+              </div>
+            )}
           </Dialog>
         </>
       ) : (

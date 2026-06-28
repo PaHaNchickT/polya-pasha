@@ -1,3 +1,4 @@
+import { clsx as cn } from "clsx";
 import { IconButton } from "@mui/material";
 import ChevronLeftIcon from "@mui/icons-material/ChevronLeft";
 import ChevronRightIcon from "@mui/icons-material/ChevronRight";
@@ -10,44 +11,34 @@ interface ImageGalleryControlButtonsProps {
 export const ImageGalleryControlButtons = ({
   goToPrev,
   goToNext,
-}: ImageGalleryControlButtonsProps) => (
-  <>
-    <IconButton
-      className="gallery-buttons"
-      onClick={goToPrev}
-      sx={{
-        position: "absolute",
-        left: 8,
-        top: "50%",
-        transform: "translateY(-50%)",
-        backgroundColor: "rgba(0,0,0,0.75)",
-        opacity: 0.7,
-        transition: "opacity 0.2s",
-        "&:hover": {
-          backgroundColor: "rgba(0,0,0,0.95)",
-        },
-      }}
-    >
-      <ChevronLeftIcon />
-    </IconButton>
+}: ImageGalleryControlButtonsProps) => {
+  const buttonsProps = [
+    {
+      onClick: goToPrev,
+      horizOffset: "left-[8px]",
+      icon: <ChevronLeftIcon />,
+    },
+    {
+      onClick: goToNext,
+      horizOffset: "right-[8px]",
+      icon: <ChevronRightIcon />,
+    },
+  ];
 
-    <IconButton
-      className="gallery-buttons"
-      onClick={goToNext}
-      sx={{
-        position: "absolute",
-        right: 8,
-        top: "50%",
-        transform: "translateY(-50%)",
-        backgroundColor: "rgba(0,0,0,0.75)",
-        opacity: 0.7,
-        transition: "opacity 0.2s",
-        "&:hover": {
-          backgroundColor: "rgba(0,0,0,0.95)",
-        },
-      }}
-    >
-      <ChevronRightIcon />
-    </IconButton>
-  </>
-);
+  return (
+    <>
+      {buttonsProps.map((item, idx) => (
+        <IconButton
+          key={idx}
+          className={cn(
+            "gallery-buttons invert !absolute top-[50%] -translate-y-1/2 opacity-[0.7] !transition !duration-200 !bg-black/75 hover:!bg-black/95",
+            item.horizOffset,
+          )}
+          onClick={item.onClick}
+        >
+          {item.icon}
+        </IconButton>
+      ))}
+    </>
+  );
+};
