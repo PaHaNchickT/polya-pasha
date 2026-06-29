@@ -17,7 +17,10 @@ export const PaginationSkeleton = ({ totalPages }: PaginationSkeletonProps) => {
 
   const emptyArray = useMemo(
     () =>
-      Array.from({ length: isSmUp ? totalPages : 4 }, (_, index) => index + 1),
+      Array.from(
+        { length: !isSmUp && totalPages > 5 ? 4 : totalPages },
+        (_, index) => index + 1,
+      ),
     [totalPages, isSmUp],
   );
 
