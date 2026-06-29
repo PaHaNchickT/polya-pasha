@@ -13,6 +13,8 @@ import { PlaceResponseData } from "@/types/api";
 import { Breadcrumbs } from "@/components/ui/common/Breadcrumbs";
 import nProgress from "nprogress";
 import { useDeletePlaceMutation, useUpdatePlaceMutation } from "@/store/api";
+import { useTheme } from "@mui/material/styles";
+import { useMediaQuery } from "@mui/material";
 
 interface PlaceEditPageProps {
   id: string;
@@ -21,6 +23,9 @@ interface PlaceEditPageProps {
 
 export const PlaceEditPage = ({ id, data }: PlaceEditPageProps) => {
   const router = useRouter();
+
+  const theme = useTheme();
+  const isSmUp = useMediaQuery(theme.breakpoints.up("sm"));
 
   const [deletePlace, { isLoading: isDeleteLoading }] =
     useDeletePlaceMutation();
@@ -65,8 +70,19 @@ export const PlaceEditPage = ({ id, data }: PlaceEditPageProps) => {
   return (
     <LocalizationProvider dateAdapter={AdapterDayjs}>
       <Breadcrumbs />
-      <Paper sx={{ p: 3, width: "100%", mx: "auto", mt: 4 }}>
-        <Typography variant="h2" gutterBottom>
+      <Paper
+        sx={{
+          p: isSmUp ? 3 : 2,
+          width: "100%",
+          mx: "auto",
+          mt: isSmUp ? 4 : 1,
+        }}
+      >
+        <Typography
+          variant={isSmUp ? "h2" : "h3"}
+          gutterBottom
+          className="text-center sm:text-start"
+        >
           Редактировать место
         </Typography>
         <PlaceForm

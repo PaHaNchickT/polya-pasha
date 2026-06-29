@@ -43,7 +43,7 @@ export default function PlaceForm({
 
   return (
     <FormProvider {...methods}>
-      <form onSubmit={handleSubmit(onSubmit)} className="mt-10">
+      <form onSubmit={handleSubmit(onSubmit)} className="mt-5 sm:mt-10">
         <Grid container spacing={3}>
           {/* Левая колонка */}
           <Grid size={{ xs: 12, md: 6 }}>
@@ -123,17 +123,12 @@ export default function PlaceForm({
           </Grid>
         </Grid>
 
-        <Box
-          mt={3}
-          display="flex"
-          flexDirection="row-reverse"
-          justifyContent="space-between"
-          alignItems="center"
-        >
+        <Box className="flex flex-row-reverse justify-between items-center gap-3 mt-6">
           <Button
             type="submit"
             variant="contained"
             size="large"
+            className="grow sm:grow-0"
             loading={formLoading}
           >
             {mode === "create" ? "Создать" : "Сохранить"}

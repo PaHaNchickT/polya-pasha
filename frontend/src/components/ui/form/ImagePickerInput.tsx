@@ -125,7 +125,7 @@ export const ImagePickerInput: FC = () => {
 
               {images.length > 0 && (
                 <>
-                  <Box display="flex" flexWrap="wrap" gap={1.5} mb={1}>
+                  <Box className="flex flex-wrap gap-2 sm:gap-3 mb-2">
                     {images.map((img) => (
                       <Box
                         key={img.id.toString()} // стабильный ключ (id уникально)

@@ -14,9 +14,15 @@ import { notify } from "@/lib/utils/notify";
 import { Breadcrumbs } from "@/components/ui/common/Breadcrumbs";
 import nProgress from "nprogress";
 import { useCreatePlaceMutation } from "@/store/api";
+import { useTheme } from "@mui/material/styles";
+import { useMediaQuery } from "@mui/material";
 
 export const PlaceCreatePage = () => {
   const router = useRouter();
+
+  const theme = useTheme();
+  const isSmUp = useMediaQuery(theme.breakpoints.up("sm"));
+
   const [createPlace, { isLoading }] = useCreatePlaceMutation();
 
   const author = localStorage.getItem(
@@ -66,8 +72,19 @@ export const PlaceCreatePage = () => {
   return (
     <LocalizationProvider dateAdapter={AdapterDayjs}>
       <Breadcrumbs />
-      <Paper sx={{ p: 3, width: "100%", mx: "auto", mt: 4 }}>
-        <Typography variant="h2" gutterBottom>
+      <Paper
+        sx={{
+          p: isSmUp ? 3 : 2,
+          width: "100%",
+          mx: "auto",
+          mt: isSmUp ? 4 : 1,
+        }}
+      >
+        <Typography
+          variant={isSmUp ? "h2" : "h3"}
+          gutterBottom
+          className="text-center sm:text-start"
+        >
           Добавить место
         </Typography>
         <PlaceForm

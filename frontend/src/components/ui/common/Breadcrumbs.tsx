@@ -27,7 +27,11 @@ export const Breadcrumbs = () => {
 
     if (isLast) {
       return (
-        <Typography key={href} color="text.primary" className="!text-lg">
+        <Typography
+          key={href}
+          color="text.primary"
+          className="!text-sm sm:!text-lg"
+        >
           {label}
         </Typography>
       );
@@ -44,7 +48,7 @@ export const Breadcrumbs = () => {
           nProgress.start();
           router.push(href);
         }}
-        className="cursor-pointer !text-lg"
+        className="cursor-pointer !text-sm sm:!text-lg"
       >
         {label}
       </Link>
