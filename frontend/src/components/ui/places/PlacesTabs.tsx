@@ -1,6 +1,6 @@
 import { IconButton } from "@mui/material";
 import { PlacesFilterButton } from "./PlacesFilterButton";
-import { ACTIVITY_TYPE_MAP } from "@/lib/constants/place";
+import { ACTIVITY_TYPE_KEYS } from "@/lib/constants/place";
 import AddIcon from "@mui/icons-material/Add";
 import { ProgressLink } from "../common/ProgressLink";
 import {
@@ -12,6 +12,9 @@ import { LabelTab } from "../common/labels/LabelTab";
 import { GetPlacesParams } from "@/types/api";
 import { SearchInput } from "../form/SearchInput";
 import { PlacesSortButton } from "./PlacesSortButton";
+import { useTheme } from "@mui/material/styles";
+import { useMediaQuery } from "@mui/material";
+import { ActivityTypeSelect } from "../form/ActivityTypeSelect";
 
 interface PlacesTabsProps {
   activityType: PlaceActivityType | "all";
@@ -39,41 +42,55 @@ export const PlacesTabs = ({
   onFilterChange,
   onSortChange,
 }: PlacesTabsProps) => {
-  const TABS_LIST = Object.keys(ACTIVITY_TYPE_MAP) as (
-    | PlaceActivityType
-    | "all"
-  )[];
+  const theme = useTheme();
+  const isSmUp = useMediaQuery(theme.breakpoints.up("sm"));
 
   const handleClick = (item: PlaceActivityType | "all") => {
     onFilterChange("activity_type", item);
   };
 
   return (
-    <div className="flex flex-col-reverse md:flex-row w-full justify-between items-start gap-8">
-      <div className="flex flex-wrap gap-2">
-        {TABS_LIST.map((tabName) => (
-          <LabelTab
-            key={`${tabName}-tab`}
-            activityType={activityType}
-            tabName={tabName}
-            counters={counters}
-            isLoading={isFetching}
-            handleClick={handleClick}
-          />
-        ))}
-      </div>
-      <div className="flex gap-2">
+    <div className="flex flex w-full justify-between items-start gap-8">
+      {isSmUp && (
+        <div className="flex flex-wrap gap-2">
+          {["all" as const, ...ACTIVITY_TYPE_KEYS].map((tabName) => (
+            <LabelTab
+              key={`${tabName}-tab`}
+              activityType={activityType}
+              tabName={tabName}
+              counters={counters}
+              isLoading={isFetching}
+              handleClick={handleClick}
+            />
+          ))}
+        </div>
+      )}
+      <div className="flex flex-col-reverse sm:flex-row w-full sm:w-auto gap-2 flex-wrap sm:flex-nowrap">
         <SearchInput
           searchValue={searchValue}
           onSearchChange={onSearchChange}
         />
-        <PlacesFilterButton filters={filters} onFilterChange={onFilterChange} />
-        <PlacesSortButton sortParams={sortParams} onSortChange={onSortChange} />
-        <ProgressLink href="/places/create">
-          <IconButton aria-label="add">
-            <AddIcon />
-          </IconButton>
-        </ProgressLink>
+        <div className="flex gap-2 w-full sm:w-auto">
+          {!isSmUp && (
+            <ActivityTypeSelect
+              activityType={activityType}
+              setActivityType={handleClick}
+            />
+          )}
+          <PlacesFilterButton
+            filters={filters}
+            onFilterChange={onFilterChange}
+          />
+          <PlacesSortButton
+            sortParams={sortParams}
+            onSortChange={onSortChange}
+          />
+          <ProgressLink href="/places/create">
+            <IconButton aria-label="add">
+              <AddIcon />
+            </IconButton>
+          </ProgressLink>
+        </div>
       </div>
     </div>
   );

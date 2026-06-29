@@ -7,7 +7,7 @@ import { TextInput } from "@/components/ui/form/TextInput";
 import { DatePickerInput } from "@/components/ui/form/DatePickerInput";
 import { PlaceTypeSelect } from "@/components/ui/form/PlaceTypeSelect";
 import { PlaceCoverSelect } from "@/components/ui/form/PlaceCoverSelect";
-import { ActivityTypeSelect } from "@/components/ui/form/ActivityTypeSelect";
+import { ActivityTypeMultipleSelect } from "@/components/ui/form/ActivityTypeMultipleSelect";
 import { VisitedRatingGroupInput } from "@/components/ui/form/VisitedRatingGroupInput";
 import { ImagePickerInput } from "@/components/ui/form/ImagePickerInput";
 import { YMPickerInput } from "@/components/ui/form/YMPickerInput";
@@ -68,7 +68,7 @@ export default function PlaceForm({
                 name="locationType"
                 label="Тип локации"
               />
-              <ActivityTypeSelect
+              <ActivityTypeMultipleSelect
                 control={control}
                 name="activityType"
                 label="Активности"

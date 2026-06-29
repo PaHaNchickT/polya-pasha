@@ -19,6 +19,8 @@ import { Pagination } from "@/components/ui/common/Pagination";
 import { camelToSnake } from "@/lib/helpers/camelToSnake";
 import { PlaceItemSkeleton } from "@/components/ui/places/PlaceItemSkeleton";
 import { PLACES_FILTERS_DEFAULT_VALUES } from "@/components/ui/places/PlacesFilterButton";
+import { useTheme } from "@mui/material/styles";
+import { useMediaQuery } from "@mui/material";
 
 type PlacesPageProps = {
   data: Place[];
@@ -44,6 +46,9 @@ export const PlacesPage = ({
   onFilterChange,
   onSortChange,
 }: PlacesPageProps) => {
+  const theme = useTheme();
+  const isSmUp = useMediaQuery(theme.breakpoints.up("sm"));
+
   const username = localStorage.getItem(LOCAL_STORAGE_USERNAME_KEY);
   const phrase =
     username === "admin" || username === "polinka"
@@ -89,7 +94,10 @@ export const PlacesPage = ({
   return (
     <main className="grow flex flex-col gap-4">
       <div>
-        <Typography variant="h1" gutterBottom>
+        <Typography
+          variant={isSmUp ? "h1" : "h2"}
+          {...(isSmUp && { gutterBottom: true })}
+        >
           Список мест
         </Typography>
         {phrase && <Typography>{phrase}</Typography>}

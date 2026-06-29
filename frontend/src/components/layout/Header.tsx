@@ -83,27 +83,27 @@ export const Header = () => {
               </ProgressLink>
             )}
 
-            {isSmUp && <HeaderTabs />}
-            {isSmUp && (
-              <div className="flex gap-4">
-                {username && (
-                  <p className="whitespace-nowrap flex items-center">
-                    {`Привет, ${USERS_MAP[username]}!`}
-                  </p>
-                )}
-                <Button
-                  size="large"
-                  disableElevation
-                  onClick={handleLogout}
-                  loading={isLoading}
-                  className="text-white opacity-90 hover:opacity-100 !min-w-0"
-                >
-                  <LogoutIcon className="h-16 text-white opacity-90 hover:opacity-100" />
-                </Button>
-              </div>
-            )}
-
-            {!isSmUp && (
+            {isSmUp ? (
+              <>
+                <HeaderTabs />
+                <div className="flex gap-4">
+                  {username && (
+                    <p className="whitespace-nowrap flex items-center">
+                      {`Привет, ${USERS_MAP[username]}!`}
+                    </p>
+                  )}
+                  <Button
+                    size="large"
+                    disableElevation
+                    onClick={handleLogout}
+                    loading={isLoading}
+                    className="text-white opacity-90 hover:opacity-100 !min-w-0"
+                  >
+                    <LogoutIcon className="h-16 text-white opacity-90 hover:opacity-100" />
+                  </Button>
+                </div>
+              </>
+            ) : (
               <BurgerMenu username={username} onLogout={handleLogout} />
             )}
           </Toolbar>
