@@ -25,6 +25,8 @@ import { ImageGallery } from "@/components/ui/common/ImageGallery";
 import { format } from "date-fns";
 import { ru } from "date-fns/locale";
 import { USERS_MAP } from "@/lib/constants/users";
+import { useTheme } from "@mui/material/styles";
+import { useMediaQuery } from "@mui/material";
 
 import { LabelNew } from "@/components/ui/common/labels/LabelNew";
 import { LabelVisited } from "@/components/ui/common/labels/LabelVisited";
@@ -53,6 +55,9 @@ interface PlacePageProps {
 
 export const PlacePage = ({ data }: PlacePageProps) => {
   const router = useRouter();
+
+  const theme = useTheme();
+  const isSmUp = useMediaQuery(theme.breakpoints.up("sm"));
 
   const [deletePlace, { isLoading }] = useDeletePlaceMutation();
 
@@ -83,7 +88,7 @@ export const PlacePage = ({ data }: PlacePageProps) => {
   );
 
   return (
-    <Box component="main" className="flex flex-col gap-8">
+    <Box component="main" className="flex flex-col gap-4 sm:gap-8">
       {/* Заголовок и кнопки действий */}
       <div>
         <Breadcrumbs />
@@ -92,49 +97,55 @@ export const PlacePage = ({ data }: PlacePageProps) => {
           {data.isVisited && <LabelVisited withIcon />}
           {data.isExpired && <LabelExpired withIcon />}
         </div>
-        <Box
-          sx={{
-            display: "flex",
-            justifyContent: "space-between",
-            alignItems: "flex-start",
-            flexWrap: "no-wrap",
-            gap: 2,
-          }}
-        >
-          <Box>
-            <Typography variant="h3" component="h1" fontWeight="bold">
-              {data.title}
-            </Typography>
-            <Typography>{data.description}</Typography>
+
+        <div className="flex flex-col gap-2 text-justify">
+          <Box
+            sx={{
+              display: "flex",
+              justifyContent: "space-between",
+              alignItems: "flex-start",
+              flexWrap: "no-wrap",
+              gap: 2,
+            }}
+          >
+            <Box>
+              <Typography variant="h3" component="h1" fontWeight="bold">
+                {data.title}
+              </Typography>
+              {isSmUp && <Typography>{data.description}</Typography>}
+            </Box>
+
+            <Stack direction="row" spacing={1}>
+              <ProgressLink href={`/places/${data.id}/edit`}>
+                <IconButton aria-label="edit" loading={isLoading}>
+                  <EditIcon />
+                </IconButton>
+              </ProgressLink>
+              <DeleteWithConfirmButton
+                isIconOnly
+                onDelete={handleDelete}
+                loading={isLoading}
+                dialogContentText="Вы уверены, что хотите удалить это место? Это действие нельзя отменить."
+              />
+            </Stack>
           </Box>
-          <Stack direction="row" spacing={1}>
-            <ProgressLink href={`/places/${data.id}/edit`}>
-              <IconButton aria-label="edit" loading={isLoading}>
-                <EditIcon />
-              </IconButton>
-            </ProgressLink>
-            <DeleteWithConfirmButton
-              isIconOnly
-              onDelete={handleDelete}
-              loading={isLoading}
-              dialogContentText="Вы уверены, что хотите удалить это место? Это действие нельзя отменить."
-            />
-          </Stack>
-        </Box>
+
+          {!isSmUp && <Typography>{data.description}</Typography>}
+        </div>
       </div>
 
-      <div className="flex gap-4">
+      <div className="flex flex-col sm:flex-row gap-4">
         {/* Левая колонка */}
-        <div className="flex flex-col gap-2 w-[60%]">
+        <div className="flex flex-col gap-4 sm:gap-2 sm:w-[60%]">
           <Card variant="outlined">
             <CardContent className="!py-4 flex flex-col gap-8">
-              <div className="flex gap-2">
+              <div className="flex gap-2 flex-wrap">
                 <Chip
                   icon={LOCATION_ICONS_MAP[data.locationType]}
                   label={LOCATION_TYPE_MAP[data.locationType]}
                   variant="outlined"
                   size="small"
-                  className="!px-1 !border-lime-500"
+                  className="!px-1 !border-lime-500 grow sm:grow-0"
                   sx={{ "& .MuiChip-icon": { color: "#84cc16 !important" } }}
                 />
                 {data.activityType.map((act) => (
@@ -144,7 +155,7 @@ export const PlacePage = ({ data }: PlacePageProps) => {
                     label={ACTIVITY_TYPE_MAP[act]}
                     variant="outlined"
                     size="small"
-                    className="!px-1 !border-blue-500"
+                    className="!px-1 !border-blue-500 grow sm:grow-0"
                     sx={{ "& .MuiChip-icon": { color: "#3b82f6 !important" } }}
                   />
                 ))}
@@ -153,7 +164,7 @@ export const PlacePage = ({ data }: PlacePageProps) => {
                   label={COVER_TYPE_MAP[data.coverType]}
                   variant="outlined"
                   size="small"
-                  className="!px-1 !border-yellow-500"
+                  className="!px-1 !border-yellow-500 grow sm:grow-0"
                   sx={{ "& .MuiChip-icon": { color: "#eab308 !important" } }}
                 />
               </div>
@@ -246,7 +257,7 @@ export const PlacePage = ({ data }: PlacePageProps) => {
         </div>
 
         {/* Правая колонка */}
-        <div className="flex flex-col gap-2 w-[40%]">
+        <div className="flex flex-col gap-2 sm:w-[40%]">
           <Card variant="outlined" className="grow">
             <CardContent className="!p-0 overflow-hidden h-full">
               <ImageGallery images={data.images} />

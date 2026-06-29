@@ -2,25 +2,32 @@ import { clsx as cn } from "clsx";
 import { IconButton } from "@mui/material";
 import ChevronLeftIcon from "@mui/icons-material/ChevronLeft";
 import ChevronRightIcon from "@mui/icons-material/ChevronRight";
+import { useTheme } from "@mui/material/styles";
+import { useMediaQuery } from "@mui/material";
 
 interface ImageGalleryControlButtonsProps {
+  isFullScreen?: boolean;
   goToPrev: () => void;
   goToNext: () => void;
 }
 
 export const ImageGalleryControlButtons = ({
+  isFullScreen = false,
   goToPrev,
   goToNext,
 }: ImageGalleryControlButtonsProps) => {
+  const theme = useTheme();
+  const isSmUp = useMediaQuery(theme.breakpoints.up("sm"));
+
   const buttonsProps = [
     {
       onClick: goToPrev,
-      horizOffset: "left-[8px]",
+      horizOffset: !isSmUp && isFullScreen ? "left-[35%]" : "left-[8px]",
       icon: <ChevronLeftIcon />,
     },
     {
       onClick: goToNext,
-      horizOffset: "right-[8px]",
+      horizOffset: !isSmUp && isFullScreen ? "right-[35%]" : "right-[8px]",
       icon: <ChevronRightIcon />,
     },
   ];

@@ -80,7 +80,7 @@ export const ImageGallery = ({ images }: ImageGalleryProps) => {
             }}
           >
             <DialogContent sx={{ p: 0, textAlign: "center" }}>
-              <div className="relative w-full h-[90vh]">
+              <div className="relative w-full sm:h-[90vh]">
                 <CardMedia
                   component="img"
                   alt={currentImage.name || "Full size Place Image"}
@@ -91,8 +91,9 @@ export const ImageGallery = ({ images }: ImageGalleryProps) => {
             </DialogContent>
 
             {images.length > 1 && (
-              <div className="fixed top-1/2 left-0 right-0 -translate-y-1/2 z-[999]">
+              <div className="fixed bottom-[30px] sm:top-1/2 left-0 right-0 -translate-y-1/2 z-[999]">
                 <ImageGalleryControlButtons
+                  isFullScreen={open}
                   goToPrev={goToPrev}
                   goToNext={goToNext}
                 />
