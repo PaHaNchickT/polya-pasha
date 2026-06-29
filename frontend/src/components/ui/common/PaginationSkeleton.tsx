@@ -4,22 +4,28 @@ import NavigateBeforeIcon from "@mui/icons-material/NavigateBefore";
 import NavigateNextIcon from "@mui/icons-material/NavigateNext";
 import FirstPageIcon from "@mui/icons-material/FirstPage";
 import LastPageIcon from "@mui/icons-material/LastPage";
+import { useTheme } from "@mui/material/styles";
+import { useMediaQuery } from "@mui/material";
 
 interface PaginationSkeletonProps {
   totalPages: number;
 }
 
 export const PaginationSkeleton = ({ totalPages }: PaginationSkeletonProps) => {
+  const theme = useTheme();
+  const isSmUp = useMediaQuery(theme.breakpoints.up("sm"));
+
   const emptyArray = useMemo(
-    () => Array.from({ length: totalPages }, (_, index) => index + 1),
-    [totalPages],
+    () =>
+      Array.from({ length: isSmUp ? totalPages : 4 }, (_, index) => index + 1),
+    [totalPages, isSmUp],
   );
 
   return (
     <Box className="flex justify-end items-center">
       {Boolean(totalPages) && (
         <>
-          <IconButtonPlaceholder icon="firstPage" />
+          {isSmUp && <IconButtonPlaceholder icon="firstPage" />}
           <IconButtonPlaceholder icon="prev" />
           {emptyArray.map((index) => (
             <Skeleton
@@ -31,7 +37,7 @@ export const PaginationSkeleton = ({ totalPages }: PaginationSkeletonProps) => {
             />
           ))}
           <IconButtonPlaceholder icon="next" />
-          <IconButtonPlaceholder icon="lastPage" />
+          {isSmUp && <IconButtonPlaceholder icon="lastPage" />}
         </>
       )}
     </Box>

@@ -20,7 +20,11 @@ export const PlacesEmptyList = ({
       <Typography variant="h6" color="text.secondary">
         Мест пока нет
       </Typography>
-      <Typography variant="body2" color="text.secondary">
+      <Typography
+        variant="body2"
+        color="text.secondary"
+        className="text-center"
+      >
         Попробуйте изменить фильтры или добавьте новое место
       </Typography>
       {isFiltersActive && (

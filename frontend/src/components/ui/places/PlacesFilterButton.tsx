@@ -101,13 +101,13 @@ export const PlacesFilterButton = ({
         className="!top-5"
       >
         <div className="p-4 flex flex-col gap-8">
-          <div className="flex gap-4">
+          <div className="flex flex-col sm:flex-row gap-4">
             {/* Левая колонка */}
             <div className="flex flex-col gap-4 min-w-[210px]">
               <PlaceTypeSelect
                 control={control}
                 name="locationType"
-                label="Тип"
+                label="Путь"
                 isFilter
               />
               <PlaceCoverSelect

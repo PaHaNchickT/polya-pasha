@@ -100,7 +100,7 @@ export const PlacesPage = ({
         >
           Список мест
         </Typography>
-        {phrase && <Typography>{phrase}</Typography>}
+        {phrase && <Typography className="pl-0.5">{phrase}</Typography>}
       </div>
       <PlacesTabs
         activityType={
@@ -115,41 +115,27 @@ export const PlacesPage = ({
         onFilterChange={onFilterChange}
         onSortChange={onSortChange}
       />
-      {isFetching && (
-        <div
-          style={{
-            display: "grid",
-            gridTemplateColumns: "repeat(4, 1fr)",
-            gap: "16px",
-          }}
-        >
+      {isFetching ? (
+        <div className="flex flex-col sm:grid sm:grid-cols-4 gap-4">
           {emptyArray.map((index) => (
             <PlaceItemSkeleton key={index} />
           ))}
         </div>
+      ) : data.length ? (
+        <div className="flex flex-col sm:grid sm:grid-cols-4 gap-4">
+          {data.map((item) => (
+            <PlaceItem key={item.id} item={item} />
+          ))}
+        </div>
+      ) : (
+        <PlacesEmptyList
+          isFiltersActive={
+            !isEqual(filters, PLACES_FILTERS_DEFAULT_VALUES) ||
+            params?.activity_type !== "all"
+          }
+          resetFilters={handleResetFilters}
+        />
       )}
-      {!isFetching &&
-        (data.length ? (
-          <div
-            style={{
-              display: "grid",
-              gridTemplateColumns: "repeat(4, 1fr)",
-              gap: "16px",
-            }}
-          >
-            {data.map((item) => (
-              <PlaceItem key={item.id} item={item} />
-            ))}
-          </div>
-        ) : (
-          <PlacesEmptyList
-            isFiltersActive={
-              !isEqual(filters, PLACES_FILTERS_DEFAULT_VALUES) ||
-              params?.activity_type !== "all"
-            }
-            resetFilters={handleResetFilters}
-          />
-        ))}
 
       <Pagination
         meta={meta}

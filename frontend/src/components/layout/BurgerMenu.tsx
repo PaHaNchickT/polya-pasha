@@ -34,7 +34,7 @@ export const BurgerMenu = ({ username, onLogout }: BurgerMenuProps) => {
         color="inherit"
         aria-label="открыть меню"
         onClick={toggleDrawer(true)}
-        className="text-white"
+        className="text-white !m-0 !p-0"
       >
         <MenuIcon />
       </IconButton>

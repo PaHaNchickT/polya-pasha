@@ -19,7 +19,7 @@ interface PlaceTypeSelectProps<TFieldValues extends FieldValues> {
 export function PlaceTypeSelect<TFieldValues extends FieldValues>({
   control,
   name,
-  label = "Тип",
+  label = "Путь",
   size = "small",
   fullWidth = true,
   isFilter = false,
