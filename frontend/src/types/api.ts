@@ -14,12 +14,19 @@ export type CustomError = {
   message: string;
 };
 
+interface UserMetaResponseData {
+  login: string;
+  role: string;
+}
+
 export interface LoginResponseData {
   token: string;
-  user: {
-    login: string;
-    role: string;
-  };
+  user: UserMetaResponseData;
+}
+
+export interface VerifyTokenResponseData {
+  valid: boolean;
+  user: UserMetaResponseData;
 }
 
 export interface PaginationMeta {

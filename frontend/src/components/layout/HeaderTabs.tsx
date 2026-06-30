@@ -1,4 +1,4 @@
-import { HEADER_TABS, HEADER_TABS_MAP } from "@/lib/constants/common";
+import { HEADER_TABS_KEYS, HEADER_TABS_MAP } from "@/lib/constants/common";
 import { Button, Typography } from "@mui/material";
 import { ProgressLink } from "../ui/common/ProgressLink";
 import { usePathname } from "next/navigation";
@@ -12,7 +12,7 @@ export const HeaderTabs = ({ onClose }: HeaderTabsProps) => {
 
   return (
     <div className="grow flex gap-4 flex-col sm:flex-row justify-center items-center px-0 text-white">
-      {HEADER_TABS.map((route) =>
+      {HEADER_TABS_KEYS.map((route) =>
         `/${route}` === pathname ? (
           <Typography
             key={`${route}-tav`}

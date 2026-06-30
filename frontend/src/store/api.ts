@@ -11,12 +11,14 @@ import {
   PlaceResponseData,
   PlacesListResponse,
   GetPlacesParams,
+  VerifyTokenResponseData,
 } from "@/types/api";
 import {
   LOCAL_STORAGE_TOKEN_KEY,
   LOCAL_STORAGE_USERNAME_KEY,
 } from "@/lib/constants/common";
 import { LoginData } from "@/types/login";
+import { notify } from "@/lib/utils/notify";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
@@ -61,6 +63,8 @@ const baseQueryWithAuth: BaseQueryFn<
       const isLoginPage =
         typeof window !== "undefined" && window.location.pathname === "/login";
       if (!isLoginPage) {
+        notify("Токен недействителен или истек", "error");
+        
         localStorage.removeItem(LOCAL_STORAGE_TOKEN_KEY);
         window.location.href = "/login";
       }
@@ -107,6 +111,10 @@ export const api = createApi({
           window.location.href = "/login";
         }
       },
+    }),
+
+    verifyToken: builder.query<VerifyTokenResponseData, void>({
+      query: () => "/api/verify-token",
     }),
 
     // ================= Places =================
@@ -185,6 +193,7 @@ export const api = createApi({
 export const {
   useLoginMutation,
   useLogoutMutation,
+  useVerifyTokenQuery,
   useGetPlacesQuery,
   useGetPlaceQuery,
   useCreatePlaceMutation,
