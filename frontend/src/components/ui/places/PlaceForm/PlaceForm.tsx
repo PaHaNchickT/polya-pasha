@@ -66,7 +66,7 @@ export default function PlaceForm({
               <PlaceTypeSelect
                 control={control}
                 name="locationType"
-                label="Тип локации"
+                label="Путь"
               />
               <ActivityTypeMultipleSelect
                 control={control}
