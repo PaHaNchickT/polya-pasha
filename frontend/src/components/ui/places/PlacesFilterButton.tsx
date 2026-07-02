@@ -13,6 +13,7 @@ import { camelToSnake } from "@/lib/helpers/camelToSnake";
 import { IsEventDateSelect } from "../form/IsEventDateSelect";
 import { IsExpiredSelect } from "../form/IsExpiredSelect";
 import { Badge } from "@mui/material";
+import { isEqual } from "lodash";
 
 export const PLACES_FILTERS_DEFAULT_VALUES: PlacesFilterParams = {
   locationType: "all",
@@ -50,6 +51,7 @@ export const PlacesFilterButton = ({
   const isFormInInitialState = Object.values(watch()).every(
     (value) => value === "all",
   );
+  const isFiltersTheSame = isEqual(filters, watch());
 
   useEffect(() => {
     reset(filters);
@@ -164,7 +166,7 @@ export const PlacesFilterButton = ({
               variant="contained"
               size="small"
               onClick={handleSubmit(onSubmit)}
-              disabled={isFormInInitialState}
+              disabled={isFormInInitialState || isFiltersTheSame}
             >
               Применить
             </Button>
