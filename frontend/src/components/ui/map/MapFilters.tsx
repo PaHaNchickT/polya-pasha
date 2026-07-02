@@ -68,10 +68,10 @@ export const MapFilters = ({
   };
 
   return (
-    <div className="flex justify-between gap-8">
-      <div className="flex flex-col gap-4 grow">
+    <div className="flex flex-col sm:flex-row justify-between gap-4 sm:gap-8">
+      <div className="flex sm:flex-col gap-2 sm:gap-4 grow">
         {/* Левая колонка */}
-        <div className="flex gap-4">
+        <div className="flex flex-col sm:flex-row gap-2 sm:gap-4 grow sm:grow-auto">
           <PlaceTypeSelect
             control={control}
             name="locationType"
@@ -92,7 +92,7 @@ export const MapFilters = ({
           />
         </div>
         {/* Правая колонка */}
-        <div className="flex gap-4">
+        <div className="flex flex-col sm:flex-row gap-2 sm:gap-4 grow sm:grow-auto">
           <IsVisitedSelect
             control={control}
             name="isVisited"
@@ -114,8 +114,8 @@ export const MapFilters = ({
         </div>
       </div>
       {/* Кнопки */}
-      <div className="flex flex-col justify-between gap-4">
-        <div className="flex gap-4 grow">
+      <div className="flex flex-col justify-between gap-2 sm:gap-4">
+        <div className="flex gap-2 sm:gap-4 grow">
           <Button
             variant="contained"
             size="small"
@@ -136,7 +136,7 @@ export const MapFilters = ({
             Сбросить фильтры
           </Button>
         </div>
-        <div className="flex gap-4 grow">
+        <div className="flex flex-col sm:flex-row gap-2 sm:gap-4 grow">
           <Button
             variant="contained"
             size="small"

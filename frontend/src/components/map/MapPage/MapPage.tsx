@@ -62,7 +62,7 @@ export const MapPage = ({
   return (
     <Box
       component="main"
-      className="flex flex-col gap-4 sm:gap-8 h-[400px] mb-[300px]"
+      className="flex flex-col gap-4 sm:gap-8 h-[400px] mb-[500px] sm:mb-[300px]"
     >
       <main className="grow flex flex-col gap-4">
         <Typography

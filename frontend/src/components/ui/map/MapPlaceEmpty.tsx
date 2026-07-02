@@ -4,7 +4,7 @@ import TravelExploreIcon from "@mui/icons-material/TravelExplore";
 import { Typography } from "@mui/material";
 
 export const MapPlaceEmpty = () => (
-  <div className="w-1/2">
+  <div className="w-full sm:w-1/2">
     <Card
       variant="outlined"
       tabIndex={0}
