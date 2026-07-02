@@ -17,8 +17,6 @@ export const MapPlaceItem = ({
 }: MapPlaceItemProps) => {
   const { data, error, isLoading, isFetching } = useGetPlaceQuery(selectedId);
 
-  console.log(data);
-
   useEffect(() => {
     if (error) {
       setSelectedId(null);

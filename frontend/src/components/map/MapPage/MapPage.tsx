@@ -49,8 +49,6 @@ export const MapPage = ({
     [params],
   );
 
-  const mapHeight = "100%";
-
   const handleResetMap = () => {
     mapRef.current?.resetMap();
   };
@@ -60,10 +58,7 @@ export const MapPage = ({
   };
 
   return (
-    <Box
-      component="main"
-      className="flex flex-col gap-4 sm:gap-8 h-[400px] mb-[500px] sm:mb-[300px]"
-    >
+    <Box component="main" className="flex flex-col gap-4 sm:gap-8">
       <main className="grow flex flex-col gap-4">
         <Typography
           variant={isSmUp ? "h1" : "h2"}
@@ -83,18 +78,19 @@ export const MapPage = ({
 
         <div className="flex flex-col sm:flex-row gap-4 grow">
           {isFetching ? (
-            <Skeleton
-              variant="rounded"
-              className="w-full h-full"
-              height={mapHeight}
-            />
+            <div className="w-full min-w-0">
+              <Skeleton
+                variant="rounded"
+                className="!w-full !h-[400px] sm:!h-full block"
+              />
+            </div>
           ) : (
             <YMapMultiply
               ref={mapRef}
               items={data || []}
               selectedItemId={selectedId}
               onSelectItem={setSelectedId}
-              height={mapHeight}
+              height={isSmUp ? null : 400}
             />
           )}
 

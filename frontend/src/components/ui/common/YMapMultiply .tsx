@@ -15,7 +15,7 @@ interface YMapMultiplyProps {
   selectedItemId: number | null;
   onSelectItem: (id: number) => void;
   width?: number | string;
-  height?: number | string;
+  height?: number | string | null;
   initialZoom?: number;
   zoomOnSelect?: number;
   initialCenter?: [number, number];
@@ -34,7 +34,7 @@ export const YMapMultiply = forwardRef<YMapMultiplyHandle, YMapMultiplyProps>(
       selectedItemId,
       onSelectItem,
       width = "100%",
-      height = "600px",
+      height,
       initialZoom = 10,
       zoomOnSelect = 16,
       initialCenter = [59.9343, 30.3351],
@@ -211,7 +211,9 @@ export const YMapMultiply = forwardRef<YMapMultiplyHandle, YMapMultiplyProps>(
 
     const style = {
       width: typeof width === "number" ? `${width}px` : width,
-      height: typeof height === "number" ? `${height}px` : height,
+      ...(height && {
+        height: typeof height === "number" ? `${height}px` : height,
+      }),
       border: "none",
       borderRadius: "0.5rem",
     };
