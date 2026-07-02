@@ -1,9 +1,16 @@
 import Card from "@mui/material/Card";
 import CardContent from "@mui/material/CardContent";
 import { Box, Skeleton } from "@mui/material";
+import { clsx as cn } from "clsx";
 
-export const PlaceItemSkeleton = () => (
-  <div className="relative">
+interface PlaceItemSkeletonProps {
+  invisible?: boolean;
+}
+
+export const PlaceItemSkeleton = ({
+  invisible = false,
+}: PlaceItemSkeletonProps) => (
+  <div className={cn("relative", invisible && "opacity-0")}>
     <Card
       variant="outlined"
       tabIndex={0}

@@ -12,6 +12,7 @@ import { useMediaQuery } from "@mui/material";
 import { MapFilters } from "@/components/ui/map/MapFilters";
 import { MapPlaceItem } from "@/components/ui/map/MapPlaceItem";
 import { PlacesFilterParams } from "@/types/place";
+import { MapPlaceEmpty } from "@/components/ui/map/MapPlaceEmpty";
 
 interface MapPageProps {
   data: MapItem[];
@@ -34,8 +35,6 @@ export const MapPage = ({
 
   const [selectedId, setSelectedId] = useState<number | null>(null);
   const mapRef = useRef<YMapMultiplyHandle>(null);
-  console.log(selectedId);
-  // const router = useRouter();
 
   const filters = useMemo(
     () =>
@@ -50,14 +49,21 @@ export const MapPage = ({
     [params],
   );
 
-  const mapHeight = 600;
+  const mapHeight = "100%";
 
   const handleResetMap = () => {
     mapRef.current?.resetMap();
   };
 
+  const handleResetPlace = () => {
+    setSelectedId(null);
+  };
+
   return (
-    <Box component="main" className="flex flex-col gap-4 sm:gap-8">
+    <Box
+      component="main"
+      className="flex flex-col gap-4 sm:gap-8 h-[400px] mb-[300px]"
+    >
       <main className="grow flex flex-col gap-4">
         <Typography
           variant={isSmUp ? "h1" : "h2"}
@@ -68,12 +74,14 @@ export const MapPage = ({
         </Typography>
 
         <MapFilters
+          selectedId={selectedId}
           filters={filters}
           onFilterChange={onFilterChange}
           handleResetMap={handleResetMap}
+          handleResetPlace={handleResetPlace}
         />
 
-        <div className="flex flex-col sm:flex-row gap-4">
+        <div className="flex flex-col sm:flex-row gap-4 grow">
           {isFetching ? (
             <Skeleton
               variant="rounded"
@@ -96,7 +104,7 @@ export const MapPage = ({
               setSelectedId={setSelectedId}
             />
           ) : (
-            <p>Empty</p>
+            <MapPlaceEmpty />
           )}
         </div>
       </main>

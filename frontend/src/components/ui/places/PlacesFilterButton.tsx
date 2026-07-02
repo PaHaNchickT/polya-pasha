@@ -37,13 +37,18 @@ export const PlacesFilterButton = ({
 }: PlacesFilterButtonProps) => {
   const [anchorEl, setAnchorEl] = useState<HTMLElement | null>(null);
 
-  const { control, handleSubmit, reset } = useForm<PlacesFilterParams>({
+  const { control, handleSubmit, reset, watch } = useForm<PlacesFilterParams>({
     defaultValues: filters,
   });
 
   const isFiltersInactive = useMemo(
     () => Object.values(filters).every((value) => value === "all"),
     [filters],
+  );
+
+  // eslint-disable-next-line react-hooks/incompatible-library
+  const isFormInInitialState = Object.values(watch()).every(
+    (value) => value === "all",
   );
 
   useEffect(() => {
@@ -151,6 +156,7 @@ export const PlacesFilterButton = ({
               size="small"
               color="error"
               onClick={handleReset}
+              disabled={isFormInInitialState}
             >
               Сбросить
             </Button>
@@ -158,6 +164,7 @@ export const PlacesFilterButton = ({
               variant="contained"
               size="small"
               onClick={handleSubmit(onSubmit)}
+              disabled={isFormInInitialState}
             >
               Применить
             </Button>

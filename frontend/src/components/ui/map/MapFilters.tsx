@@ -21,22 +21,31 @@ export const PLACES_FILTERS_DEFAULT_VALUES: PlacesFilterParams = {
 };
 
 interface MapFiltersProps {
+  selectedId: number | null;
   filters: PlacesFilterParams;
   onFilterChange: (
     key: keyof GetMapParams,
     value: string | boolean | undefined,
   ) => void;
   handleResetMap: () => void;
+  handleResetPlace: () => void;
 }
 
 export const MapFilters = ({
+  selectedId,
   filters,
   onFilterChange,
   handleResetMap,
+  handleResetPlace,
 }: MapFiltersProps) => {
-  const { control, handleSubmit, reset } = useForm<PlacesFilterParams>({
+  const { control, handleSubmit, reset, watch } = useForm<PlacesFilterParams>({
     defaultValues: filters,
   });
+
+  // eslint-disable-next-line react-hooks/incompatible-library
+  const isFormInInitialState = Object.values(watch()).every(
+    (value) => value === "all",
+  );
 
   useEffect(() => {
     reset(filters);
@@ -110,22 +119,42 @@ export const MapFilters = ({
           <Button
             variant="contained"
             size="small"
-            color="error"
-            onClick={handleReset}
+            onClick={handleSubmit(onSubmit)}
+            className="grow"
+            disabled={isFormInInitialState}
           >
-            Сбросить
+            Применить
           </Button>
           <Button
             variant="contained"
             size="small"
-            onClick={handleSubmit(onSubmit)}
+            color="error"
+            onClick={handleReset}
+            className="grow"
+            disabled={isFormInInitialState}
           >
-            Применить
+            Сбросить фильтры
           </Button>
         </div>
-        <Button variant="contained" color="error" onClick={handleResetMap}>
-          Сбросить карту
-        </Button>
+        <div className="flex gap-4 grow">
+          <Button
+            variant="contained"
+            size="small"
+            color="error"
+            onClick={handleResetMap}
+          >
+            Сбросить карту
+          </Button>
+          <Button
+            variant="contained"
+            size="small"
+            color="error"
+            onClick={handleResetPlace}
+            disabled={!selectedId}
+          >
+            Сбросить место
+          </Button>
+        </div>
       </div>
     </div>
   );
