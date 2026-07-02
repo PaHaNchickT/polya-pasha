@@ -1,12 +1,10 @@
-import { DefaultBooleanKeys } from "./common";
+import { MapItem } from "./map";
 import {
   ImageData,
   PlaceActivityType,
   PlaceAuthorType,
   PlaceCoverType,
   PlaceLocationType,
-  PlaceSortOrder,
-  PlaceSortType,
 } from "./place";
 
 export type CustomError = {
@@ -42,21 +40,6 @@ export interface PlacesListResponse {
   meta: PaginationMeta;
 }
 
-export interface GetPlacesParams {
-  page?: number;
-  limit?: number;
-  sort?: PlaceSortType;
-  order?: PlaceSortOrder;
-  search?: string;
-  activity_type?: string;
-  location_type?: string;
-  cover_type?: string;
-  author?: string;
-  event_date?: DefaultBooleanKeys | "all";
-  is_visited?: DefaultBooleanKeys | "all";
-  is_expired?: DefaultBooleanKeys | "all";
-}
-
 export interface PlaceResponseData {
   id: number;
   title: string;
@@ -82,3 +65,7 @@ export type PlacePostData = Omit<
   PlaceResponseData,
   "id" | "created_at" | "is_new" | "is_expired"
 >;
+
+export interface MapResponseData {
+  data: MapItem[];
+}

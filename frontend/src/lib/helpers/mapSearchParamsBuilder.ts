@@ -1,52 +1,19 @@
-import { PaginationMeta } from "@/types/api";
 import {
   ACTIVITY_TYPE_KEYS,
   COVER_TYPE_KEYS,
   LOCATION_TYPE_KEYS,
-  SORTING_TYPE_KEYS,
 } from "../constants/place";
-import { SORTING_ORDER_KEYS } from "../constants/common";
 import {
-  GetPlacesParams,
   PlaceActivityType,
   PlaceCoverType,
   PlaceLocationType,
 } from "@/types/place";
 import { USERS_KEYS } from "../constants/users";
 import { UserTypes } from "@/types/common";
+import { GetMapParams } from "@/types/map";
 
-export const placesSearchParamsBuilder = (
-  params: GetPlacesParams,
-  meta: PaginationMeta,
-) => {
+export const mapSearchParamsBuilder = (params: GetMapParams) => {
   const newSearchParams = new URLSearchParams();
-
-  if (
-    params.page &&
-    typeof params.page === "number" &&
-    params.page > 1 &&
-    params.page <= meta.totalPages
-  )
-    newSearchParams.set("page", String(params.page));
-
-  if (params.limit && params.limit !== 12)
-    newSearchParams.set("limit", String(params.limit));
-
-  if (
-    params.sort &&
-    SORTING_TYPE_KEYS.includes(params.sort) &&
-    params.sort !== "created_at"
-  )
-    newSearchParams.set("sort", params.sort);
-
-  if (
-    params.order &&
-    SORTING_ORDER_KEYS.includes(params.order) &&
-    params.order !== "desc"
-  )
-    newSearchParams.set("order", params.order);
-
-  if (params.search) newSearchParams.set("search", params.search);
 
   if (
     params.location_type &&

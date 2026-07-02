@@ -4,12 +4,12 @@ import { ACTIVITY_TYPE_KEYS } from "@/lib/constants/place";
 import AddIcon from "@mui/icons-material/Add";
 import { ProgressLink } from "../common/ProgressLink";
 import {
+  GetPlacesParams,
   PlaceActivityType,
   PlacesFilterParams,
   PlacesSortParams,
 } from "@/types/place";
 import { LabelTab } from "../common/labels/LabelTab";
-import { GetPlacesParams } from "@/types/api";
 import { SearchInput } from "../form/SearchInput";
 import { PlacesSortButton } from "./PlacesSortButton";
 import { useTheme } from "@mui/material/styles";

@@ -7,9 +7,8 @@ import { Loader } from "@/components/ui/common/Loader";
 import { transformPlaceData } from "@/lib/helpers/transformPlaceData";
 import { useGetPlacesQuery } from "@/store/api";
 import { notify } from "@/lib/utils/notify";
-import type { GetPlacesParams } from "@/types/api";
 import { placesSearchParamsBuilder } from "@/lib/helpers/placesSearchParamsBuilder";
-import { PlacesSortParams } from "@/types/place";
+import { GetPlacesParams, PlacesSortParams } from "@/types/place";
 
 export default function PlacesPageServer() {
   const router = useRouter();

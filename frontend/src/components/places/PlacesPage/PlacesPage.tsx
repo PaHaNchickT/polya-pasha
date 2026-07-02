@@ -6,6 +6,7 @@ import { PlacesTabs } from "@/components/ui/places/PlacesTabs";
 import { LOCAL_STORAGE_USERNAME_KEY } from "@/lib/constants/common";
 import { getRandomPhrase } from "@/lib/helpers/getRandomPhrase";
 import {
+  GetPlacesParams,
   Place,
   PlaceActivityType,
   PlacesFilterParams,
@@ -14,7 +15,7 @@ import {
 import { Typography } from "@mui/material";
 import { useMemo } from "react";
 import isEqual from "lodash/isEqual";
-import { GetPlacesParams, PaginationMeta } from "@/types/api";
+import { PaginationMeta } from "@/types/api";
 import { Pagination } from "@/components/ui/common/Pagination";
 import { camelToSnake } from "@/lib/helpers/camelToSnake";
 import { PlaceItemSkeleton } from "@/components/ui/places/PlaceItemSkeleton";
@@ -97,10 +98,15 @@ export const PlacesPage = ({
         <Typography
           variant={isSmUp ? "h1" : "h2"}
           {...(isSmUp && { gutterBottom: true })}
+          className="text-center sm:text-start"
         >
           Список мест
         </Typography>
-        {phrase && <Typography className="pl-0.5">{phrase}</Typography>}
+        {phrase && (
+          <Typography className="pl-0.5 text-center sm:text-start">
+            {phrase}
+          </Typography>
+        )}
       </div>
       <PlacesTabs
         activityType={

@@ -10,8 +10,8 @@ import {
   PlacePostData,
   PlaceResponseData,
   PlacesListResponse,
-  GetPlacesParams,
   VerifyTokenResponseData,
+  MapResponseData,
 } from "@/types/api";
 import {
   LOCAL_STORAGE_TOKEN_KEY,
@@ -19,6 +19,8 @@ import {
 } from "@/lib/constants/common";
 import { LoginData } from "@/types/login";
 import { notify } from "@/lib/utils/notify";
+import { GetPlacesParams } from "@/types/place";
+import { GetMapParams } from "@/types/map";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
@@ -64,7 +66,7 @@ const baseQueryWithAuth: BaseQueryFn<
         typeof window !== "undefined" && window.location.pathname === "/login";
       if (!isLoginPage) {
         notify("Токен недействителен или истек", "error");
-        
+
         localStorage.removeItem(LOCAL_STORAGE_TOKEN_KEY);
         window.location.href = "/login";
       }
@@ -187,6 +189,31 @@ export const api = createApi({
       }),
       invalidatesTags: (_, __, id) => [{ type: "Place", id }, "Places"],
     }),
+
+    // ================= Map =================
+    getMapPlaces: builder.query<MapResponseData, GetMapParams>({
+      query: (params) => {
+        const searchParams = new URLSearchParams();
+        if (params?.search) searchParams.set("search", params.search);
+        if (params?.activity_type)
+          searchParams.set("activity_type", params.activity_type);
+        if (params?.location_type)
+          searchParams.set("location_type", params.location_type);
+        if (params?.cover_type)
+          searchParams.set("cover_type", params.cover_type);
+        if (params?.author) searchParams.set("author", params.author);
+        if (params?.is_visited !== undefined)
+          searchParams.set("is_visited", String(params.is_visited));
+        if (params?.event_date)
+          searchParams.set("event_date", String(params.event_date));
+        if (params?.is_expired)
+          searchParams.set("is_expired", String(params.is_expired));
+
+        const queryString = searchParams.toString();
+        return `/api/map${queryString ? `?${queryString}` : ""}`;
+      },
+      providesTags: ["Places"], // можно инвалидировать при изменениях мест
+    }),
   }),
 });
 
@@ -199,4 +226,5 @@ export const {
   useCreatePlaceMutation,
   useUpdatePlaceMutation,
   useDeletePlaceMutation,
+  useGetMapPlacesQuery,
 } = api;

@@ -63,3 +63,18 @@ export interface PlacesSortParams {
   sort: PlaceSortType;
   order: PlaceSortOrder;
 }
+
+export interface GetPlacesParams {
+  page?: number;
+  limit?: number;
+  sort?: PlaceSortType;
+  order?: PlaceSortOrder;
+  search?: string;
+  activity_type?: string;
+  location_type?: string;
+  cover_type?: string;
+  author?: string;
+  event_date?: DefaultBooleanKeys | "all";
+  is_visited?: DefaultBooleanKeys | "all";
+  is_expired?: DefaultBooleanKeys | "all";
+}
