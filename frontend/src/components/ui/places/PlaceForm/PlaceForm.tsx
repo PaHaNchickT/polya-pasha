@@ -62,7 +62,7 @@ export default function PlaceForm({
                 rows={7}
                 fullWidth
               />
-              <DatePickerInput control={control} name="eventDate" />
+              <DatePickerInput control={control} name="eventDate" fullWidth />
               <PlaceTypeSelect
                 control={control}
                 name="locationType"

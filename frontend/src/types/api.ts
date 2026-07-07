@@ -69,3 +69,21 @@ export type PlacePostData = Omit<
 export interface MapResponseData {
   data: MapItem[];
 }
+
+export interface ReviewResponseData {
+  id: number;
+  place_id: number;
+  title: string;
+  description: string;
+  created_at: string;
+  visited_at: string;
+  author: PlaceAuthorType;
+}
+
+export interface ReviewPostData {
+  place_id?: number;
+  title: string;
+  description: string;
+  visited_at: string;
+  author?: PlaceAuthorType;
+}

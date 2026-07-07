@@ -5,29 +5,49 @@ import { Loader } from "@/components/ui/common/Loader";
 import { useParams, useRouter } from "next/navigation";
 import { PlacePage } from "@/components/places/PlacePage/PlacePage";
 import { transformPlaceData } from "@/lib/helpers/transformPlaceData";
-import { useGetPlaceQuery } from "@/store/api";
+import { useGetPlaceQuery, useGetReviewsQuery } from "@/store/api";
 import { notify } from "@/lib/utils/notify";
+import { transformReviewData } from "@/lib/helpers/transformReviewData";
 
 export default function PlacePageServer() {
   const router = useRouter();
-
   const { id } = useParams<{ id: string }>();
-  const { data, error, isLoading } = useGetPlaceQuery(+id);
+
+  const {
+    data: placeData,
+    error: placeError,
+    isLoading: isPlaceLoading,
+  } = useGetPlaceQuery(+id);
+
+  const {
+    data: reviewsData,
+    error: reviewsError,
+    isLoading: isReviewsLoading,
+  } = useGetReviewsQuery({ place_id: +id });
 
   useEffect(() => {
-    if (error) {
+    if (placeError || reviewsError) {
       router.push("/places");
-      notify(error.message || "Не удалось загрузить место", "error");
+      notify(
+        placeError?.message ||
+          reviewsError?.message ||
+          "Не удалось загрузить место",
+        "error",
+      );
+      console.error(placeError?.message);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [error]);
+  }, [placeError, reviewsError]);
 
   return (
     <>
-      {isLoading || !data ? (
+      {isPlaceLoading || isReviewsLoading || !placeData || !reviewsData ? (
         <Loader />
       ) : (
-        <PlacePage data={transformPlaceData(data)} />
+        <PlacePage
+          placeData={transformPlaceData(placeData)}
+          reviewsData={reviewsData.map((review) => transformReviewData(review))}
+        />
       )}
     </>
   );

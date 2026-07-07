@@ -12,6 +12,8 @@ import {
   PlacesListResponse,
   VerifyTokenResponseData,
   MapResponseData,
+  ReviewResponseData,
+  ReviewPostData,
 } from "@/types/api";
 import {
   LOCAL_STORAGE_TOKEN_KEY,
@@ -21,6 +23,7 @@ import { LoginData } from "@/types/login";
 import { notify } from "@/lib/utils/notify";
 import { GetPlacesParams } from "@/types/place";
 import { GetMapParams } from "@/types/map";
+import { GetReviewsParams } from "@/types/reviews";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
@@ -81,7 +84,7 @@ const baseQueryWithAuth: BaseQueryFn<
 export const api = createApi({
   reducerPath: "api",
   baseQuery: baseQueryWithAuth,
-  tagTypes: ["Places", "Place"],
+  tagTypes: ["Places", "Place", "Reviews"],
   endpoints: (builder) => ({
     // ================= Auth =================
     login: builder.mutation<LoginResponseData, LoginData>({
@@ -214,6 +217,64 @@ export const api = createApi({
       },
       providesTags: ["Places"], // можно инвалидировать при изменениях мест
     }),
+
+    // ================= Reviews =================
+    // Получить все отзывы (опционально фильтр по place_id)
+    getReviews: builder.query<ReviewResponseData[], GetReviewsParams>({
+      query: (params) => {
+        const searchParams = new URLSearchParams();
+        if (params?.place_id !== undefined) {
+          searchParams.set("place_id", String(params.place_id));
+        }
+        const queryString = searchParams.toString();
+        return `/api/reviews${queryString ? `?${queryString}` : ""}`;
+      },
+      providesTags: (result) =>
+        result
+          ? [
+              ...result.map(({ id }) => ({ type: "Reviews" as const, id })),
+              "Reviews",
+            ]
+          : ["Reviews"],
+    }),
+
+    // Получить один отзыв по ID
+    getReview: builder.query<ReviewResponseData, number>({
+      query: (id) => `/api/reviews/${id}`,
+      providesTags: (_, __, id) => [{ type: "Reviews", id }],
+    }),
+
+    // Создать отзыв
+    createReview: builder.mutation<ReviewResponseData, ReviewPostData>({
+      query: (body) => ({
+        url: "/api/reviews",
+        method: "POST",
+        body,
+      }),
+      invalidatesTags: ["Reviews"], // инвалидируем список
+    }),
+
+    // Обновить отзыв
+    updateReview: builder.mutation<
+      ReviewResponseData,
+      { id: number; data: Partial<ReviewPostData> }
+    >({
+      query: ({ id, data }) => ({
+        url: `/api/reviews/${id}`,
+        method: "PATCH",
+        body: data,
+      }),
+      invalidatesTags: (_, __, { id }) => [{ type: "Reviews", id }, "Reviews"],
+    }),
+
+    // Удалить отзыв
+    deleteReview: builder.mutation<void, number>({
+      query: (id) => ({
+        url: `/api/reviews/${id}`,
+        method: "DELETE",
+      }),
+      invalidatesTags: (_, __, id) => [{ type: "Reviews", id }, "Reviews"],
+    }),
   }),
 });
 
@@ -221,10 +282,18 @@ export const {
   useLoginMutation,
   useLogoutMutation,
   useVerifyTokenQuery,
+
   useGetPlacesQuery,
   useGetPlaceQuery,
   useCreatePlaceMutation,
   useUpdatePlaceMutation,
   useDeletePlaceMutation,
+
   useGetMapPlacesQuery,
+
+  useGetReviewsQuery,
+  useGetReviewQuery,
+  useCreateReviewMutation,
+  useUpdateReviewMutation,
+  useDeleteReviewMutation,
 } = api;

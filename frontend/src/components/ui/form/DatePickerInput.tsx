@@ -6,12 +6,18 @@ interface DatePickerInputProps<TFieldValues extends FieldValues> {
   control: Control<TFieldValues>;
   name: Path<TFieldValues>;
   label?: string;
+  fullWidth?: boolean;
+  size?: "small" | "medium";
+  disabled?: boolean;
 }
 
 export function DatePickerInput<TFieldValues extends FieldValues>({
   control,
   name,
   label = "Дата события",
+  fullWidth = false,
+  size = "medium",
+  disabled = false,
 }: DatePickerInputProps<TFieldValues>) {
   return (
     <Controller
@@ -21,12 +27,14 @@ export function DatePickerInput<TFieldValues extends FieldValues>({
         <DatePicker
           label={label}
           value={value ? dayjs(value) : null}
+          disabled={disabled}
           onChange={(date: Dayjs | null) =>
             onChange(date ? date.toISOString() : null)
           }
           slotProps={{
             textField: {
-              fullWidth: true,
+              fullWidth,
+              size,
               error: !!error,
               helperText: error?.message,
             },
