@@ -21,7 +21,8 @@ import { useCreateReviewMutation, useUpdateReviewMutation } from "@/store/api";
 import { notify } from "@/lib/utils/notify";
 import { LOCAL_STORAGE_USERNAME_KEY } from "@/lib/constants/common";
 import { PlaceAuthorType } from "@/types/place";
-
+import { useTheme } from "@mui/material/styles";
+import { useMediaQuery } from "@mui/material";
 import CheckIcon from "@mui/icons-material/Check";
 import CloseIcon from "@mui/icons-material/Close";
 import { USERS_MAP } from "@/lib/constants/users";
@@ -41,17 +42,19 @@ export const ReviewForm = ({
   defaultValues,
   onToggleMode,
 }: ReviewFormProps) => {
+  const theme = useTheme();
+  const isSmUp = useMediaQuery(theme.breakpoints.up("sm"));
+
+  const [createReview, { isLoading: isCreateLoading }] =
+    useCreateReviewMutation();
+  const [editReview, { isLoading: isEditLoading }] = useUpdateReviewMutation();
+
   const methods = useForm<ReviewFormData>({
     resolver: zodResolver(reviewFormSchema),
     defaultValues,
     mode: "onChange",
   });
-
   const { handleSubmit, control, reset } = methods;
-
-  const [createReview, { isLoading: isCreateLoading }] =
-    useCreateReviewMutation();
-  const [editReview, { isLoading: isEditLoading }] = useUpdateReviewMutation();
 
   const author = localStorage.getItem(
     LOCAL_STORAGE_USERNAME_KEY,
@@ -134,7 +137,7 @@ export const ReviewForm = ({
           />
 
           <div className="flex justify-between items-end">
-            <Box className="flex items-center gap-2">
+            <Box className="hidden sm:flex items-center gap-2">
               <Avatar
                 alt={USERS_MAP[author]}
                 src={`/images/${author}-avatar.png`}
@@ -150,6 +153,7 @@ export const ReviewForm = ({
               label="Дата посещения"
               size="small"
               disabled={isCreateLoading}
+              fullWidth={isSmUp ? false : true}
             />
           </div>
         </form>

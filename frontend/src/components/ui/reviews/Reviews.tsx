@@ -16,9 +16,17 @@ export const Reviews = ({ placeId, data }: ReviewsProps) => {
 
   return (
     <div
-      className={data.length ? "grid grid-cols-2 gap-4" : "flex justify-center"}
+      className={
+        data.length
+          ? "flex flex-col sm:grid sm:grid-cols-2 gap-4"
+          : "flex justify-center"
+      }
     >
-      <div className={data.length ? "min-w-0" : "min-w-[680px]"}>
+      <div
+        className={
+          data.length ? "min-w-0" : " w-full sm:w-auto sm:min-w-[680px]"
+        }
+      >
         <ReviewForm
           placeId={placeId}
           mode="create"

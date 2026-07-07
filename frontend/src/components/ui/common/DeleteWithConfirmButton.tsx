@@ -75,6 +75,11 @@ export const DeleteWithConfirmButton: FC<DeleteWithConfirmButtonProps> = ({
       <Dialog
         open={open}
         onClose={handleClose}
+        PaperProps={{
+          sx: {
+            margin: 2,
+          },
+        }}
         aria-labelledby="delete-dialog-title"
         aria-describedby="delete-dialog-description"
       >
