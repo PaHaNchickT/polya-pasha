@@ -94,47 +94,62 @@ export const ReviewForm = ({
 
   return (
     <FormProvider {...methods}>
-      <Card variant="outlined" className="p-4">
+      <Card variant="outlined" className="p-4 h-full">
         <form
           onSubmit={handleSubmit(handleFormSubmit)}
-          className="flex flex-col gap-3"
+          className="flex flex-col gap-3 justify-between h-full"
         >
-          <div className="flex justify-between">
+          <div className="flex flex-col gap-2.5 sm:gap-2 grow">
+            <div className="flex justify-between">
+              <TextInput
+                control={control}
+                name="title"
+                label="Название отзыва"
+                size="small"
+                disabled={isCreateLoading || isEditLoading}
+              />
+              <Stack direction="row" spacing={1} height={40}>
+                <IconButton
+                  aria-label="submit"
+                  type="submit"
+                  loading={isCreateLoading || isEditLoading}
+                >
+                  <CheckIcon />
+                </IconButton>
+                {mode === "edit" && (
+                  <IconButton
+                    aria-label="close"
+                    loading={isCreateLoading || isEditLoading}
+                    color="error"
+                    onClick={onToggleMode}
+                  >
+                    <CloseIcon />
+                  </IconButton>
+                )}
+              </Stack>
+            </div>
             <TextInput
               control={control}
-              name="title"
-              label="Название отзыва"
+              name="description"
+              label="Описание"
+              fullWidth
               size="small"
+              multiline
+              minRows={3}
               disabled={isCreateLoading || isEditLoading}
+              className="grow"
+              sx={{
+                "& .MuiInputBase-root": {
+                  height: "100%",
+                  alignItems: "flex-start",
+                },
+                "& .MuiInputBase-input": {
+                  flex: 1,
+                  overflow: "auto",
+                },
+              }}
             />
-            <Stack direction="row" spacing={1} height={40}>
-              <IconButton
-                aria-label="submit"
-                type="submit"
-                loading={isCreateLoading || isEditLoading}
-              >
-                <CheckIcon />
-              </IconButton>
-              {mode === "edit" && (
-                <IconButton
-                  aria-label="close"
-                  loading={isCreateLoading || isEditLoading}
-                  color="error"
-                  onClick={onToggleMode}
-                >
-                  <CloseIcon />
-                </IconButton>
-              )}
-            </Stack>
           </div>
-          <TextInput
-            control={control}
-            name="description"
-            label="Описание"
-            fullWidth
-            size="small"
-            disabled={isCreateLoading || isEditLoading}
-          />
 
           <div className="flex justify-between items-end">
             <Box className="hidden sm:flex items-center gap-2">

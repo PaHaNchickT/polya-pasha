@@ -46,7 +46,7 @@ export const ReviewItem = ({ data, placeId }: ReviewItemProps) => {
       {mode === "read" ? (
         <Card
           variant="outlined"
-          className="p-4 flex flex-col justify-between min-h-[170px]"
+          className="p-4 flex flex-col justify-between min-h-[170px] gap-3"
         >
           <div className="flex flex-col">
             <div className="flex justify-between">
